@@ -27,7 +27,7 @@ export async function PATCH(
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json(data[0])
+    return NextResponse.json(data?.[0] || {})
   } catch (error) {
     return NextResponse.json(
       { error: 'Internal server error' },
