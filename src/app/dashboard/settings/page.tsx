@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useSession } from 'next-auth/react'
+import GoogleConnect from '@/components/integrations/GoogleConnect'
 
 interface Business {
   id: string
@@ -204,6 +205,25 @@ export default function SettingsPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+      </div>
+
+      {/* Integrations Section */}
+      <div>
+        {businesses.length > 0 && (
+          <GoogleConnect
+            businessId={businesses[0].id}
+            isConnected={false}
+            onSuccess={() => fetchBusinesses()}
+          />
+        )}
+
+        {businesses.length === 0 && (
+          <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <p className="text-gray-600">
+              Create a business first to set up integrations.
+            </p>
           </div>
         )}
       </div>
