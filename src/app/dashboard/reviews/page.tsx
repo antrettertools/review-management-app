@@ -77,13 +77,13 @@ export default function ReviewsPage() {
       <h1 className="text-3xl font-bold text-slate-900 mb-8">Reviews</h1>
 
       {/* Filters */}
-      <div className="card mb-6">
-        <div className="flex flex-wrap gap-2">
+      <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-slate-100">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-4 py-2.5 rounded-lg font-medium transition-all ${
               filter === 'all'
-                ? 'bg-blue-900 text-white'
+                ? 'bg-blue-900 text-white shadow-md'
                 : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
             }`}
           >
@@ -91,9 +91,9 @@ export default function ReviewsPage() {
           </button>
           <button
             onClick={() => setFilter('responded')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-4 py-2.5 rounded-lg font-medium transition-all ${
               filter === 'responded'
-                ? 'bg-blue-900 text-white'
+                ? 'bg-blue-900 text-white shadow-md'
                 : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
             }`}
           >
@@ -101,9 +101,9 @@ export default function ReviewsPage() {
           </button>
           <button
             onClick={() => setFilter('not-responded')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-4 py-2.5 rounded-lg font-medium transition-all ${
               filter === 'not-responded'
-                ? 'bg-blue-900 text-white'
+                ? 'bg-blue-900 text-white shadow-md'
                 : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
             }`}
           >
@@ -111,9 +111,9 @@ export default function ReviewsPage() {
           </button>
           <button
             onClick={() => setFilter('urgent')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-4 py-2.5 rounded-lg font-medium transition-all ${
               filter === 'urgent'
-                ? 'bg-red-600 text-white'
+                ? 'bg-red-600 text-white shadow-md'
                 : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
             }`}
           >
@@ -130,17 +130,17 @@ export default function ReviewsPage() {
       ) : (
         <div className="space-y-4">
           {reviews.map((review) => (
-            <div key={review.id} className="card">
+            <div key={review.id} className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-6 border border-slate-100">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="font-semibold text-slate-900">
+                  <h3 className="font-semibold text-slate-900 text-lg">
                     {review.author_name}
                   </h3>
                   <p className="text-sm text-slate-500 mt-1">{review.platform}</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap justify-end">
                   <span
-                    className={`px-3 py-1 rounded-lg text-sm font-medium text-white ${
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium text-white ${
                       review.rating >= 4
                         ? 'bg-green-600'
                         : review.rating >= 3
@@ -151,30 +151,30 @@ export default function ReviewsPage() {
                     {review.rating} star
                   </span>
                   {review.is_responded && (
-                    <span className="px-3 py-1 rounded-lg text-sm font-medium bg-blue-100 text-blue-700">
+                    <span className="px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-100 text-blue-700">
                       Responded
                     </span>
                   )}
                   {review.urgency_level === 'critical' && (
-                    <span className="px-3 py-1 rounded-lg text-sm font-medium bg-red-100 text-red-700">
+                    <span className="px-3 py-1.5 rounded-lg text-sm font-medium bg-red-100 text-red-700">
                       Urgent
                     </span>
                   )}
                 </div>
               </div>
 
-              <p className="text-slate-700 mb-4">{review.content}</p>
+              <p className="text-slate-700 mb-6 leading-relaxed">{review.content}</p>
 
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <button
                   onClick={() => handleReplyClick(review)}
-                  className="btn-primary"
+                  className="px-4 py-2.5 bg-blue-900 text-white rounded-lg font-medium hover:bg-blue-800 transition-colors"
                 >
                   Reply
                 </button>
                 <button
                   onClick={() => handleMarkUrgent(review.id)}
-                  className="btn-secondary"
+                  className="px-4 py-2.5 bg-slate-200 text-slate-900 rounded-lg font-medium hover:bg-slate-300 transition-colors"
                 >
                   Mark Urgent
                 </button>

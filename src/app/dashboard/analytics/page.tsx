@@ -80,19 +80,19 @@ export default function AnalyticsPage() {
       <h1 className="text-3xl font-bold text-slate-900 mb-8">Analytics</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <div className="card">
+        <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-6 border border-slate-100">
           <p className="text-sm text-slate-600 font-medium">Total Reviews</p>
-          <p className="text-4xl font-bold text-slate-900 mt-2">{stats.totalReviews}</p>
+          <p className="text-4xl font-bold text-slate-900 mt-3">{stats.totalReviews}</p>
         </div>
 
-        <div className="card">
+        <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-6 border border-slate-100">
           <p className="text-sm text-slate-600 font-medium">Average Rating</p>
-          <p className="text-4xl font-bold text-slate-900 mt-2">{stats.averageRating}</p>
+          <p className="text-4xl font-bold text-slate-900 mt-3">{stats.averageRating}</p>
         </div>
 
-        <div className="card">
+        <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-6 border border-slate-100">
           <p className="text-sm text-slate-600 font-medium">Response Rate</p>
-          <p className="text-4xl font-bold text-blue-600 mt-2">
+          <p className="text-4xl font-bold text-blue-600 mt-3">
             {stats.totalReviews > 0
               ? Math.round(
                   (stats.respondedReviews / stats.totalReviews) * 100
@@ -101,9 +101,9 @@ export default function AnalyticsPage() {
           </p>
         </div>
 
-        <div className="card">
+        <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-6 border border-slate-100">
           <p className="text-sm text-slate-600 font-medium">Positive (4-5 stars)</p>
-          <div className="flex items-baseline gap-3 mt-2">
+          <div className="flex items-baseline gap-3 mt-3">
             <p className="text-4xl font-bold text-green-600">{stats.positiveReviews}</p>
             <span className="text-sm text-slate-500">
               {stats.totalReviews > 0
@@ -113,9 +113,9 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        <div className="card">
+        <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-6 border border-slate-100">
           <p className="text-sm text-slate-600 font-medium">Negative (1-2 stars)</p>
-          <div className="flex items-baseline gap-3 mt-2">
+          <div className="flex items-baseline gap-3 mt-3">
             <p className="text-4xl font-bold text-red-600">{stats.negativeReviews}</p>
             <span className="text-sm text-slate-500">
               {stats.totalReviews > 0
@@ -125,15 +125,15 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        <div className="card">
+        <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-6 border border-slate-100">
           <p className="text-sm text-slate-600 font-medium">Urgent Reviews</p>
-          <p className="text-4xl font-bold text-orange-600 mt-2">{stats.urgentReviews}</p>
+          <p className="text-4xl font-bold text-orange-600 mt-3">{stats.urgentReviews}</p>
         </div>
       </div>
 
-      <div className="card">
-        <h2 className="text-xl font-semibold text-slate-900 mb-4">Summary</h2>
-        <div className="space-y-3 text-slate-700">
+      <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100">
+        <h2 className="text-xl font-semibold text-slate-900 mb-6">Summary</h2>
+        <div className="space-y-4 text-slate-700">
           <p>
             You have <strong>{stats.totalReviews}</strong> total reviews with an average rating of <strong>{stats.averageRating}</strong>.
           </p>
