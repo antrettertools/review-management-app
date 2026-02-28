@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXTAUTH_URL}/dashboard`,
+      success_url: `${process.env.NEXTAUTH_URL}/dashboard?payment=success&plan=${planId}`,
       cancel_url: `${process.env.NEXTAUTH_URL}/pricing`,
       customer_email: user.email,
       metadata: {
