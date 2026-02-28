@@ -11,7 +11,7 @@ export default function PricingPage() {
 
   const handleSelectPlan = (planId: string) => {
     if (!session) {
-      router.push('/auth/signup')
+      router.push(`/auth/signup?plan=${planId}`)
       return
     }
 
@@ -85,7 +85,7 @@ export default function PricingPage() {
                       : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
                   }`}
                 >
-                  {session ? 'Get Started' : 'Sign Up Now'}
+                  {session ? 'Get Started' : 'Start Free Trial'}
                 </button>
 
                 <div className="border-t border-slate-200 mt-8 pt-8">
@@ -122,13 +122,13 @@ export default function PricingPage() {
 
           <div className="space-y-8">
             <div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">Can I change my plan later?</h3>
-              <p className="text-slate-600">Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately.</p>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">What's included in the free trial?</h3>
+              <p className="text-slate-600">The Starter plan includes all core features: review management, AI-powered responses, and analytics. Your 7-day trial starts immediately with no credit card required.</p>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">Is there a free trial?</h3>
-              <p className="text-slate-600">We offer a 14-day free trial for new users with no credit card required.</p>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Can I change my plan later?</h3>
+              <p className="text-slate-600">Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately.</p>
             </div>
 
             <div>

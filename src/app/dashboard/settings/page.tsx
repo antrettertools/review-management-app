@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useSession } from 'next-auth/react'
 import GoogleConnect from '@/components/integrations/GoogleConnect'
+import { canCreateBusiness } from '@/lib/plan-features'
 
 interface Business {
   id: string
@@ -31,12 +32,30 @@ export default function SettingsPage() {
     description: '',
     website: '',
   })
+  const [userPlan, setUserPlan] = useState<'starter' | 'advanced'>('starter')
 
   useEffect(() => {
     if ((session?.user as any)?.id) {
       fetchBusinesses()
+      fetchUserPlan()
     }
   }, [session])
+
+  const fetchUserPlan = async () => {
+    try {
+      const { data } = await supabase
+        .from('users')
+        .select('subscription_plan')
+        .eq('id', (session?.user as any)?.id)
+        .single()
+
+      if (data) {
+        setUserPlan(data.subscription_plan || 'starter')
+      }
+    } catch (error) {
+      console.error('Error fetching plan:', error)
+    }
+  }
 
   const fetchBusinesses = async () => {
     setLoading(true)
@@ -56,6 +75,12 @@ export default function SettingsPage() {
 
   const handleAddBusiness = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Check plan limits
+    if (!canCreateBusiness(userPlan, businesses.length)) {
+      alert(`Your ${userPlan} plan allows only 1 business. Upgrade to Advanced to add more.`)
+      return
+    }
 
     try {
       const { error } = await supabase.from('businesses').insert([
@@ -109,17 +134,44 @@ export default function SettingsPage() {
     <div>
       <h1 className="text-3xl font-bold text-slate-900 mb-8">Settings</h1>
 
+      {/* Plan Info */}
+      <div className="bg-white rounded-2xl shadow-lg p-8 mb-6 border border-slate-100">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-semibold text-slate-900">Current Plan</h2>
+            <p className="text-slate-600 mt-1 capitalize">{userPlan} Plan</p>
+          </div>
+          <a href="/pricing" className="px-6 py-2.5 bg-blue-900 text-white rounded-lg font-medium hover:bg-blue-800 transition-colors">
+            Upgrade
+          </a>
+        </div>
+      </div>
+
       {/* Businesses Section */}
-      <div className="card mb-6">
+      <div className="bg-white rounded-2xl shadow-lg p-8 mb-6 border border-slate-100">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-slate-900">My Businesses</h2>
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="btn-primary text-sm"
+            disabled={!canCreateBusiness(userPlan, businesses.length)}
+            className={`font-semibold py-2.5 px-4 rounded-lg transition-colors ${
+              canCreateBusiness(userPlan, businesses.length)
+                ? 'bg-blue-900 text-white hover:bg-blue-800'
+                : 'bg-slate-200 text-slate-500 cursor-not-allowed'
+            }`}
           >
             {showAddForm ? 'Cancel' : 'Add Business'}
           </button>
         </div>
+
+        {!canCreateBusiness(userPlan, businesses.length) && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <p className="text-sm text-yellow-800">
+              You've reached the business limit for your {userPlan} plan. 
+              <a href="/pricing" className="font-semibold hover:underline ml-1">Upgrade to Advanced</a> to add more businesses.
+            </p>
+          </div>
+        )}
 
         {/* Add Business Form */}
         {showAddForm && (
@@ -135,7 +187,7 @@ export default function SettingsPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="input-field"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition-all"
                   required
                 />
               </div>
@@ -149,7 +201,7 @@ export default function SettingsPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  className="input-field"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition-all"
                   rows={3}
                 />
               </div>
@@ -164,7 +216,7 @@ export default function SettingsPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, website: e.target.value })
                   }
-                  className="input-field"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -190,7 +242,7 @@ export default function SettingsPage() {
             {businesses.map((business) => (
               <div
                 key={business.id}
-                className="flex justify-between items-start p-4 border border-slate-200 rounded-lg"
+                className="flex justify-between items-start p-4 border border-slate-200 rounded-xl hover:shadow-md transition-shadow"
               >
                 <div>
                   <h3 className="font-semibold text-slate-900">{business.name}</h3>
@@ -202,10 +254,12 @@ export default function SettingsPage() {
                   )}
                 </div>
                 <div className="flex gap-2">
-                  <button className="btn-secondary text-sm">Edit</button>
+                  <button className="px-4 py-2 bg-slate-200 text-slate-900 rounded-lg font-medium hover:bg-slate-300 transition-colors text-sm">
+                    Edit
+                  </button>
                   <button
                     onClick={() => handleDeleteBusiness(business.id)}
-                    className="btn-danger text-sm"
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors text-sm"
                   >
                     Delete
                   </button>
@@ -231,7 +285,7 @@ export default function SettingsPage() {
         )}
 
         {businesses.length === 0 && (
-          <div className="card">
+          <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100">
             <p className="text-slate-600">
               Create a business first to set up integrations.
             </p>
@@ -240,7 +294,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Account Section */}
-      <div className="card mt-6">
+      <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100 mt-6">
         <h2 className="text-xl font-semibold text-slate-900 mb-4">Account</h2>
         <div className="space-y-4">
           <div>
@@ -248,8 +302,8 @@ export default function SettingsPage() {
             <p className="text-slate-900 font-medium mt-1">{session?.user?.email}</p>
           </div>
           <div>
-            <label className="text-sm text-slate-600">Plan</label>
-            <p className="text-slate-900 font-medium mt-1">Starter</p>
+            <label className="text-sm text-slate-600">Name</label>
+            <p className="text-slate-900 font-medium mt-1">{session?.user?.name}</p>
           </div>
         </div>
       </div>
