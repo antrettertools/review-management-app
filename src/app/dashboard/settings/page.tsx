@@ -12,6 +12,13 @@ interface Business {
   website: string
   logo_url: string
   is_active: boolean
+  platform_connections?: {
+    google?: {
+      accessToken: string
+      refreshToken: string
+      connectedAt: string
+    }
+  }
 }
 
 export default function SettingsPage() {
@@ -214,7 +221,11 @@ export default function SettingsPage() {
         {businesses.length > 0 && (
           <GoogleConnect
             businessId={businesses[0].id}
-            isConnected={false}
+            isConnected={
+              businesses[0].platform_connections?.google?.accessToken
+                ? true
+                : false
+            }
             onSuccess={() => fetchBusinesses()}
           />
         )}

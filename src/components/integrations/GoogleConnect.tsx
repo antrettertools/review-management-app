@@ -16,7 +16,10 @@ export default function GoogleConnect({
 }: GoogleConnectProps) {
   const { data: session } = useSession()
   const [loading, setLoading] = useState(false)
+  const [syncing, setSyncing] = useState(false)
   const [error, setError] = useState('')
+  const [syncMessage, setSyncMessage] = useState('')
+  const [connected, setConnected] = useState(isConnected)
 
   const handleConnect = async () => {
     setLoading(true)
@@ -47,34 +50,64 @@ export default function GoogleConnect({
     }
   }
 
+  const handleSync = async () => {
+    setSyncing(true)
+    setError('')
+    setSyncMessage('')
+
+    try {
+      const response = await fetch('/api/integrations/google/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ businessId }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to sync reviews')
+      }
+
+      const data = await response.json()
+      setSyncMessage(data.message || `Synced ${data.reviewsCount} reviews`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+    } finally {
+      setSyncing(false)
+    }
+  }
+
   const handleDisconnect = async () => {
-    if (!confirm('Are you sure you want to disconnect Google Business?')) {
+    if (!confirm('Are you sure you want to disconnect Google Business? Your synced reviews will remain.')) {
       return
     }
 
     try {
-      // TODO: Implement disconnect logic
-      console.log('Disconnect Google')
+      setLoading(true)
+      // TODO: Implement disconnect logic in future
+      setConnected(false)
+      setError('')
+      setSyncMessage('')
       onSuccess()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
     <div className="bg-white rounded-lg shadow p-6 mb-6">
-      <div className="flex justify-between items-start">
+      <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="text-lg font-semibold text-gray-800 mb-2">
             Google Business Reviews
           </h3>
-          <p className="text-gray-600 text-sm mb-4">
-            Connect your Google Business account to sync reviews automatically.
+          <p className="text-gray-600 text-sm">
+            Connect your Google Business account to automatically sync customer reviews.
           </p>
         </div>
-        {isConnected && (
+        {connected && (
           <span className="px-3 py-1 text-sm bg-green-100 text-green-800 rounded">
-            ✓ Connected
+            Connected
           </span>
         )}
       </div>
@@ -85,14 +118,30 @@ export default function GoogleConnect({
         </div>
       )}
 
+      {syncMessage && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          {syncMessage}
+        </div>
+      )}
+
       <div className="flex gap-2">
-        {isConnected ? (
-          <button
-            onClick={handleDisconnect}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Disconnect
-          </button>
+        {connected ? (
+          <>
+            <button
+              onClick={handleSync}
+              disabled={syncing}
+              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+            >
+              {syncing ? 'Syncing...' : 'Sync Reviews'}
+            </button>
+            <button
+              onClick={handleDisconnect}
+              disabled={loading}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+            >
+              Disconnect
+            </button>
+          </>
         ) : (
           <button
             onClick={handleConnect}
