@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary: #1E3A8A;
+    --primary-light: #3B82F6;
+    --secondary: #F59E0B;
+    --success: #10B981;
+    --warning: #F97316;
+    --danger: #EF4444;
+    --neutral: #64748B;
+    --light-gray: #F8FAFC;
+    --border: #E2E8F0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 font-sans;
+  }
+
+  button {
+    @apply transition-all duration-200;
+  }
+
+  input,
+  textarea,
+  select {
+    @apply transition-all duration-200;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-slate-200 p-6 transition-all duration-200 hover:shadow-md;
+  }
+
+  .btn-primary {
+    @apply px-4 py-2.5 bg-blue-900 text-white rounded-lg font-medium hover:bg-blue-800 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2.5 bg-slate-200 text-slate-900 rounded-lg font-medium hover:bg-slate-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-danger {
+    @apply px-4 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition-all duration-200 bg-white;
+  }
+
+  .badge {
+    @apply inline-block px-3 py-1 rounded-full text-sm font-medium;
+  }
+
+  .badge-success {
+    @apply badge bg-green-100 text-green-700;
+  }
+
+  .badge-warning {
+    @apply badge bg-orange-100 text-orange-700;
+  }
+
+  .badge-danger {
+    @apply badge bg-red-100 text-red-700;
+  }
+
+  .badge-info {
+    @apply badge bg-blue-100 text-blue-700;
+  }
+}

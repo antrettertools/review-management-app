@@ -107,15 +107,15 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Settings</h1>
+      <h1 className="text-3xl font-bold text-slate-900 mb-8">Settings</h1>
 
       {/* Businesses Section */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
+      <div className="card mb-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800">My Businesses</h2>
+          <h2 className="text-xl font-semibold text-slate-900">My Businesses</h2>
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800"
+            className="btn-primary text-sm"
           >
             {showAddForm ? 'Cancel' : 'Add Business'}
           </button>
@@ -123,10 +123,10 @@ export default function SettingsPage() {
 
         {/* Add Business Form */}
         {showAddForm && (
-          <form onSubmit={handleAddBusiness} className="mb-6 p-4 bg-gray-50 rounded">
+          <form onSubmit={handleAddBusiness} className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-900 mb-1">
                   Business Name
                 </label>
                 <input
@@ -135,13 +135,13 @@ export default function SettingsPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input-field"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-900 mb-1">
                   Description
                 </label>
                 <textarea
@@ -149,13 +149,13 @@ export default function SettingsPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input-field"
                   rows={3}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-900 mb-1">
                   Website
                 </label>
                 <input
@@ -164,13 +164,13 @@ export default function SettingsPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, website: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input-field"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                className="w-full px-4 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
               >
                 Create Business
               </button>
@@ -180,32 +180,32 @@ export default function SettingsPage() {
 
         {/* Businesses List */}
         {loading ? (
-          <div className="text-center py-8 text-gray-500">Loading...</div>
+          <div className="text-center py-8 text-slate-500">Loading...</div>
         ) : businesses.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            No businesses yet. Create one to get started!
+          <div className="text-center py-8 text-slate-500">
+            No businesses yet. Create one to get started.
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {businesses.map((business) => (
               <div
                 key={business.id}
-                className="flex justify-between items-center p-4 border border-gray-200 rounded"
+                className="flex justify-between items-start p-4 border border-slate-200 rounded-lg"
               >
                 <div>
-                  <h3 className="font-semibold text-gray-800">{business.name}</h3>
-                  <p className="text-sm text-gray-500">{business.description}</p>
+                  <h3 className="font-semibold text-slate-900">{business.name}</h3>
+                  {business.description && (
+                    <p className="text-sm text-slate-600 mt-1">{business.description}</p>
+                  )}
                   {business.website && (
-                    <p className="text-sm text-blue-600">{business.website}</p>
+                    <p className="text-sm text-blue-600 mt-1">{business.website}</p>
                   )}
                 </div>
                 <div className="flex gap-2">
-                  <button className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800">
-                    Edit
-                  </button>
+                  <button className="btn-secondary text-sm">Edit</button>
                   <button
                     onClick={() => handleDeleteBusiness(business.id)}
-                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                    className="btn-danger text-sm"
                   >
                     Delete
                   </button>
@@ -231,8 +231,8 @@ export default function SettingsPage() {
         )}
 
         {businesses.length === 0 && (
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <p className="text-gray-600">
+          <div className="card">
+            <p className="text-slate-600">
               Create a business first to set up integrations.
             </p>
           </div>
@@ -240,16 +240,16 @@ export default function SettingsPage() {
       </div>
 
       {/* Account Section */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Account</h2>
+      <div className="card mt-6">
+        <h2 className="text-xl font-semibold text-slate-900 mb-4">Account</h2>
         <div className="space-y-4">
           <div>
-            <label className="text-sm text-gray-600">Email</label>
-            <p className="text-gray-800 font-medium">{session?.user?.email}</p>
+            <label className="text-sm text-slate-600">Email</label>
+            <p className="text-slate-900 font-medium mt-1">{session?.user?.email}</p>
           </div>
           <div>
-            <label className="text-sm text-gray-600">Plan</label>
-            <p className="text-gray-800 font-medium">Starter</p>
+            <label className="text-sm text-slate-600">Plan</label>
+            <p className="text-slate-900 font-medium mt-1">Starter</p>
           </div>
         </div>
       </div>

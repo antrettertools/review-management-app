@@ -22,7 +22,6 @@ export default function ReviewsPage() {
   const fetchReviews = async () => {
     setLoading(true)
     try {
-      // Get user's businesses first
       const { data: businesses } = await supabase
         .from('businesses')
         .select('id')
@@ -31,7 +30,6 @@ export default function ReviewsPage() {
       if (businesses && businesses.length > 0) {
         const businessIds = businesses.map((b) => b.id)
 
-        // Fetch reviews for these businesses
         let query = supabase
           .from('reviews')
           .select('*')
@@ -76,47 +74,47 @@ export default function ReviewsPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Reviews</h1>
+      <h1 className="text-3xl font-bold text-slate-900 mb-8">Reviews</h1>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-4 mb-6">
-        <div className="flex gap-4 flex-wrap">
+      <div className="card mb-6">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded ${
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               filter === 'all'
                 ? 'bg-blue-900 text-white'
-                : 'bg-gray-200 text-gray-800'
+                : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
             }`}
           >
             All
           </button>
           <button
             onClick={() => setFilter('responded')}
-            className={`px-4 py-2 rounded ${
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               filter === 'responded'
                 ? 'bg-blue-900 text-white'
-                : 'bg-gray-200 text-gray-800'
+                : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
             }`}
           >
             Responded
           </button>
           <button
             onClick={() => setFilter('not-responded')}
-            className={`px-4 py-2 rounded ${
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               filter === 'not-responded'
                 ? 'bg-blue-900 text-white'
-                : 'bg-gray-200 text-gray-800'
+                : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
             }`}
           >
             Not Responded
           </button>
           <button
             onClick={() => setFilter('urgent')}
-            className={`px-4 py-2 rounded ${
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               filter === 'urgent'
                 ? 'bg-red-600 text-white'
-                : 'bg-gray-200 text-gray-800'
+                : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
             }`}
           >
             Urgent
@@ -126,23 +124,23 @@ export default function ReviewsPage() {
 
       {/* Reviews List */}
       {loading ? (
-        <div className="text-center py-8 text-gray-500">Loading reviews...</div>
+        <div className="text-center py-8 text-slate-500">Loading reviews...</div>
       ) : reviews.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">No reviews yet</div>
+        <div className="text-center py-8 text-slate-500">No reviews found</div>
       ) : (
         <div className="space-y-4">
           {reviews.map((review) => (
-            <div key={review.id} className="bg-white rounded-lg shadow p-6">
+            <div key={review.id} className="card">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="font-semibold text-gray-800">
+                  <h3 className="font-semibold text-slate-900">
                     {review.author_name}
                   </h3>
-                  <p className="text-sm text-gray-500">{review.platform}</p>
+                  <p className="text-sm text-slate-500 mt-1">{review.platform}</p>
                 </div>
                 <div className="flex gap-2">
                   <span
-                    className={`px-3 py-1 rounded text-sm text-white ${
+                    className={`px-3 py-1 rounded-lg text-sm font-medium text-white ${
                       review.rating >= 4
                         ? 'bg-green-600'
                         : review.rating >= 3
@@ -150,33 +148,33 @@ export default function ReviewsPage() {
                         : 'bg-red-600'
                     }`}
                   >
-                    ★ {review.rating}
+                    {review.rating} star
                   </span>
                   {review.is_responded && (
-                    <span className="px-3 py-1 rounded text-sm bg-blue-600 text-white">
+                    <span className="px-3 py-1 rounded-lg text-sm font-medium bg-blue-100 text-blue-700">
                       Responded
                     </span>
                   )}
                   {review.urgency_level === 'critical' && (
-                    <span className="px-3 py-1 rounded text-sm bg-red-600 text-white">
+                    <span className="px-3 py-1 rounded-lg text-sm font-medium bg-red-100 text-red-700">
                       Urgent
                     </span>
                   )}
                 </div>
               </div>
 
-              <p className="text-gray-700 mb-4">{review.content}</p>
+              <p className="text-slate-700 mb-4">{review.content}</p>
 
               <div className="flex gap-2">
                 <button
                   onClick={() => handleReplyClick(review)}
-                  className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800"
+                  className="btn-primary"
                 >
                   Reply
                 </button>
                 <button
                   onClick={() => handleMarkUrgent(review.id)}
-                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+                  className="btn-secondary"
                 >
                   Mark Urgent
                 </button>
