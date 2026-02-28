@@ -1,312 +1,233 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import { useSession } from 'next-auth/react'
-import GoogleConnect from '@/components/integrations/GoogleConnect'
-import { canCreateBusiness } from '@/lib/plan-features'
 
-interface Business {
-  id: string
-  name: string
-  description: string
-  website: string
-  logo_url: string
-  is_active: boolean
-  platform_connections?: {
-    google?: {
-      accessToken: string
-      refreshToken: string
-      connectedAt: string
-    }
-  }
-}
+function SignupContent() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const planParam = searchParams.get('plan') || 'starter'
+  
+  const [selectedPlan, setSelectedPlan] = useState(planParam)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-export default function SettingsPage() {
-  const { data: session } = useSession()
-  const [businesses, setBusinesses] = useState<Business[]>([])
-  const [loading, setLoading] = useState(true)
-  const [showAddForm, setShowAddForm] = useState(false)
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    website: '',
-  })
-  const [userPlan, setUserPlan] = useState<'starter' | 'advanced'>('starter')
+  const plans = [
+    {
+      id: 'starter',
+      name: 'Starter',
+      price: 'Free',
+      duration: '7 days',
+      description: 'Perfect for small businesses',
+    },
+    {
+      id: 'advanced',
+      name: 'Advanced',
+      price: '$49.99',
+      duration: '/month',
+      description: 'For growing businesses',
+    },
+  ]
 
-  useEffect(() => {
-    if ((session?.user as any)?.id) {
-      fetchBusinesses()
-      fetchUserPlan()
-    }
-  }, [session])
-
-  const fetchUserPlan = async () => {
-    try {
-      const { data } = await supabase
-        .from('users')
-        .select('subscription_plan')
-        .eq('id', (session?.user as any)?.id)
-        .single()
-
-      if (data) {
-        setUserPlan(data.subscription_plan || 'starter')
-      }
-    } catch (error) {
-      console.error('Error fetching plan:', error)
-    }
-  }
-
-  const fetchBusinesses = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
     setLoading(true)
-    try {
-      const { data } = await supabase
-        .from('businesses')
-        .select('*')
-        .eq('user_id', (session?.user as any)?.id)
 
-      setBusinesses(data || [])
-    } catch (error) {
-      console.error('Error fetching businesses:', error)
+    try {
+      // Create Supabase auth user
+      const { data, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+          },
+        },
+      })
+
+      if (authError) {
+        setError(authError.message)
+        return
+      }
+
+      // Create user record in database with selected plan
+      if (data.user) {
+        const { error: dbError } = await supabase
+          .from('users')
+          .insert([
+            {
+              id: data.user.id,
+              email,
+              name,
+              subscription_plan: selectedPlan,
+            },
+          ])
+
+        if (dbError) {
+          setError('Failed to create user profile')
+          return
+        }
+      }
+
+      router.push('/auth/login?signup=success')
+    } catch (err) {
+      setError('An error occurred. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleAddBusiness = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    // Check plan limits
-    if (!canCreateBusiness(userPlan, businesses.length)) {
-      alert(`Your ${userPlan} plan allows only 1 business. Upgrade to Advanced to add more.`)
-      return
-    }
-
-    try {
-      const { error } = await supabase.from('businesses').insert([
-        {
-          user_id: (session?.user as any)?.id,
-          name: formData.name,
-          description: formData.description,
-          website: formData.website,
-          is_active: true,
-        },
-      ])
-
-      if (error) {
-        alert('Error creating business: ' + error.message)
-        return
-      }
-
-      setFormData({ name: '', description: '', website: '' })
-      setShowAddForm(false)
-      fetchBusinesses()
-    } catch (error) {
-      console.error('Error:', error)
-      alert('Failed to create business')
-    }
-  }
-
-  const handleDeleteBusiness = async (businessId: string) => {
-    if (!confirm('Are you sure you want to delete this business?')) {
-      return
-    }
-
-    try {
-      const { error } = await supabase
-        .from('businesses')
-        .delete()
-        .eq('id', businessId)
-
-      if (error) {
-        alert('Error deleting business: ' + error.message)
-        return
-      }
-
-      fetchBusinesses()
-    } catch (error) {
-      console.error('Error:', error)
-      alert('Failed to delete business')
-    }
-  }
-
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-slate-900 mb-8">Settings</h1>
-
-      {/* Plan Info */}
-      <div className="bg-white rounded-2xl shadow-lg p-8 mb-6 border border-slate-100">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-xl font-semibold text-slate-900">Current Plan</h2>
-            <p className="text-slate-600 mt-1 capitalize">{userPlan} Plan</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+      {/* Header */}
+      <header className="border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          <Link href="/" className="text-2xl font-bold text-slate-900">
+            ReviewHub
+          </Link>
+          <div className="flex gap-3">
+            <Link
+              href="/auth/login"
+              className="px-6 py-2.5 text-slate-900 font-medium hover:bg-slate-100 rounded-lg transition-colors"
+            >
+              Sign In
+            </Link>
           </div>
-          <a href="/pricing" className="px-6 py-2.5 bg-blue-900 text-white rounded-lg font-medium hover:bg-blue-800 transition-colors">
-            Upgrade
-          </a>
         </div>
-      </div>
+      </header>
 
-      {/* Businesses Section */}
-      <div className="bg-white rounded-2xl shadow-lg p-8 mb-6 border border-slate-100">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-slate-900">My Businesses</h2>
-          <button
-            onClick={() => setShowAddForm(!showAddForm)}
-            disabled={!canCreateBusiness(userPlan, businesses.length)}
-            className={`font-semibold py-2.5 px-4 rounded-lg transition-colors ${
-              canCreateBusiness(userPlan, businesses.length)
-                ? 'bg-blue-900 text-white hover:bg-blue-800'
-                : 'bg-slate-200 text-slate-500 cursor-not-allowed'
-            }`}
-          >
-            {showAddForm ? 'Cancel' : 'Add Business'}
-          </button>
+      <div className="max-w-6xl mx-auto px-6 py-16">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-slate-900 mb-4">Start Your Free Trial</h1>
+          <p className="text-xl text-slate-600">Choose your plan and get started today. No credit card required.</p>
         </div>
 
-        {!canCreateBusiness(userPlan, businesses.length) && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-yellow-800">
-              You've reached the business limit for your {userPlan} plan. 
-              <a href="/pricing" className="font-semibold hover:underline ml-1">Upgrade to Advanced</a> to add more businesses.
-            </p>
-          </div>
-        )}
-
-        {/* Add Business Form */}
-        {showAddForm && (
-          <form onSubmit={handleAddBusiness} className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
+        <div className="grid lg:grid-cols-3 gap-8 mb-12">
+          {/* Plan Selection */}
+          <div className="lg:col-span-1">
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-900 mb-1">
-                  Business Name
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition-all"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-900 mb-1">
-                  Description
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition-all"
-                  rows={3}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-900 mb-1">
-                  Website
-                </label>
-                <input
-                  type="text"
-                  value={formData.website}
-                  onChange={(e) =>
-                    setFormData({ ...formData, website: e.target.value })
-                  }
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition-all"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full px-4 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
-              >
-                Create Business
-              </button>
+              {plans.map((plan) => (
+                <button
+                  key={plan.id}
+                  onClick={() => setSelectedPlan(plan.id)}
+                  className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                    selectedPlan === plan.id
+                      ? 'border-blue-900 bg-blue-50'
+                      : 'border-slate-200 bg-white hover:border-slate-300'
+                  }`}
+                >
+                  <div className="font-semibold text-slate-900">{plan.name}</div>
+                  <div className="text-sm text-slate-600 mt-1">{plan.description}</div>
+                  <div className="text-lg font-bold text-slate-900 mt-2">
+                    {plan.price} <span className="text-sm text-slate-600">{plan.duration}</span>
+                  </div>
+                </button>
+              ))}
             </div>
-          </form>
-        )}
-
-        {/* Businesses List */}
-        {loading ? (
-          <div className="text-center py-8 text-slate-500">Loading...</div>
-        ) : businesses.length === 0 ? (
-          <div className="text-center py-8 text-slate-500">
-            No businesses yet. Create one to get started.
           </div>
-        ) : (
-          <div className="space-y-3">
-            {businesses.map((business) => (
-              <div
-                key={business.id}
-                className="flex justify-between items-start p-4 border border-slate-200 rounded-xl hover:shadow-md transition-shadow"
-              >
+
+          {/* Signup Form */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100">
+              <h2 className="text-2xl font-bold text-slate-900 mb-6">
+                Sign up for {selectedPlan === 'starter' ? 'Free 7-Day Trial' : 'Advanced Plan'}
+              </h2>
+
+              {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <h3 className="font-semibold text-slate-900">{business.name}</h3>
-                  {business.description && (
-                    <p className="text-sm text-slate-600 mt-1">{business.description}</p>
-                  )}
-                  {business.website && (
-                    <p className="text-sm text-blue-600 mt-1">{business.website}</p>
-                  )}
+                  <label className="block text-sm font-medium text-slate-900 mb-2">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition-all"
+                    required
+                  />
                 </div>
-                <div className="flex gap-2">
-                  <button className="px-4 py-2 bg-slate-200 text-slate-900 rounded-lg font-medium hover:bg-slate-300 transition-colors text-sm">
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteBusiness(business.id)}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors text-sm"
-                  >
-                    Delete
-                  </button>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-900 mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition-all"
+                    required
+                  />
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
-      {/* Integrations Section */}
-      <div>
-        {businesses.length > 0 && (
-          <GoogleConnect
-            businessId={businesses[0].id}
-            isConnected={
-              businesses[0].platform_connections?.google?.accessToken
-                ? true
-                : false
-            }
-            onSuccess={() => fetchBusinesses()}
-          />
-        )}
+                <div>
+                  <label className="block text-sm font-medium text-slate-900 mb-2">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition-all"
+                    required
+                  />
+                </div>
 
-        {businesses.length === 0 && (
-          <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100">
-            <p className="text-slate-600">
-              Create a business first to set up integrations.
-            </p>
-          </div>
-        )}
-      </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full px-4 py-3 bg-blue-900 text-white rounded-lg font-semibold hover:bg-blue-800 disabled:opacity-50 transition-colors mt-6"
+                >
+                  {loading ? 'Creating account...' : `Start ${selectedPlan === 'starter' ? 'Free Trial' : 'Advanced Plan'}`}
+                </button>
+              </form>
 
-      {/* Account Section */}
-      <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100 mt-6">
-        <h2 className="text-xl font-semibold text-slate-900 mb-4">Account</h2>
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm text-slate-600">Email</label>
-            <p className="text-slate-900 font-medium mt-1">{session?.user?.email}</p>
-          </div>
-          <div>
-            <label className="text-sm text-slate-600">Name</label>
-            <p className="text-slate-900 font-medium mt-1">{session?.user?.name}</p>
+              <p className="text-center text-slate-600 mt-6">
+                Already have an account?{' '}
+                <Link href="/auth/login" className="text-blue-600 hover:underline font-medium">
+                  Sign in
+                </Link>
+              </p>
+
+              {selectedPlan === 'starter' && (
+                <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-sm text-green-800">
+                    Your 7-day free trial starts immediately. No credit card required. Upgrade anytime.
+                  </p>
+                </div>
+              )}
+
+              {selectedPlan === 'advanced' && (
+                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    You'll be redirected to payment after account creation.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="text-center py-20">Loading...</div>}>
+      <SignupContent />
+    </Suspense>
   )
 }
