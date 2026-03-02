@@ -58,6 +58,10 @@ function SignupContent() {
 
       // Create user record in database with selected plan
       if (data.user) {
+        // Calculate trial end date (7 days from now for starter plan)
+        const trialEndsAt = new Date()
+        trialEndsAt.setDate(trialEndsAt.getDate() + 7)
+
         const { error: dbError } = await supabase
           .from('users')
           .insert([
@@ -66,10 +70,12 @@ function SignupContent() {
               email,
               name,
               subscription_plan: selectedPlan,
+              trial_ends_at: selectedPlan === 'starter' ? trialEndsAt.toISOString() : null,
             },
           ])
 
         if (dbError) {
+          console.error('DB Error:', dbError)
           setError('Failed to create user profile')
           return
         }
@@ -77,6 +83,7 @@ function SignupContent() {
 
       router.push('/auth/login?signup=success')
     } catch (err) {
+      console.error('Signup error:', err)
       setError('An error occurred. Please try again.')
     } finally {
       setLoading(false)
