@@ -3,163 +3,146 @@ import Stripe from 'stripe'
 import { supabase } from '@/lib/supabase'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '')
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || ''
 
 export async function POST(request: NextRequest) {
+  const body = await request.text()
+  const sig = request.headers.get('stripe-signature') || ''
+
+  let event: Stripe.Event
+
   try {
-    const body = await request.text()
-    const signature = request.headers.get('stripe-signature') || ''
+    event = stripe.webhooks.constructEvent(
+      body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET || ''
+    )
+  } catch (err) {
+    console.error('Webhook signature verification failed:', err)
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
+  }
 
-    // Verify webhook signature
-    let event: Stripe.Event
+  console.log('Stripe webhook event:', event.type)
 
-    try {
-      event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
-    } catch (err) {
-      console.error('Webhook signature verification failed:', err)
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 400 }
-      )
-    }
-
-    // Handle different event types
+  try {
     switch (event.type) {
-      case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session
-        await handleCheckoutSessionCompleted(session)
+      case 'checkout.session.completed':
+        await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session)
         break
-      }
 
-      case 'customer.subscription.updated': {
-        const subscription = event.data.object as Stripe.Subscription
-        await handleSubscriptionUpdated(subscription)
+      case 'customer.subscription.updated':
+        await handleSubscriptionUpdated(event.data.object as Stripe.Subscription)
         break
-      }
 
-      case 'customer.subscription.deleted': {
-        const subscription = event.data.object as Stripe.Subscription
-        await handleSubscriptionDeleted(subscription)
+      case 'customer.subscription.deleted':
+        await handleSubscriptionDeleted(event.data.object as Stripe.Subscription)
         break
-      }
 
       default:
         console.log(`Unhandled event type: ${event.type}`)
     }
 
     return NextResponse.json({ received: true })
-  } catch (error) {
-    console.error('Webhook error:', error)
-    return NextResponse.json(
-      { error: 'Webhook processing failed' },
-      { status: 500 }
-    )
+  } catch (err) {
+    console.error('Webhook error:', err)
+    return NextResponse.json({ error: 'Webhook error' }, { status: 500 })
   }
 }
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
-  try {
-    console.log('Checkout session completed:', session.id)
+  console.log('Checkout session completed:', session.id)
 
-    const planId = session.metadata?.planId
-    const userId = session.metadata?.userId
+  const userId = session.metadata?.userId
+  const planId = session.metadata?.planId
 
-    if (!planId || !userId) {
-      console.error('Missing metadata in checkout session')
-      return
-    }
+  if (!userId || !planId) {
+    console.error('Missing userId or planId in metadata')
+    return
+  }
 
-    // Update user subscription plan in database
-    const { error } = await supabase
-      .from('users')
-      .update({
-        subscription_plan: planId,
-        stripe_customer_id: session.customer as string,
-      })
-      .eq('id', userId)
+  const customerId = session.customer as string
 
-    if (error) {
-      console.error('Error updating user subscription:', error)
-    } else {
-      console.log('User subscription updated:', userId, planId)
-    }
-  } catch (error) {
-    console.error('Error handling checkout session:', error)
+  // Update user with subscription plan and customer ID
+  const { error } = await supabase
+    .from('users')
+    .update({
+      subscription_plan: planId,
+      stripe_customer_id: customerId,
+    })
+    .eq('id', userId)
+
+  if (error) {
+    console.error('Error updating user:', error)
+  } else {
+    console.log('User updated with plan:', planId)
   }
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  try {
-    console.log('Subscription updated:', subscription.id)
+  console.log('Subscription updated:', subscription.id)
 
-    const customerId = subscription.customer as string
+  const customerId = subscription.customer as string
 
-    // Find user by stripe_customer_id
-    const { data: user, error: fetchError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('stripe_customer_id', customerId)
-      .single()
+  // Get the price ID from subscription items
+  const priceId = subscription.items.data[0]?.price.id
 
-    if (fetchError || !user) {
-      console.error('User not found for customer:', customerId)
-      return
-    }
+  // Determine plan based on price ID
+  let planId = 'starter'
+  if (
+    priceId === process.env.NEXT_PUBLIC_STRIPE_ADVANCED_PRICE_ID ||
+    priceId === process.env.STRIPE_ADVANCED_PRICE_ID
+  ) {
+    planId = 'advanced'
+  }
 
-    // Determine plan from subscription items
-    const priceId = subscription.items.data[0]?.price.id
-    let planId = 'starter'
+  // Find user by stripe_customer_id and update
+  const { data: user, error: findError } = await supabase
+    .from('users')
+    .select('id')
+    .eq('stripe_customer_id', customerId)
+    .single()
 
-    if (priceId?.includes('advanced') || priceId?.includes('49')) {
-      planId = 'advanced'
-    }
+  if (findError || !user) {
+    console.error('User not found:', findError)
+    return
+  }
 
-    // Update subscription plan
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({ subscription_plan: planId })
-      .eq('id', user.id)
+  const { error: updateError } = await supabase
+    .from('users')
+    .update({ subscription_plan: planId })
+    .eq('id', user.id)
 
-    if (updateError) {
-      console.error('Error updating subscription:', updateError)
-    } else {
-      console.log('Subscription updated for user:', user.id, planId)
-    }
-  } catch (error) {
-    console.error('Error handling subscription update:', error)
+  if (updateError) {
+    console.error('Error updating subscription:', updateError)
+  } else {
+    console.log('Subscription updated to plan:', planId)
   }
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  try {
-    console.log('Subscription deleted:', subscription.id)
+  console.log('Subscription deleted:', subscription.id)
 
-    const customerId = subscription.customer as string
+  const customerId = subscription.customer as string
 
-    // Find user by stripe_customer_id
-    const { data: user, error: fetchError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('stripe_customer_id', customerId)
-      .single()
+  // Find user and downgrade to starter
+  const { data: user, error: findError } = await supabase
+    .from('users')
+    .select('id')
+    .eq('stripe_customer_id', customerId)
+    .single()
 
-    if (fetchError || !user) {
-      console.error('User not found for customer:', customerId)
-      return
-    }
+  if (findError || !user) {
+    console.error('User not found:', findError)
+    return
+  }
 
-    // Downgrade to starter plan
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({ subscription_plan: 'starter' })
-      .eq('id', user.id)
+  const { error: updateError } = await supabase
+    .from('users')
+    .update({ subscription_plan: 'starter' })
+    .eq('id', user.id)
 
-    if (updateError) {
-      console.error('Error downgrading subscription:', updateError)
-    } else {
-      console.log('Subscription cancelled for user:', user.id)
-    }
-  } catch (error) {
-    console.error('Error handling subscription deletion:', error)
+  if (updateError) {
+    console.error('Error downgrading user:', updateError)
+  } else {
+    console.log('User downgraded to starter plan')
   }
 }
