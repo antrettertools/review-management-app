@@ -1,7 +1,7 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { signOut } from 'next-auth/react'
@@ -14,6 +14,7 @@ export default function DashboardLayout({
 }) {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
   useEffect(() => {
@@ -30,6 +31,16 @@ export default function DashboardLayout({
     return null
   }
 
+  const isActive = (href: string) => pathname === href
+
+  const navItems = [
+    { href: '/dashboard', label: 'Dashboard' },
+    { href: '/dashboard/reviews', label: 'Reviews' },
+    { href: '/dashboard/analytics', label: 'Analytics' },
+    { href: '/dashboard/notifications', label: 'Notifications' },
+    { href: '/dashboard/settings', label: 'Settings' },
+  ]
+
   return (
     <div className="flex h-screen bg-slate-50">
       {/* Sidebar */}
@@ -45,42 +56,22 @@ export default function DashboardLayout({
           </div>
 
           <nav className="space-y-2 mb-8">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors font-medium bg-white hover:shadow-md"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/dashboard/reviews"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors font-medium bg-white hover:shadow-md"
-            >
-              Reviews
-            </Link>
-            <Link
-              href="/dashboard/analytics"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors font-medium bg-white hover:shadow-md"
-            >
-              Analytics
-            </Link>
-            <Link
-              href="/dashboard/notifications"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors font-medium bg-white hover:shadow-md"
-            >
-              Notifications
-            </Link>
-            <Link
-              href="/dashboard/settings"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors font-medium bg-white hover:shadow-md"
-            >
-              Settings
-            </Link>
-            <Link
-              href="/pricing"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors font-medium bg-white hover:shadow-md"
-            >
-              Upgrade
-            </Link>
+            {navItems.map((item) => {
+              const active = isActive(item.href)
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${
+                    active
+                      ? 'bg-blue-900 text-white shadow-md'
+                      : 'text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              )
+            })}
           </nav>
 
           <div className="border-t border-slate-200 pt-6">
@@ -97,6 +88,14 @@ export default function DashboardLayout({
           </div>
         </div>
       </div>
+
+      {/* Overlay for mobile */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 lg:hidden z-30"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
