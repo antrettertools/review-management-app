@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   console.log('Checkout session completed:', session.id)
+  console.log('Session metadata:', session.metadata)
 
   const userId = session.metadata?.userId
   const planId = session.metadata?.planId
@@ -61,19 +62,22 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
   const customerId = session.customer as string
 
+  console.log('Updating user:', userId, 'with plan:', planId, 'and customer:', customerId)
+
   // Update user with subscription plan and customer ID
-  const { error } = await supabase
+  const { error, data } = await supabase
     .from('users')
     .update({
       subscription_plan: planId,
       stripe_customer_id: customerId,
     })
     .eq('id', userId)
+    .select()
 
   if (error) {
     console.error('Error updating user:', error)
   } else {
-    console.log('User updated with plan:', planId)
+    console.log('User updated successfully:', data)
   }
 }
 
@@ -85,6 +89,9 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   // Get the price ID from subscription items
   const priceId = subscription.items.data[0]?.price.id
 
+  console.log('Price ID:', priceId)
+  console.log('Advanced price ID env:', process.env.NEXT_PUBLIC_STRIPE_ADVANCED_PRICE_ID)
+
   // Determine plan based on price ID
   let planId = 'starter'
   if (
@@ -93,6 +100,8 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   ) {
     planId = 'advanced'
   }
+
+  console.log('Determined plan:', planId)
 
   // Find user by stripe_customer_id and update
   const { data: user, error: findError } = await supabase
@@ -105,6 +114,8 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     console.error('User not found:', findError)
     return
   }
+
+  console.log('Updating user:', user.id, 'to plan:', planId)
 
   const { error: updateError } = await supabase
     .from('users')
@@ -134,6 +145,8 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     console.error('User not found:', findError)
     return
   }
+
+  console.log('Downgrading user:', user.id, 'to starter')
 
   const { error: updateError } = await supabase
     .from('users')
