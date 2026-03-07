@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { supabase } from '@/lib/supabase'
-import Link from 'next/link'
-import { ChevronRight, LogOut, Zap, X } from 'lucide-react'
+import { X, Zap } from 'lucide-react'
 
 interface UserProfile {
   id: string
@@ -18,7 +16,6 @@ interface UserProfile {
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { data: session } = useSession()
   const [user, setUser] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -31,74 +28,64 @@ export default function SettingsPage() {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const { data: { user: authUser } } = await supabase.auth.getUser()
-        
-        if (!authUser) {
-          router.push('/auth/login')
-          return
-        }
+    loadUser()
+  }, [])
 
-        // Fetch user profile from database
-        const { data, error: dbError } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', authUser.id)
-          .single()
-
-        if (dbError && dbError.code !== 'PGRST116') {
-          console.error('Error fetching user:', dbError)
-          setError('Failed to load user profile')
-          return
-        }
-
-        // If user doesn't exist in database, create it
-        if (!data) {
-          const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-          const { error: insertError } = await supabase
-            .from('users')
-            .insert([
-              {
-                id: authUser.id,
-                email: authUser.email,
-                name: authUser.user_metadata?.name || 'User',
-                subscription_plan: 'starter',
-                trial_ends_at: trialEndsAt,
-              },
-            ])
-
-          if (insertError) {
-            console.error('Error creating user:', insertError)
-          }
-
-          setUser({
-            id: authUser.id,
-            email: authUser.email || '',
-            name: authUser.user_metadata?.name || 'User',
-            subscription_plan: 'starter',
-            created_at: new Date().toISOString(),
-            trial_ends_at: trialEndsAt,
-          })
-          setEditName(authUser.user_metadata?.name || 'User')
-        } else {
-          setUser(data)
-          setEditName(data.name)
-        }
-      } catch (err) {
-        console.error('Error:', err)
-        setError('An error occurred')
-      } finally {
-        setLoading(false)
+  const loadUser = async () => {
+    try {
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      
+      if (!authUser) {
+        router.push('/auth/login')
+        return
       }
+
+      const { data, error: dbError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', authUser.id)
+        .single()
+
+      if (dbError && dbError.code !== 'PGRST116') {
+        console.error('Error fetching user:', dbError)
+        setError('Failed to load user profile')
+        setLoading(false)
+        return
+      }
+
+      if (!data) {
+        const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+        await supabase
+          .from('users')
+          .insert([
+            {
+              id: authUser.id,
+              email: authUser.email,
+              name: authUser.user_metadata?.name || 'User',
+              subscription_plan: 'starter',
+              trial_ends_at: trialEndsAt,
+            },
+          ])
+
+        setUser({
+          id: authUser.id,
+          email: authUser.email || '',
+          name: authUser.user_metadata?.name || 'User',
+          subscription_plan: 'starter',
+          created_at: new Date().toISOString(),
+          trial_ends_at: trialEndsAt,
+        })
+        setEditName(authUser.user_metadata?.name || 'User')
+      } else {
+        setUser(data)
+        setEditName(data.name)
+      }
+    } catch (err) {
+      console.error('Error loading user:', err)
+      setError('An error occurred')
+    } finally {
+      setLoading(false)
     }
-
-    fetchUser()
-  }, [router])
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push('/auth/login')
   }
 
   const handleUpdateProfile = async () => {
@@ -118,6 +105,7 @@ export default function SettingsPage() {
 
       setUser({ ...user, name: editName })
       setIsEditing(false)
+      setError('')
     } catch (err) {
       console.error('Error updating profile:', err)
       setError('An error occurred')
@@ -227,6 +215,14 @@ export default function SettingsPage() {
     )
   }
 
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center py-8 text-slate-600">
+        Unable to load user profile
+      </div>
+    )
+  }
+
   return (
     <div>
       <h1 className="text-3xl font-bold text-slate-900 mb-8">Settings</h1>
@@ -259,16 +255,13 @@ export default function SettingsPage() {
       )}
 
       {/* Account Tab */}
-      {activeTab === 'account' && user && (
+      {activeTab === 'account' && (
         <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100">
           <h2 className="text-2xl font-bold text-slate-900 mb-6">Account Settings</h2>
 
           <div className="space-y-6">
-            {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-slate-900 mb-2">
-                Full Name
-              </label>
+              <label className="block text-sm font-medium text-slate-900 mb-2">Full Name</label>
               {isEditing ? (
                 <div className="flex gap-2">
                   <input
@@ -307,19 +300,13 @@ export default function SettingsPage() {
               )}
             </div>
 
-            {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-slate-900 mb-2">
-                Email Address
-              </label>
+              <label className="block text-sm font-medium text-slate-900 mb-2">Email Address</label>
               <p className="text-slate-600">{user.email}</p>
             </div>
 
-            {/* Account Created */}
             <div>
-              <label className="block text-sm font-medium text-slate-900 mb-2">
-                Account Created
-              </label>
+              <label className="block text-sm font-medium text-slate-900 mb-2">Account Created</label>
               <p className="text-slate-600">{formatDate(user.created_at)}</p>
             </div>
           </div>
@@ -327,12 +314,11 @@ export default function SettingsPage() {
       )}
 
       {/* Billing Tab */}
-      {activeTab === 'billing' && user && (
+      {activeTab === 'billing' && (
         <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100">
           <h2 className="text-2xl font-bold text-slate-900 mb-6">Billing & Plan</h2>
 
           <div className="space-y-6">
-            {/* Current Plan Card */}
             <div className="border-2 border-slate-200 rounded-xl p-6 bg-gradient-to-br from-slate-50 to-white">
               <div className="flex justify-between items-start mb-4">
                 <div>
@@ -348,7 +334,6 @@ export default function SettingsPage() {
                 </span>
               </div>
 
-              {/* Trial Info */}
               {user.subscription_plan === 'starter' && user.trial_ends_at && (
                 <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   {isTrialExpired ? (
@@ -366,12 +351,12 @@ export default function SettingsPage() {
 
               {user.subscription_plan === 'advanced' && (
                 <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm text-green-900 font-medium">
+                  <p className="text-sm text-green-900 font-medium mb-3">
                     ✓ You have access to all Advanced features
                   </p>
                   <button
                     onClick={() => setShowCancelConfirm(true)}
-                    className="mt-3 text-sm text-red-600 hover:text-red-800 font-medium transition-colors"
+                    className="text-sm text-red-600 hover:text-red-800 font-medium transition-colors"
                   >
                     Cancel subscription
                   </button>
@@ -379,7 +364,6 @@ export default function SettingsPage() {
               )}
             </div>
 
-            {/* Plan Features */}
             <div>
               <h3 className="text-lg font-semibold text-slate-900 mb-4">Current Plan Includes</h3>
               <ul className="space-y-2">
@@ -395,7 +379,7 @@ export default function SettingsPage() {
       )}
 
       {/* Plans Tab */}
-      {activeTab === 'upgrade' && user && (
+      {activeTab === 'upgrade' && (
         <div className="space-y-8">
           <div>
             <h2 className="text-2xl font-bold text-slate-900 mb-6">Choose Your Plan</h2>
@@ -456,11 +440,10 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Info Box */}
           <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6">
             <h3 className="font-semibold text-blue-900 mb-2">Secure Payment</h3>
             <p className="text-sm text-blue-900">
-              Upgrades are processed securely through Stripe. You can cancel your subscription anytime from the Billing & Plan tab. Changes take effect immediately.
+              Upgrades are processed securely through Stripe. You can cancel your subscription anytime from the Billing & Plan tab.
             </p>
           </div>
         </div>
