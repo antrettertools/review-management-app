@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { X, Zap } from 'lucide-react'
 
@@ -18,6 +18,7 @@ interface UserProfile {
 export default function SettingsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [user, setUser] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -28,6 +29,7 @@ export default function SettingsPage() {
   const [upgradeLoading, setUpgradeLoading] = useState(false)
   const [cancelLoading, setCancelLoading] = useState(false)
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -39,6 +41,18 @@ export default function SettingsPage() {
       loadUser()
     }
   }, [status, session, router])
+
+  // Check if payment was successful
+  useEffect(() => {
+    const paymentSuccess = searchParams.get('payment')
+    if (paymentSuccess === 'success') {
+      setSuccessMessage('Payment successful! Refreshing your plan...')
+      // Wait a moment then reload user data
+      setTimeout(() => {
+        loadUser()
+      }, 1000)
+    }
+  }, [searchParams])
 
   const loadUser = async () => {
     if (!session?.user) return
@@ -85,6 +99,9 @@ export default function SettingsPage() {
       } else {
         setUser(data)
         setEditName(data.name)
+        if (successMessage) {
+          setSuccessMessage('')
+        }
       }
     } catch (err) {
       console.error('Error loading user:', err)
@@ -171,6 +188,7 @@ export default function SettingsPage() {
 
       setUser({ ...user, subscription_plan: 'starter' })
       setShowCancelConfirm(false)
+      setSuccessMessage('Subscription cancelled successfully')
     } catch (err) {
       console.error('Error canceling plan:', err)
       setError('An error occurred')
@@ -232,6 +250,13 @@ export default function SettingsPage() {
   return (
     <div>
       <h1 className="text-3xl font-bold text-slate-900 mb-8">Settings</h1>
+
+      {/* Success Message */}
+      {successMessage && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-6">
+          {successMessage}
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-4 mb-8 border-b border-slate-200">
