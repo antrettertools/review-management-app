@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { X, Zap } from 'lucide-react'
+import { X, Zap, RotateCw } from 'lucide-react'
 
 interface UserProfile {
   id: string
@@ -21,6 +21,7 @@ export default function SettingsPage() {
   const searchParams = useSearchParams()
   const [user, setUser] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState('account')
   const [isEditing, setIsEditing] = useState(false)
@@ -46,11 +47,18 @@ export default function SettingsPage() {
   useEffect(() => {
     const paymentSuccess = searchParams.get('payment')
     if (paymentSuccess === 'success') {
-      setSuccessMessage('Payment successful! Refreshing your plan...')
-      // Wait a moment then reload user data
-      setTimeout(() => {
-        loadUser()
-      }, 1000)
+      setSuccessMessage('Payment successful! Checking your updated plan...')
+      setActiveTab('billing')
+      
+      // Refresh immediately
+      refreshUserPlan()
+      
+      // Also refresh after 3 seconds to ensure webhook has processed
+      const timer = setTimeout(() => {
+        refreshUserPlan()
+      }, 3000)
+      
+      return () => clearTimeout(timer)
     }
   }, [searchParams])
 
@@ -99,15 +107,45 @@ export default function SettingsPage() {
       } else {
         setUser(data)
         setEditName(data.name)
-        if (successMessage) {
-          setSuccessMessage('')
-        }
       }
     } catch (err) {
       console.error('Error loading user:', err)
       setError('An error occurred')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const refreshUserPlan = async () => {
+    if (!session?.user) return
+
+    setRefreshing(true)
+    try {
+      const userId = (session.user as any).id || session.user.email
+
+      const { data, error: dbError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single()
+
+      if (dbError) {
+        console.error('Error refreshing user:', dbError)
+        return
+      }
+
+      if (data) {
+        setUser(data)
+        if (data.subscription_plan === 'advanced') {
+          setSuccessMessage('Plan upgraded to Advanced! You now have unlimited features.')
+        } else {
+          setSuccessMessage('')
+        }
+      }
+    } catch (err) {
+      console.error('Error refreshing plan:', err)
+    } finally {
+      setRefreshing(false)
     }
   }
 
@@ -188,7 +226,8 @@ export default function SettingsPage() {
 
       setUser({ ...user, subscription_plan: 'starter' })
       setShowCancelConfirm(false)
-      setSuccessMessage('Subscription cancelled successfully')
+      setSuccessMessage('Subscription cancelled. You are now on the Starter plan.')
+      setActiveTab('billing')
     } catch (err) {
       console.error('Error canceling plan:', err)
       setError('An error occurred')
@@ -253,8 +292,9 @@ export default function SettingsPage() {
 
       {/* Success Message */}
       {successMessage && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-6">
-          {successMessage}
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-6 flex justify-between items-center">
+          <span>{successMessage}</span>
+          {refreshing && <div className="animate-spin"><RotateCw size={18} /></div>}
         </div>
       )}
 
@@ -347,7 +387,17 @@ export default function SettingsPage() {
       {/* Billing Tab */}
       {activeTab === 'billing' && (
         <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100">
-          <h2 className="text-2xl font-bold text-slate-900 mb-6">Billing & Plan</h2>
+          <div className="flex justify-between items-start mb-6">
+            <h2 className="text-2xl font-bold text-slate-900">Billing & Plan</h2>
+            <button
+              onClick={refreshUserPlan}
+              disabled={refreshing}
+              className="flex items-center gap-2 px-3 py-2 bg-slate-200 text-slate-900 rounded-lg hover:bg-slate-300 disabled:opacity-50 transition-colors text-sm font-medium"
+            >
+              <RotateCw size={16} className={refreshing ? 'animate-spin' : ''} />
+              Refresh
+            </button>
+          </div>
 
           <div className="space-y-6">
             <div className="border-2 border-slate-200 rounded-xl p-6 bg-gradient-to-br from-slate-50 to-white">
@@ -382,14 +432,14 @@ export default function SettingsPage() {
 
               {user.subscription_plan === 'advanced' && (
                 <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm text-green-900 font-medium mb-3">
+                  <p className="text-sm text-green-900 font-medium mb-4">
                     ✓ You have access to all Advanced features
                   </p>
                   <button
                     onClick={() => setShowCancelConfirm(true)}
-                    className="text-sm text-red-600 hover:text-red-800 font-medium transition-colors"
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors text-sm"
                   >
-                    Cancel subscription
+                    Cancel Subscription
                   </button>
                 </div>
               )}
