@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   console.log('Checkout session completed:', session.id)
   console.log('Session metadata:', session.metadata)
+  console.log('Session customer:', session.customer)
 
   const userId = session.metadata?.userId
   const planId = session.metadata?.planId
@@ -83,6 +84,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   console.log('Subscription updated:', subscription.id)
+  console.log('Customer ID:', subscription.customer)
 
   const customerId = subscription.customer as string
 
@@ -111,7 +113,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     .single()
 
   if (findError || !user) {
-    console.error('User not found:', findError)
+    console.error('User not found by customer ID:', findError)
     return
   }
 

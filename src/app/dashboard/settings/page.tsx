@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { X, Zap } from 'lucide-react'
@@ -15,6 +16,7 @@ interface UserProfile {
 }
 
 export default function SettingsPage() {
+  const { data: session, status } = useSession()
   const router = useRouter()
   const [user, setUser] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -28,22 +30,26 @@ export default function SettingsPage() {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
 
   useEffect(() => {
-    loadUser()
-  }, [])
+    if (status === 'unauthenticated') {
+      router.push('/auth/login')
+      return
+    }
+
+    if (status === 'authenticated' && session?.user) {
+      loadUser()
+    }
+  }, [status, session, router])
 
   const loadUser = async () => {
+    if (!session?.user) return
+
     try {
-      const { data: { user: authUser } } = await supabase.auth.getUser()
-      
-      if (!authUser) {
-        router.push('/auth/login')
-        return
-      }
+      const userId = (session.user as any).id || session.user.email
 
       const { data, error: dbError } = await supabase
         .from('users')
         .select('*')
-        .eq('id', authUser.id)
+        .eq('id', userId)
         .single()
 
       if (dbError && dbError.code !== 'PGRST116') {
@@ -59,23 +65,23 @@ export default function SettingsPage() {
           .from('users')
           .insert([
             {
-              id: authUser.id,
-              email: authUser.email,
-              name: authUser.user_metadata?.name || 'User',
+              id: userId,
+              email: session.user.email,
+              name: session.user.name || 'User',
               subscription_plan: 'starter',
               trial_ends_at: trialEndsAt,
             },
           ])
 
         setUser({
-          id: authUser.id,
-          email: authUser.email || '',
-          name: authUser.user_metadata?.name || 'User',
+          id: userId,
+          email: session.user.email || '',
+          name: session.user.name || 'User',
           subscription_plan: 'starter',
           created_at: new Date().toISOString(),
           trial_ends_at: trialEndsAt,
         })
-        setEditName(authUser.user_metadata?.name || 'User')
+        setEditName(session.user.name || 'User')
       } else {
         setUser(data)
         setEditName(data.name)
@@ -207,7 +213,7 @@ export default function SettingsPage() {
     },
   ]
 
-  if (loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="flex items-center justify-center py-8 text-slate-600">
         Loading...
@@ -215,10 +221,10 @@ export default function SettingsPage() {
     )
   }
 
-  if (!user) {
+  if (!user || !session) {
     return (
       <div className="flex items-center justify-center py-8 text-slate-600">
-        Unable to load user profile
+        Unable to load settings
       </div>
     )
   }

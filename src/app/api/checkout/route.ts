@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     // Get user email
     const { data: user, error: userError } = await supabase
       .from('users')
-      .select('email')
+      .select('email, stripe_customer_id')
       .eq('id', userId)
       .single()
 
@@ -38,19 +38,40 @@ export async function POST(request: NextRequest) {
 
     console.log('Stripe initialized')
 
+    // If user already has a stripe customer ID, use it. Otherwise create new.
+    let customerId = user.stripe_customer_id
+
+    if (!customerId) {
+      // Create new customer
+      const customer = await stripe.customers.create({
+        email: user.email,
+        metadata: {
+          userId: userId,
+        },
+      })
+      customerId = customer.id
+      console.log('Created new Stripe customer:', customerId)
+
+      // Update user with customer ID
+      await supabase
+        .from('users')
+        .update({ stripe_customer_id: customerId })
+        .eq('id', userId)
+    }
+
     // Create checkout session
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
+      customer: customerId,
       line_items: [
         {
           price: priceId,
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXTAUTH_URL}/dashboard?payment=success&plan=${planId}`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/pricing`,
-      customer_email: user.email,
+      success_url: `${process.env.NEXTAUTH_URL}/dashboard/settings?payment=success&plan=${planId}`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/dashboard/settings?tab=upgrade`,
       metadata: {
         planId,
         userId,
