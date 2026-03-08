@@ -1,16 +1,16 @@
 'use client'
 
-import { useState, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
-function SignupContent() {
+export default function SignupPage() {
   const router = useRouter()
   
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [name, setName] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -38,11 +38,17 @@ function SignupContent() {
       }
 
       if (data.user) {
-        // Just redirect to login - user profile will be created via database trigger or next login
-        router.push('/auth/login?signup=success')
+        // Store user info in session/local storage for checkout
+        sessionStorage.setItem('signupData', JSON.stringify({
+          userId: data.user.id,
+          email,
+          name,
+        }))
+
+        // Redirect to checkout
+        router.push('/checkout')
       }
     } catch (err) {
-      console.error('Signup error:', err)
       setError('An error occurred. Please try again.')
       setLoading(false)
     }
@@ -69,8 +75,8 @@ function SignupContent() {
 
       <div className="max-w-md mx-auto px-6 py-16">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-slate-900 mb-4">Create Account</h1>
-          <p className="text-xl text-slate-600">Start your free trial today. Upgrade anytime from settings.</p>
+          <h1 className="text-4xl font-bold text-slate-900 mb-4">Create Your Account</h1>
+          <p className="text-xl text-slate-600">Sign up to get started with ReviewHub</p>
         </div>
 
         {/* Signup Form */}
@@ -129,7 +135,7 @@ function SignupContent() {
               disabled={loading}
               className="w-full px-4 py-3 bg-blue-900 text-white rounded-lg font-semibold hover:bg-blue-800 disabled:opacity-50 transition-colors mt-6"
             >
-              {loading ? 'Creating account...' : 'Create Account'}
+              {loading ? 'Creating account...' : 'Continue to Payment'}
             </button>
           </form>
 
@@ -140,23 +146,13 @@ function SignupContent() {
             </Link>
           </p>
 
-          <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-sm text-green-800">
-              ✓ Free trial starts immediately<br/>
-              ✓ No credit card required<br/>
-              ✓ Upgrade anytime from settings
+          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-900">
+              Next, you'll proceed to payment. ReviewHub is $39.99/month.
             </p>
           </div>
         </div>
       </div>
     </div>
-  )
-}
-
-export default function SignupPage() {
-  return (
-    <Suspense fallback={<div className="text-center py-20">Loading...</div>}>
-      <SignupContent />
-    </Suspense>
   )
 }

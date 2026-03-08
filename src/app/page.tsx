@@ -36,12 +36,6 @@ export default function Home() {
             >
               Sign In
             </Link>
-            <Link
-              href="/auth/signup"
-              className="px-6 py-2.5 bg-blue-900 text-white font-medium rounded-lg hover:bg-blue-800 transition-colors"
-            >
-              Get Started
-            </Link>
           </div>
         </div>
       </header>
@@ -67,29 +61,32 @@ export default function Home() {
               href="/auth/signup"
               className="px-8 py-3.5 bg-blue-900 text-white font-medium rounded-lg hover:bg-blue-800 transition-colors text-center"
             >
-              Start Free Trial
+              Get Started - $39.99/month
             </Link>
             <Link
-              href="/pricing"
+              href="#features"
               className="px-8 py-3.5 border border-slate-300 text-slate-900 font-medium rounded-lg hover:bg-slate-100 transition-colors text-center"
             >
-              See Pricing
+              Learn More
             </Link>
           </div>
 
           {/* Feature Grid */}
-          <div className="grid md:grid-cols-3 gap-8 mt-20">
-            <div className="card">
+          <div id="features" className="grid md:grid-cols-3 gap-8 mt-20">
+            <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100 hover:shadow-xl transition-shadow">
+              <div className="text-4xl mb-4">📊</div>
               <h3 className="text-lg font-semibold text-slate-900 mb-2">Unified Dashboard</h3>
               <p className="text-slate-600">See all reviews from Google, Yelp, and more in one place. Never miss important feedback.</p>
             </div>
 
-            <div className="card">
+            <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100 hover:shadow-xl transition-shadow">
+              <div className="text-4xl mb-4">🤖</div>
               <h3 className="text-lg font-semibold text-slate-900 mb-2">AI-Powered Responses</h3>
               <p className="text-slate-600">Get intelligent response suggestions tailored to each review. Save hours every week.</p>
             </div>
 
-            <div className="card">
+            <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100 hover:shadow-xl transition-shadow">
+              <div className="text-4xl mb-4">📈</div>
               <h3 className="text-lg font-semibold text-slate-900 mb-2">Smart Analytics</h3>
               <p className="text-slate-600">Track ratings, sentiment, and response rates. Make data-driven decisions.</p>
             </div>
@@ -121,12 +118,12 @@ export default function Home() {
       {/* CTA Section */}
       <section className="max-w-7xl mx-auto px-6 py-24 text-center">
         <h2 className="text-4xl font-bold text-slate-900 mb-4">Ready to simplify review management?</h2>
-        <p className="text-xl text-slate-600 mb-8">Join thousands of businesses already using ReviewHub</p>
+        <p className="text-xl text-slate-600 mb-8">Start managing all your reviews today</p>
         <Link
           href="/auth/signup"
           className="inline-block px-8 py-3.5 bg-blue-900 text-white font-medium rounded-lg hover:bg-blue-800 transition-colors"
         >
-          Get Started Free
+          Get Started Now
         </Link>
       </section>
 
