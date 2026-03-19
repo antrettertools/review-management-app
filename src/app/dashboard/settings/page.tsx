@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { X, Plus, Trash2 } from 'lucide-react'
+import GoogleConnect from '@/components/integrations/GoogleConnect'
 
 interface UserProfile {
   id: string
@@ -44,6 +45,9 @@ export default function SettingsPage() {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
   const [cancelLoading, setCancelLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
+
+  // Google connection
+  const [selectedBusinessForGoogle, setSelectedBusinessForGoogle] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -436,7 +440,9 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <button className="w-full px-3 py-2 text-sm bg-blue-50 text-blue-900 rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors font-medium">
+                    <button
+                      onClick={() => setSelectedBusinessForGoogle(business.id)}
+                      className="w-full px-3 py-2 text-sm bg-blue-50 text-blue-900 rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors font-medium">
                       Connect Google Reviews
                     </button>
                     <div className="px-3 py-2 text-xs bg-slate-100 text-slate-600 rounded-lg border border-slate-200 text-center">
@@ -514,6 +520,33 @@ export default function SettingsPage() {
               >
                 Keep Subscription
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Google Connect Modal */}
+      {selectedBusinessForGoogle && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4">
+            <div className="flex justify-between items-center p-8 border-b border-slate-200">
+              <h2 className="text-2xl font-bold text-slate-900">Connect Google Reviews</h2>
+              <button
+                onClick={() => setSelectedBusinessForGoogle(null)}
+                className="text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <div className="p-8">
+              <GoogleConnect
+                businessId={selectedBusinessForGoogle}
+                isConnected={businesses.find(b => b.id === selectedBusinessForGoogle)?.platform_connections?.google ? true : false}
+                onSuccess={() => {
+                  setSelectedBusinessForGoogle(null)
+                  loadBusinesses()
+                }}
+              />
             </div>
           </div>
         </div>
