@@ -27,6 +27,7 @@ export default function CheckoutPage() {
 
   const handleCheckout = async () => {
     if (!signupData) return
+
     setLoading(true)
     setError('')
 
@@ -46,6 +47,7 @@ export default function CheckoutPage() {
       }
 
       const data = await response.json()
+
       if (data.url) {
         window.location.href = data.url
       }
@@ -98,31 +100,38 @@ export default function CheckoutPage() {
             <p className="text-slate-600">{signupData.email}</p>
           </div>
 
-          <ul className="mb-6 space-y-2">
-            <li className="flex items-center gap-2 text-slate-700">
-              <span className="text-green-600">✓</span> Unlimited Businesses
-            </li>
-            <li className="flex items-center gap-2 text-slate-700">
-              <span className="text-green-600">✓</span> Unlimited AI Responses
-            </li>
-            <li className="flex items-center gap-2 text-slate-700">
-              <span className="text-green-600">✓</span> Full Analytics
-            </li>
-            <li className="flex items-center gap-2 text-slate-700">
-              <span className="text-green-600">✓</span> Priority Support
-            </li>
-            <li className="flex items-center gap-2 text-slate-700">
-              <span className="text-green-600">✓</span> Google Reviews Integration
-            </li>
-          </ul>
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">What You Get:</h3>
+            <ul className="space-y-2">
+              <li className="flex items-center gap-2 text-slate-700">
+                <span className="text-green-600 font-bold">✓</span> Unlimited Businesses
+              </li>
+              <li className="flex items-center gap-2 text-slate-700">
+                <span className="text-green-600 font-bold">✓</span> Unlimited AI Responses
+              </li>
+              <li className="flex items-center gap-2 text-slate-700">
+                <span className="text-green-600 font-bold">✓</span> Full Analytics
+              </li>
+              <li className="flex items-center gap-2 text-slate-700">
+                <span className="text-green-600 font-bold">✓</span> Priority Support
+              </li>
+              <li className="flex items-center gap-2 text-slate-700">
+                <span className="text-green-600 font-bold">✓</span> Google Reviews Integration
+              </li>
+            </ul>
+          </div>
 
           <button
             onClick={handleCheckout}
             disabled={loading}
-            className="w-full py-3 bg-blue-900 text-white rounded-lg font-semibold hover:bg-blue-800 disabled:opacity-50"
+            className="w-full py-3 px-4 bg-blue-900 text-white rounded-lg font-semibold hover:bg-blue-800 disabled:opacity-50 transition-colors"
           >
             {loading ? 'Processing...' : 'Proceed to Payment'}
           </button>
+
+          <p className="text-center text-slate-600 mt-4 text-xs">
+            You'll be redirected to our secure payment processor
+          </p>
         </div>
       </div>
     </div>
