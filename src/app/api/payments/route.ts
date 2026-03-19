@@ -10,24 +10,17 @@ export async function POST(request: NextRequest) {
     const { planId, priceId, userId } = body
 
     if (!planId || !priceId || !userId) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // Get user email
-    const { data: user, error: userError } = await supabase
+    const { data: user } = await supabase
       .from('users')
       .select('email, stripe_customer_id')
       .eq('id', userId)
       .single()
 
-    if (userError || !user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     let customerId = user.stripe_customer_id
@@ -35,9 +28,7 @@ export async function POST(request: NextRequest) {
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email,
-        metadata: {
-          userId: userId,
-        },
+        metadata: { userId },
       })
       customerId = customer.id
 
@@ -51,28 +42,15 @@ export async function POST(request: NextRequest) {
       mode: 'subscription',
       payment_method_types: ['card'],
       customer: customerId,
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
+      line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${process.env.NEXTAUTH_URL}/dashboard?payment=success`,
       cancel_url: `${process.env.NEXTAUTH_URL}/auth/signup`,
-      metadata: {
-        planId,
-        userId,
-      },
+      metadata: { planId, userId },
     })
 
     return NextResponse.json({ url: checkoutSession.url })
   } catch (error) {
-    console.error('Checkout error:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    )
+    console.error('Error:', error)
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
