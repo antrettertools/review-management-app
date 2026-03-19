@@ -30,7 +30,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // If user already has a stripe customer ID, use it. Otherwise create new.
     let customerId = user.stripe_customer_id
 
     if (!customerId) {
@@ -42,14 +41,12 @@ export async function POST(request: NextRequest) {
       })
       customerId = customer.id
 
-      // Update user with customer ID
       await supabase
         .from('users')
         .update({ stripe_customer_id: customerId })
         .eq('id', userId)
     }
 
-    // Create checkout session
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
