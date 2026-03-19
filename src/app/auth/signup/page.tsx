@@ -20,7 +20,7 @@ export default function SignupPage() {
     setLoading(true)
 
     try {
-      // Create Supabase auth user
+      // Sign up with Supabase auth
       const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -38,15 +38,33 @@ export default function SignupPage() {
       }
 
       if (data.user) {
-        // Store user info in session/local storage for checkout
-        sessionStorage.setItem('signupData', JSON.stringify({
+        // Create user record in database
+        await supabase
+          .from('users')
+          .insert([
+            {
+              id: data.user.id,
+              email,
+              name,
+              subscription_plan: 'pending',
+            },
+          ])
+          .select()
+
+        // Store signup data and redirect to checkout
+        const signupData = {
           userId: data.user.id,
           email,
           name,
-        }))
+        }
 
-        // Redirect to checkout
-        router.push('/checkout')
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('signupData', JSON.stringify(signupData))
+        }
+
+        setTimeout(() => {
+          router.push('/checkout')
+        }, 300)
       }
     } catch (err) {
       setError('An error occurred. Please try again.')
@@ -56,7 +74,6 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
-      {/* Header */}
       <header className="border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <Link href="/" className="text-2xl font-bold text-slate-900">
@@ -79,7 +96,6 @@ export default function SignupPage() {
           <p className="text-xl text-slate-600">Sign up to get started with ReviewHub</p>
         </div>
 
-        {/* Signup Form */}
         <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100">
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
