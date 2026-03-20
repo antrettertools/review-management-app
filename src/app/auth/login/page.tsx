@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -27,7 +28,23 @@ export default function LoginPage() {
       setError('Invalid email or password')
       setLoading(false)
     } else {
-      router.push('/dashboard')
+      // Check subscription status
+      try {
+        const { data: profile } = await supabase
+          .from('users')
+          .select('subscription_plan')
+          .eq('email', email)
+          .single()
+
+        if (profile?.subscription_plan === 'cancelled') {
+          router.push('/account-cancelled')
+        } else {
+          router.push('/dashboard')
+        }
+      } catch (err) {
+        // If subscription check fails, redirect to dashboard
+        router.push('/dashboard')
+      }
     }
   }
 

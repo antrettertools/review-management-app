@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { X, Plus, Trash2, CheckCircle, Pencil, Globe } from 'lucide-react'
@@ -337,6 +337,11 @@ export default function SettingsPage() {
       setUser({ ...user, subscription_plan: 'cancelled' })
       setShowCancelConfirm(false)
       setSuccessMessage('Subscription cancelled successfully')
+
+      // Log out after a short delay to show success message
+      setTimeout(() => {
+        signOut({ callbackUrl: '/auth/login' })
+      }, 2000)
     } catch (err) {
       console.error('Error canceling plan:', err)
       setError('An error occurred')
