@@ -38,18 +38,26 @@ export default function SignupPage() {
       }
 
       if (data.user) {
-        // Create user record in database
-        await supabase
+        // Create or update user record in database
+        const { error: dbError } = await supabase
           .from('users')
-          .insert([
-            {
-              id: data.user.id,
-              email,
-              name,
-              subscription_plan: 'pending',
-            },
-          ])
-          .select()
+          .upsert(
+            [
+              {
+                id: data.user.id,
+                email,
+                name,
+                subscription_plan: 'pending',
+              },
+            ],
+            { onConflict: 'id' }
+          )
+
+        if (dbError) {
+          setError('Failed to create account profile. Please try again.')
+          setLoading(false)
+          return
+        }
 
         // Store signup data and redirect to checkout
         const signupData = {
