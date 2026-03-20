@@ -40,8 +40,7 @@ export async function POST(request: NextRequest) {
     // Sync reviews from Google
     const syncResult = await syncGoogleReviews(
       googleConnection.accessToken,
-      `accounts/[ACCOUNT_ID]/locations/${business.id}`,
-      businessId
+      `accounts/[ACCOUNT_ID]/locations/${business.id}`
     )
 
     if (!syncResult.success) {
