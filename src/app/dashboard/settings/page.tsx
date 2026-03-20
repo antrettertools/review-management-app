@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { X, Plus, Trash2, CheckCircle, Pencil, Globe, Link } from 'lucide-react'
+import { X, Plus, Trash2, CheckCircle, Pencil, Globe } from 'lucide-react'
 
 interface UserProfile {
   id: string
@@ -473,160 +473,201 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Businesses Section */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">Businesses</h2>
-            {isGoogleConnected && (
+        {/* Businesses Section - Full Width */}
+        <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100 md:col-span-2">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-2xl font-bold text-slate-900">Your Businesses</h2>
+            <button
+              onClick={() => setShowAddBusiness(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors font-medium"
+            >
+              <Plus size={18} />
+              Add Business
+            </button>
+          </div>
+
+          {/* Google Connection Section */}
+          <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-blue-900 mb-1">Google Business Connection</h3>
+                <p className="text-sm text-blue-800 mb-4">
+                  {isGoogleConnected
+                    ? 'Your Google account is connected. Reviews will sync automatically daily.'
+                    : 'Connect your Google Business account to automatically sync and manage your reviews.'}
+                </p>
+              </div>
+              {isGoogleConnected && (
+                <div className="flex items-center gap-2 px-3 py-2 bg-green-100 border border-green-300 rounded-lg ml-4 whitespace-nowrap">
+                  <CheckCircle size={18} className="text-green-600" />
+                  <span className="text-sm font-medium text-green-700">Connected</span>
+                </div>
+              )}
+            </div>
+
+            {!isGoogleConnected && (
               <button
-                onClick={() => setShowAddBusiness(true)}
-                className="p-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors"
+                onClick={handleConnectGoogle}
+                disabled={googleConnecting}
+                className="px-6 py-2.5 bg-blue-900 text-white rounded-lg font-semibold hover:bg-blue-800 disabled:opacity-50 transition-colors"
               >
-                <Plus size={20} />
+                {googleConnecting ? 'Connecting...' : 'Connect Google Account'}
               </button>
             )}
           </div>
 
-          {/* Google Connection - show only if not connected */}
-          {!isGoogleConnected ? (
-            <div className="text-center py-6">
-              <Globe size={48} className="text-slate-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">Connect Google Business</h3>
-              <p className="text-sm text-slate-600 mb-6">
-                Connect your Google account to manage reviews for your businesses.
-              </p>
-              <button
-                onClick={handleConnectGoogle}
-                disabled={googleConnecting}
-                className="w-full px-4 py-3 bg-blue-900 text-white rounded-lg font-semibold hover:bg-blue-800 disabled:opacity-50 transition-colors"
-              >
-                {googleConnecting ? 'Connecting...' : 'Connect Google Account'}
-              </button>
-            </div>
-          ) : (
-            <>
-              {/* Connected badge */}
-              <div className="flex items-center gap-2 mb-4 px-3 py-2 bg-green-50 border border-green-200 rounded-lg">
-                <CheckCircle size={16} className="text-green-600" />
-                <span className="text-sm font-medium text-green-800">Google Connected</span>
-              </div>
-
-              {/* Add business form */}
-              {showAddBusiness && (
-                <div className="mb-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+          {/* Add Business Form */}
+          {showAddBusiness && (
+            <div className="mb-8 p-6 bg-slate-50 border border-slate-200 rounded-xl">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Add New Business</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Business Name *</label>
                   <input
                     type="text"
                     value={newBusinessName}
                     onChange={(e) => setNewBusinessName(e.target.value)}
-                    placeholder="Business name"
-                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 mb-3"
+                    placeholder="e.g., Main Location, Downtown Office"
+                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900"
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Website (Optional)</label>
                   <input
                     type="url"
                     value={newBusinessWebsite}
                     onChange={(e) => setNewBusinessWebsite(e.target.value)}
-                    placeholder="Website (optional)"
-                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 mb-3"
+                    placeholder="https://example.com"
+                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900"
                   />
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleAddBusiness}
-                      disabled={savingBusiness}
-                      className="flex-1 px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 disabled:opacity-50 transition-colors font-medium text-sm"
-                    >
-                      {savingBusiness ? 'Creating...' : 'Create'}
-                    </button>
-                    <button
-                      onClick={() => { setShowAddBusiness(false); setNewBusinessName(''); setNewBusinessWebsite('') }}
-                      className="flex-1 px-4 py-2 border border-slate-300 text-slate-900 rounded-lg hover:bg-slate-50 transition-colors font-medium text-sm"
-                    >
-                      Cancel
-                    </button>
-                  </div>
                 </div>
-              )}
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={handleAddBusiness}
+                    disabled={savingBusiness || !newBusinessName.trim()}
+                    className="px-6 py-2.5 bg-blue-900 text-white rounded-lg hover:bg-blue-800 disabled:opacity-50 transition-colors font-medium"
+                  >
+                    {savingBusiness ? 'Creating...' : 'Create Business'}
+                  </button>
+                  <button
+                    onClick={() => { setShowAddBusiness(false); setNewBusinessName(''); setNewBusinessWebsite('') }}
+                    className="px-6 py-2.5 border border-slate-300 text-slate-900 rounded-lg hover:bg-slate-100 transition-colors font-medium"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
-              {/* Business list */}
-              <div className="space-y-3">
-                {businesses.length === 0 ? (
-                  <p className="text-slate-500 text-sm text-center py-4">No businesses added yet</p>
-                ) : (
-                  businesses.map((business) => (
-                    <div key={business.id} className="group rounded-lg border border-slate-200 bg-slate-50 overflow-hidden transition-all">
-                      {/* Business header row */}
-                      <div className="flex items-center justify-between p-4">
-                        <div className="flex-1">
-                          <p className="font-semibold text-slate-900">{business.name}</p>
-                          {business.website && (
-                            <div className="flex items-center gap-1 mt-1">
-                              <Link size={12} className="text-slate-400" />
-                              <p className="text-xs text-slate-500 truncate">{business.website}</p>
-                            </div>
-                          )}
-                        </div>
-                        <button
-                          onClick={() => {
-                            if (expandedBusinessId === business.id) {
-                              setExpandedBusinessId(null)
-                            } else {
-                              setExpandedBusinessId(business.id)
-                              setEditBusinessName(business.name)
-                              setEditBusinessWebsite(business.website || '')
-                            }
-                          }}
-                          className="p-2 text-slate-400 hover:text-blue-900 hover:bg-blue-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                        >
-                          <Pencil size={16} />
-                        </button>
+          {/* Business List */}
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-4">
+              {businesses.length === 0 ? 'No Businesses Yet' : `${businesses.length} Business${businesses.length !== 1 ? 'es' : ''}`}
+            </h3>
+
+            {businesses.length === 0 ? (
+              <div className="text-center py-12 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl">
+                <Globe size={48} className="text-slate-300 mx-auto mb-3" />
+                <p className="text-slate-600 mb-2">No businesses added yet</p>
+                <p className="text-sm text-slate-500">Click "Add Business" above to get started</p>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {businesses.map((business) => (
+                  <div key={business.id} className="group rounded-xl border border-slate-200 bg-white hover:shadow-md transition-all overflow-hidden">
+                    {/* Business header row */}
+                    <div className="flex items-center justify-between p-5">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-lg font-semibold text-slate-900 truncate">{business.name}</h4>
+                        {business.website && (
+                          <div className="flex items-center gap-2 mt-2">
+                            <Globe size={14} className="text-slate-400 flex-shrink-0" />
+                            <a
+                              href={business.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm text-blue-600 hover:text-blue-800 truncate"
+                            >
+                              {business.website}
+                            </a>
+                          </div>
+                        )}
                       </div>
+                      <button
+                        onClick={() => {
+                          if (expandedBusinessId === business.id) {
+                            setExpandedBusinessId(null)
+                          } else {
+                            setExpandedBusinessId(business.id)
+                            setEditBusinessName(business.name)
+                            setEditBusinessWebsite(business.website || '')
+                          }
+                        }}
+                        className={`ml-4 flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all ${
+                          expandedBusinessId === business.id
+                            ? 'bg-blue-100 text-blue-900'
+                            : 'text-slate-600 hover:bg-slate-100 opacity-0 group-hover:opacity-100'
+                        }`}
+                      >
+                        <Pencil size={16} />
+                        <span className="text-sm">Edit</span>
+                      </button>
+                    </div>
 
-                      {/* Expanded edit panel */}
-                      {expandedBusinessId === business.id && (
-                        <div className="px-4 pb-4 border-t border-slate-200 bg-white">
-                          <div className="pt-4 space-y-3">
-                            <div>
-                              <label className="block text-xs font-medium text-slate-700 mb-1">Business Name</label>
-                              <input
-                                type="text"
-                                value={editBusinessName}
-                                onChange={(e) => setEditBusinessName(e.target.value)}
-                                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-xs font-medium text-slate-700 mb-1">Website</label>
-                              <input
-                                type="url"
-                                value={editBusinessWebsite}
-                                onChange={(e) => setEditBusinessWebsite(e.target.value)}
-                                placeholder="https://example.com"
-                                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900"
-                              />
-                            </div>
-                            <div className="flex gap-2 pt-2">
-                              <button
-                                onClick={() => handleUpdateBusiness(business.id)}
-                                disabled={savingBusiness}
-                                className="flex-1 px-3 py-2 text-sm bg-blue-900 text-white rounded-lg hover:bg-blue-800 disabled:opacity-50 transition-colors font-medium"
-                              >
-                                {savingBusiness ? 'Saving...' : 'Save Changes'}
-                              </button>
-                              <button
-                                onClick={() => handleDeleteBusiness(business.id)}
-                                className="px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
-                              >
-                                <Trash2 size={14} />
-                              </button>
-                            </div>
+                    {/* Expanded edit panel */}
+                    {expandedBusinessId === business.id && (
+                      <div className="px-5 pb-5 border-t border-slate-200 bg-slate-50">
+                        <div className="pt-5 space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">Business Name</label>
+                            <input
+                              type="text"
+                              value={editBusinessName}
+                              onChange={(e) => setEditBusinessName(e.target.value)}
+                              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">Website</label>
+                            <input
+                              type="url"
+                              value={editBusinessWebsite}
+                              onChange={(e) => setEditBusinessWebsite(e.target.value)}
+                              placeholder="https://example.com"
+                              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900"
+                            />
+                          </div>
+                          <div className="flex gap-3 pt-3">
+                            <button
+                              onClick={() => handleUpdateBusiness(business.id)}
+                              disabled={savingBusiness}
+                              className="flex-1 px-4 py-2.5 bg-blue-900 text-white rounded-lg hover:bg-blue-800 disabled:opacity-50 transition-colors font-medium"
+                            >
+                              {savingBusiness ? 'Saving...' : 'Save Changes'}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteBusiness(business.id)}
+                              className="px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                              title="Delete business"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                            <button
+                              onClick={() => setExpandedBusinessId(null)}
+                              className="px-4 py-2.5 border border-slate-300 text-slate-900 rounded-lg hover:bg-white transition-colors font-medium"
+                            >
+                              Close
+                            </button>
                           </div>
                         </div>
-                      )}
-                    </div>
-                  ))
-                )}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
-            </>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Billing Section */}
