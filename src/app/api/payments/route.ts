@@ -7,7 +7,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '')
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { planId, priceId, userId } = body
+    const { planId, priceId, userId, cancelUrl } = body
 
     if (!planId || !priceId || !userId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         },
       ],
       success_url: `${process.env.NEXTAUTH_URL}/dashboard?payment=success`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/auth/signup`,
+      cancel_url: `${process.env.NEXTAUTH_URL}${cancelUrl || '/auth/signup'}`,
       metadata: {
         planId,
         userId,

@@ -170,7 +170,7 @@ export default function AccountCancelledPage() {
           <div className="grid md:grid-cols-2 gap-4 mb-6">
             {/* Reactivate Button */}
             <Link
-              href="/checkout"
+              href="/reactivate"
               className="block p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-900 rounded-xl hover:shadow-lg transition-shadow"
             >
               <h3 className="text-lg font-bold text-blue-900 mb-2">Reactivate Subscription</h3>
