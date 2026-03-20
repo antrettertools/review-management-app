@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXTAUTH_URL}/dashboard?payment=success`,
+      success_url: `${process.env.NEXTAUTH_URL}/api/payments/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXTAUTH_URL}${cancelUrl || '/auth/signup'}`,
       metadata: {
         planId,

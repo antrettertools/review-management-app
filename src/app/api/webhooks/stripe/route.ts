@@ -97,6 +97,11 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   // Determine plan based on price ID
   let planId = 'starter'
   if (
+    priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_ID ||
+    priceId === process.env.STRIPE_PRICE_ID
+  ) {
+    planId = 'pro'
+  } else if (
     priceId === process.env.NEXT_PUBLIC_STRIPE_ADVANCED_PRICE_ID ||
     priceId === process.env.STRIPE_ADVANCED_PRICE_ID
   ) {
