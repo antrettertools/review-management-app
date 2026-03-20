@@ -55,6 +55,24 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Create a notification
+    try {
+      await fetch(`${process.env.NEXTAUTH_URL}/api/notifications`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          type: 'system',
+          title: 'Google Reviews Connected',
+          message: 'Your Google Business Reviews account has been successfully connected.',
+          data: { businessId },
+        }),
+      })
+    } catch (notificationError) {
+      console.error('Error creating notification:', notificationError)
+      // Don't fail the whole flow if notification fails
+    }
+
     // Redirect back to settings
     return NextResponse.redirect(
       `${process.env.NEXTAUTH_URL}/dashboard/settings?google=connected`

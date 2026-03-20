@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { X, Plus, Trash2 } from 'lucide-react'
+import { X, Plus, Trash2, CheckCircle } from 'lucide-react'
 import GoogleConnect from '@/components/integrations/GoogleConnect'
 
 interface UserProfile {
@@ -18,12 +18,14 @@ interface UserProfile {
 interface Business {
   id: string
   name: string
+  website?: string
   platform_connections?: Record<string, any>
 }
 
 export default function SettingsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [user, setUser] = useState<UserProfile | null>(null)
   const [businesses, setBusinesses] = useState<Business[]>([])
   const [loading, setLoading] = useState(true)
@@ -39,7 +41,12 @@ export default function SettingsPage() {
   // Business creation
   const [showAddBusiness, setShowAddBusiness] = useState(false)
   const [newBusinessName, setNewBusinessName] = useState('')
+  const [newBusinessWebsite, setNewBusinessWebsite] = useState('')
   const [savingBusiness, setSavingBusiness] = useState(false)
+
+  // Business editing
+  const [editingBusinessId, setEditingBusinessId] = useState<string | null>(null)
+  const [editingBusinessWebsite, setEditingBusinessWebsite] = useState('')
 
   // Cancel subscription
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
@@ -48,6 +55,7 @@ export default function SettingsPage() {
 
   // Google connection
   const [selectedBusinessForGoogle, setSelectedBusinessForGoogle] = useState<string | null>(null)
+  const [showGoogleConnectSuccess, setShowGoogleConnectSuccess] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -60,6 +68,16 @@ export default function SettingsPage() {
       loadBusinesses()
     }
   }, [status, session, router])
+
+  // Check for Google connection success
+  useEffect(() => {
+    const googleConnected = searchParams.get('google')
+    if (googleConnected === 'connected') {
+      setShowGoogleConnectSuccess(true)
+      // Clean up URL
+      window.history.replaceState({}, '', '/dashboard/settings')
+    }
+  }, [searchParams])
 
   const loadUser = async () => {
     if (!session?.user) return
@@ -175,6 +193,7 @@ export default function SettingsPage() {
           {
             user_id: user.id,
             name: newBusinessName,
+            website: newBusinessWebsite || null,
             platform_connections: {},
           },
         ])
@@ -186,10 +205,35 @@ export default function SettingsPage() {
       }
 
       setNewBusinessName('')
+      setNewBusinessWebsite('')
       setShowAddBusiness(false)
       await loadBusinesses()
     } catch (err) {
       console.error('Error creating business:', err)
+      setError('An error occurred')
+    } finally {
+      setSavingBusiness(false)
+    }
+  }
+
+  const handleUpdateBusinessWebsite = async (businessId: string, website: string) => {
+    setSavingBusiness(true)
+    try {
+      const { error } = await supabase
+        .from('businesses')
+        .update({ website: website || null })
+        .eq('id', businessId)
+
+      if (error) {
+        setError('Failed to update website')
+        setSavingBusiness(false)
+        return
+      }
+
+      setEditingBusinessId(null)
+      await loadBusinesses()
+    } catch (err) {
+      console.error('Error updating website:', err)
       setError('An error occurred')
     } finally {
       setSavingBusiness(false)
@@ -405,6 +449,13 @@ export default function SettingsPage() {
                 placeholder="Business name"
                 className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 mb-3"
               />
+              <input
+                type="url"
+                value={newBusinessWebsite}
+                onChange={(e) => setNewBusinessWebsite(e.target.value)}
+                placeholder="Website (optional)"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 mb-3"
+              />
               <div className="flex gap-2">
                 <button
                   onClick={handleAddBusiness}
@@ -430,7 +481,46 @@ export default function SettingsPage() {
               businesses.map((business) => (
                 <div key={business.id} className="p-4 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
                   <div className="flex justify-between items-start mb-3">
-                    <p className="font-medium text-slate-900">{business.name}</p>
+                    <div className="flex-1">
+                      <p className="font-medium text-slate-900">{business.name}</p>
+                      {editingBusinessId === business.id ? (
+                        <div className="mt-2 flex gap-2">
+                          <input
+                            type="url"
+                            value={editingBusinessWebsite}
+                            onChange={(e) => setEditingBusinessWebsite(e.target.value)}
+                            placeholder="Website URL"
+                            className="flex-1 px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900"
+                          />
+                          <button
+                            onClick={() => handleUpdateBusinessWebsite(business.id, editingBusinessWebsite)}
+                            disabled={savingBusiness}
+                            className="px-3 py-1.5 text-sm bg-blue-900 text-white rounded-lg hover:bg-blue-800 disabled:opacity-50 transition-colors font-medium"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => setEditingBusinessId(null)}
+                            className="px-3 py-1.5 text-sm border border-slate-300 text-slate-900 rounded-lg hover:bg-slate-100 transition-colors font-medium"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="mt-2 flex justify-between items-center">
+                          <p className="text-sm text-slate-600">{business.website || 'No website'}</p>
+                          <button
+                            onClick={() => {
+                              setEditingBusinessId(business.id)
+                              setEditingBusinessWebsite(business.website || '')
+                            }}
+                            className="text-blue-600 hover:text-blue-900 text-sm font-medium transition-colors"
+                          >
+                            Edit
+                          </button>
+                        </div>
+                      )}
+                    </div>
                     <button
                       onClick={() => handleDeleteBusiness(business.id)}
                       className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -547,6 +637,27 @@ export default function SettingsPage() {
                   loadBusinesses()
                 }}
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Google Connection Success Modal */}
+      {showGoogleConnectSuccess && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full mx-4">
+            <div className="flex flex-col items-center text-center">
+              <CheckCircle size={56} className="text-green-600 mb-4" />
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">Google Reviews Connected!</h2>
+              <p className="text-slate-600 mb-6">
+                Your Google Business account has been successfully connected. You'll now receive notifications when reviews are synced.
+              </p>
+              <button
+                onClick={() => setShowGoogleConnectSuccess(false)}
+                className="w-full px-4 py-3 bg-blue-900 text-white rounded-lg font-semibold hover:bg-blue-800 transition-colors"
+              >
+                Got it!
+              </button>
             </div>
           </div>
         </div>
