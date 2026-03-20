@@ -687,7 +687,7 @@ export default function SettingsPage() {
 
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-900 font-medium">Price</p>
-              <p className="text-lg font-bold text-blue-900 mt-1">$49.99/month</p>
+              <p className="text-lg font-bold text-blue-900 mt-1">$39.99/month</p>
             </div>
 
             <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">

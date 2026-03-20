@@ -67,20 +67,16 @@ export default function AccountCancelledPage() {
     setError('')
 
     try {
-      // Delete all businesses for this user
-      await supabase
-        .from('businesses')
-        .delete()
-        .eq('user_id', user.id)
+      // Call server-side delete API that handles auth + DB deletion
+      const response = await fetch('/api/account/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id }),
+      })
 
-      // Delete user
-      const { error: deleteError } = await supabase
-        .from('users')
-        .delete()
-        .eq('id', user.id)
-
-      if (deleteError) {
-        setError('Failed to delete account')
+      if (!response.ok) {
+        const data = await response.json()
+        setError(data.error || 'Failed to delete account')
         setDeleting(false)
         return
       }
