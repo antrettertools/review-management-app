@@ -9,12 +9,14 @@ export async function syncGoogleReviews(
     const auth = new google.auth.OAuth2()
     auth.setCredentials({ access_token: accessToken })
 
-    const mybusiness = google.mybusinessbusinessinformation('v1') as any
+    const mybusiness = google.mybusinessbusinessinformation({
+      version: 'v1',
+      auth: auth,
+    }) as any
 
     // Fetch reviews for the location
     const response = await mybusiness.locations.reviews.list({
       parent: locationName,
-      auth,
     })
 
     const reviews = response.data.reviews || []
