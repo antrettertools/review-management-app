@@ -15,6 +15,7 @@ export default function AccountCancelledPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState('')
+  const [deletionTermsAccepted, setDeletionTermsAccepted] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -217,20 +218,38 @@ export default function AccountCancelledPage() {
               Delete Account?
             </h2>
 
-            <p className="text-slate-600 text-center mb-6">
+            <p className="text-slate-600 text-center mb-4">
               This action cannot be undone. All your data, including businesses, reviews, and settings will be permanently deleted.
             </p>
+
+            <div className="flex items-start gap-3 mb-6 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <input
+                type="checkbox"
+                id="deletion-terms"
+                checked={deletionTermsAccepted}
+                onChange={(e) => setDeletionTermsAccepted(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-red-300 text-red-600 focus:ring-red-500"
+                disabled={deleting}
+              />
+              <label htmlFor="deletion-terms" className="text-sm text-red-800">
+                I understand that account deletion is permanent and irreversible. I acknowledge the{' '}
+                <Link href="/terms" target="_blank" className="text-red-600 hover:underline font-medium">
+                  Terms and Conditions
+                </Link>
+                {' '}regarding account deletion (Section 8), including that published content on third-party platforms will not be removed, and I waive all claims related to data deletion.
+              </label>
+            </div>
 
             <div className="space-y-3">
               <button
                 onClick={handleDeleteAccount}
-                disabled={deleting}
+                disabled={deleting || !deletionTermsAccepted}
                 className="w-full py-3 px-4 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 transition-colors"
               >
                 {deleting ? 'Deleting...' : 'Yes, Delete Everything'}
               </button>
               <button
-                onClick={() => setShowDeleteConfirm(false)}
+                onClick={() => { setShowDeleteConfirm(false); setDeletionTermsAccepted(false) }}
                 disabled={deleting}
                 className="w-full py-3 px-4 border border-slate-300 text-slate-900 rounded-lg font-semibold hover:bg-slate-50 disabled:opacity-50 transition-colors"
               >

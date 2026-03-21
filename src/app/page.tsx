@@ -131,6 +131,9 @@ export default function Home() {
       <footer className="bg-white border-t border-slate-200 py-8">
         <div className="max-w-7xl mx-auto px-6 text-center text-slate-600 text-sm">
           <p>&copy; 2026 ReviewHub. All rights reserved.</p>
+          <p className="mt-2">
+            <Link href="/terms" className="text-blue-600 hover:underline">Terms and Conditions</Link>
+          </p>
         </div>
       </footer>
     </div>

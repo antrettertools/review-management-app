@@ -13,11 +13,18 @@ export default function SignupPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
+
+    if (!termsAccepted) {
+      setError('You must accept the Terms and Conditions to create an account.')
+      setLoading(false)
+      return
+    }
 
     try {
       // Sign up with Supabase auth
@@ -48,6 +55,7 @@ export default function SignupPage() {
                 email,
                 name,
                 subscription_plan: 'pending',
+                terms_accepted_at: new Date().toISOString(),
               },
             ],
             { onConflict: 'id' }
@@ -154,10 +162,28 @@ export default function SignupPage() {
               />
             </div>
 
+            <div className="flex items-start gap-3 mt-6">
+              <input
+                type="checkbox"
+                id="terms"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-900 focus:ring-blue-900"
+                disabled={loading}
+              />
+              <label htmlFor="terms" className="text-sm text-slate-600">
+                I have read and agree to the{' '}
+                <Link href="/terms" target="_blank" className="text-blue-600 hover:underline font-medium">
+                  Terms and Conditions
+                </Link>
+                , including the AI-Generated Content Disclaimer, Limitation of Liability, and Arbitration Agreement.
+              </label>
+            </div>
+
             <button
               type="submit"
-              disabled={loading}
-              className="w-full px-4 py-3 bg-blue-900 text-white rounded-lg font-semibold hover:bg-blue-800 disabled:opacity-50 transition-colors mt-6"
+              disabled={loading || !termsAccepted}
+              className="w-full px-4 py-3 bg-blue-900 text-white rounded-lg font-semibold hover:bg-blue-800 disabled:opacity-50 transition-colors mt-4"
             >
               {loading ? 'Creating account...' : 'Continue to Payment'}
             </button>

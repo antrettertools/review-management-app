@@ -20,6 +20,7 @@ export default function ReactivatePage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [pageLoading, setPageLoading] = useState(true)
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -68,10 +69,21 @@ export default function ReactivatePage() {
   const handleCheckout = async () => {
     if (!user) return
 
+    if (!termsAccepted) {
+      setError('You must accept the Terms and Conditions to reactivate your subscription.')
+      return
+    }
+
     setLoading(true)
     setError('')
 
     try {
+      // Record terms acceptance for reactivation
+      await supabase
+        .from('users')
+        .update({ terms_accepted_at: new Date().toISOString() })
+        .eq('id', user.id)
+
       const response = await fetch('/api/payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -175,9 +187,27 @@ export default function ReactivatePage() {
             </ul>
           </div>
 
+          <div className="flex items-start gap-3 mb-4">
+            <input
+              type="checkbox"
+              id="terms"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-900 focus:ring-blue-900"
+              disabled={loading}
+            />
+            <label htmlFor="terms" className="text-sm text-slate-600">
+              I have read and agree to the{' '}
+              <Link href="/terms" target="_blank" className="text-blue-600 hover:underline font-medium">
+                Terms and Conditions
+              </Link>
+              , including the AI-Generated Content Disclaimer, Limitation of Liability, and Arbitration Agreement.
+            </label>
+          </div>
+
           <button
             onClick={handleCheckout}
-            disabled={loading}
+            disabled={loading || !termsAccepted}
             className="w-full py-3 px-4 bg-blue-900 text-white rounded-lg font-semibold hover:bg-blue-800 disabled:opacity-50 transition-colors"
           >
             {loading ? 'Processing...' : 'Reactivate Subscription'}
