@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import AISuggestion from './AISuggestion'
-import { Star, Trash2, MessageSquare, X, Sparkles, Clock, Send } from 'lucide-react'
+import { Star, Trash2, AlertTriangle, MessageSquare, X, Sparkles, Clock, Send } from 'lucide-react'
 
 interface ResponseModalProps {
   review: {
