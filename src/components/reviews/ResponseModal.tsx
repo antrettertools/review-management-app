@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import AISuggestion from './AISuggestion'
-import { Star, Trash2, AlertTriangle, MessageSquare, X, Sparkles, Clock, Send } from 'lucide-react'
+import { Star, Trash2, MessageSquare, X, Sparkles, Clock, Send } from 'lucide-react'
 
 interface ResponseModalProps {
   review: {
@@ -39,8 +39,6 @@ export default function ResponseModal({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showAISuggestion, setShowAISuggestion] = useState(false)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [deleting, setDeleting] = useState(false)
 
   // Existing responses state
   const [existingResponses, setExistingResponses] = useState<SavedResponse[]>([])
@@ -110,24 +108,6 @@ export default function ResponseModal({
     }
   }
 
-  const handleDeleteReview = async () => {
-    setDeleting(true)
-    setError('')
-
-    try {
-      await supabase
-        .from('reviews')
-        .delete()
-        .eq('id', review.id)
-
-      setShowDeleteConfirm(false)
-      onSuccess()
-      onClose()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete review')
-      setDeleting(false)
-    }
-  }
 
   const handleDeleteResponse = async (responseId: string) => {
     setDeletingResponseId(responseId)
@@ -361,16 +341,7 @@ export default function ResponseModal({
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-2.5 justify-between pt-4 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => setShowDeleteConfirm(true)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors font-semibold text-xs"
-              >
-                <Trash2 size={14} />
-                Delete Review
-              </button>
-
+            <div className="flex gap-2.5 justify-end pt-4 border-t border-slate-100">
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -393,40 +364,6 @@ export default function ResponseModal({
         </div>
       </div>
 
-      {/* Delete Review Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-[60] p-4 animate-fade-in">
-          <div className="bg-white rounded-lg shadow-lg max-w-sm w-full p-6 space-y-4 animate-scale-in border border-slate-200">
-            <div className="flex items-center justify-center w-12 h-12 bg-red-100 rounded-full mx-auto">
-              <AlertTriangle size={22} className="text-red-600" />
-            </div>
-
-            <div className="text-center">
-              <h3 className="text-lg font-bold text-slate-900">Delete This Review?</h3>
-              <p className="text-slate-500 text-sm mt-2">
-                This action cannot be undone. The review from <strong className="text-slate-700">{review.author_name}</strong> will be permanently removed.
-              </p>
-            </div>
-
-            <div className="space-y-2 pt-2">
-              <button
-                onClick={handleDeleteReview}
-                disabled={deleting}
-                className="w-full px-4 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 disabled:opacity-50 transition-colors font-semibold text-sm"
-              >
-                {deleting ? 'Deleting...' : 'Yes, Delete Review'}
-              </button>
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                disabled={deleting}
-                className="w-full px-4 py-2.5 border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 disabled:opacity-50 transition-colors font-semibold text-sm"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

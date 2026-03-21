@@ -35,8 +35,13 @@ export async function generateReviewResponse(review: {
       system: systemPrompt,
     })
 
-    const responseText =
+    let responseText =
       message.content[0].type === 'text' ? message.content[0].text : ''
+
+    // Truncate to 500 characters max
+    if (responseText.length > 500) {
+      responseText = responseText.substring(0, 500).trim()
+    }
 
     return {
       response: responseText,
