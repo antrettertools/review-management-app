@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useSession } from 'next-auth/react'
 import ResponseModal from '@/components/reviews/ResponseModal'
-import { Star, MessageSquare, AlertTriangle, CheckCircle, Filter } from 'lucide-react'
+import { Star, MessageSquare, AlertTriangle, CheckCircle, Clock } from 'lucide-react'
 
 export default function ReviewsPage() {
   const { data: session } = useSession()
@@ -78,119 +78,153 @@ export default function ReviewsPage() {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          size={14}
-          className={star <= rating ? 'text-yellow-500 fill-yellow-500' : 'text-slate-200'}
+          size={13}
+          className={star <= rating ? 'text-amber-400 fill-amber-400' : 'text-slate-200'}
         />
       ))}
     </div>
   )
 
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return ''
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
+  }
+
   const filters = [
-    { key: 'all', label: 'All', activeClass: 'bg-blue-900 text-white shadow-md' },
-    { key: 'responded', label: 'Responded', activeClass: 'bg-blue-900 text-white shadow-md' },
-    { key: 'not-responded', label: 'Not Responded', activeClass: 'bg-blue-900 text-white shadow-md' },
-    { key: 'urgent', label: 'Urgent', activeClass: 'bg-red-600 text-white shadow-md' },
+    { key: 'all', label: 'All Reviews' },
+    { key: 'responded', label: 'Responded' },
+    { key: 'not-responded', label: 'Awaiting Response' },
+    { key: 'urgent', label: 'Urgent' },
   ]
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Reviews</h1>
+    <div className="max-w-5xl">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Reviews</h1>
+          <p className="text-sm text-slate-400 mt-1">Manage and respond to your customer reviews</p>
+        </div>
         {!loading && (
-          <p className="text-sm text-slate-500">{reviews.length} review{reviews.length !== 1 ? 's' : ''}</p>
+          <div className="text-sm text-slate-400 font-medium bg-white px-3.5 py-2 rounded-lg border border-slate-200/60">
+            {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+          </div>
         )}
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-2xl shadow-md p-5 mb-6 border border-slate-100 animate-fade-in-up">
-        <div className="flex items-center gap-3 flex-wrap">
-          <Filter size={16} className="text-slate-400" />
-          {filters.map((f) => (
-            <button
-              key={f.key}
-              onClick={() => setFilter(f.key)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                filter === f.key
-                  ? f.activeClass
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
+      <div className="bg-white rounded-xl border border-slate-200/60 p-1.5 mb-6 inline-flex gap-1 animate-fade-in-up">
+        {filters.map((f) => (
+          <button
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              filter === f.key
+                ? f.key === 'urgent'
+                  ? 'bg-red-600 text-white shadow-md shadow-red-600/20'
+                  : 'bg-gradient-to-b from-blue-800 to-blue-900 text-white shadow-md shadow-blue-900/20'
+                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
       </div>
 
       {/* Reviews List */}
       {loading ? (
-        <div className="flex items-center justify-center py-16">
+        <div className="flex items-center justify-center py-20">
           <div className="text-center">
             <div className="w-8 h-8 border-2 border-blue-900 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-slate-500">Loading reviews...</p>
+            <p className="text-slate-400 text-sm">Loading reviews...</p>
           </div>
         </div>
       ) : reviews.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-2xl shadow-md border border-slate-100">
-          <MessageSquare size={40} className="text-slate-300 mx-auto mb-3" />
-          <p className="text-slate-500 font-medium">No reviews found</p>
-          <p className="text-sm text-slate-400 mt-1">
+        <div className="text-center py-20 bg-white rounded-2xl border border-slate-200/60">
+          <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <MessageSquare size={24} className="text-slate-300" />
+          </div>
+          <p className="text-slate-900 font-semibold">No reviews found</p>
+          <p className="text-sm text-slate-400 mt-1 max-w-xs mx-auto">
             {filter !== 'all' ? 'Try changing the filter above.' : 'Connect your platforms to start seeing reviews.'}
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {reviews.map((review, index) => (
             <div
               key={review.id}
-              className={`bg-white rounded-2xl shadow-md hover:shadow-lg transition-all p-6 border animate-fade-in-up ${
+              className={`bg-white rounded-xl hover:shadow-md transition-all p-5 border animate-fade-in-up ${
                 review.urgency_level === 'critical'
-                  ? 'border-orange-200 bg-gradient-to-r from-white to-orange-50/30'
-                  : 'border-slate-100'
+                  ? 'border-orange-200/80 bg-gradient-to-r from-white to-orange-50/30'
+                  : 'border-slate-200/60'
               }`}
-              style={{ animationDelay: `${Math.min(index * 50, 300)}ms` }}
+              style={{ animationDelay: `${Math.min(index * 40, 300)}ms` }}
             >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="font-semibold text-slate-900 text-lg">
-                    {review.author_name}
-                  </h3>
-                  <div className="flex items-center gap-3 mt-1.5">
-                    {renderStars(review.rating)}
-                    <span className="text-xs text-slate-400 font-medium uppercase tracking-wide">{review.platform}</span>
+              {/* Review header */}
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex items-start gap-3">
+                  {/* Author avatar */}
+                  <div className="w-9 h-9 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center text-slate-500 text-sm font-bold flex-shrink-0">
+                    {review.author_name?.charAt(0)?.toUpperCase() || '?'}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-slate-900 text-[15px] leading-tight">
+                      {review.author_name}
+                    </h3>
+                    <div className="flex items-center gap-2.5 mt-1">
+                      {renderStars(review.rating)}
+                      <span className="text-[11px] text-slate-400 font-medium uppercase tracking-wide">{review.platform}</span>
+                      {review.created_at && (
+                        <>
+                          <span className="text-slate-200">|</span>
+                          <span className="text-[11px] text-slate-400 flex items-center gap-1">
+                            <Clock size={10} />
+                            {formatDate(review.created_at)}
+                          </span>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="flex gap-2 flex-wrap justify-end">
+                <div className="flex gap-1.5 flex-shrink-0">
                   {review.is_responded && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
-                      <CheckCircle size={12} />
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-100">
+                      <CheckCircle size={11} />
                       Responded
                     </span>
                   )}
                   {review.urgency_level === 'critical' && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-orange-50 text-orange-700 border border-orange-100">
-                      <AlertTriangle size={12} />
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-orange-50 text-orange-700 border border-orange-100">
+                      <AlertTriangle size={11} />
                       Urgent
                     </span>
                   )}
                 </div>
               </div>
 
-              <p className="text-slate-700 mb-5 leading-relaxed">{review.content}</p>
+              {/* Review content */}
+              <p className="text-slate-600 text-sm leading-relaxed mb-4 ml-12">{review.content}</p>
 
-              <div className="flex gap-3">
+              {/* Actions */}
+              <div className="flex gap-2 ml-12">
                 <button
                   onClick={() => handleReplyClick(review)}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-medium hover:bg-blue-800 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-b from-blue-800 to-blue-900 text-white rounded-lg text-xs font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-sm shadow-blue-900/20"
                 >
-                  <MessageSquare size={14} />
-                  Reply
+                  <MessageSquare size={13} />
+                  {review.is_responded ? 'View Response' : 'Reply'}
                 </button>
                 {review.urgency_level !== 'critical' && (
                   <button
                     onClick={() => handleMarkUrgent(review.id)}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-50 text-slate-600 rounded-lg text-xs font-semibold hover:bg-slate-100 transition-colors border border-slate-200/60"
                   >
-                    <AlertTriangle size={14} />
+                    <AlertTriangle size={13} />
                     Mark Urgent
                   </button>
                 )}
