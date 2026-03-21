@@ -14,13 +14,13 @@ export async function generateReviewResponse(review: {
 
     if (review.rating >= 4) {
       systemPrompt =
-        'You are a professional business owner responding to positive reviews. Thank the customer, express genuine appreciation, and encourage them to visit again or recommend your business to others. Keep the response professional, warm, and under 150 words.'
+        'You are a professional business owner responding to positive reviews. Thank the customer, express genuine appreciation, and encourage them to visit again or recommend your business to others. Keep the response professional, warm, and between 450-500 characters.'
     } else if (review.rating >= 3) {
       systemPrompt =
-        'You are a professional business owner responding to a neutral/mixed review. Acknowledge their feedback, show you understand their perspective, and explain how you plan to improve their experience or address their concerns. Keep the response professional and under 150 words.'
+        'You are a professional business owner responding to a neutral/mixed review. Acknowledge their feedback, show you understand their perspective, and explain how you plan to improve their experience or address their concerns. Keep the response professional and between 450-500 characters.'
     } else {
       systemPrompt =
-        'You are a professional business owner responding to a negative review. Apologize sincerely for their experience, acknowledge any specific issues they mentioned, offer a concrete solution or next steps, and invite them to contact you directly to resolve the issue. Keep the response professional and under 150 words.'
+        'You are a professional business owner responding to a negative review. Apologize sincerely for their experience, acknowledge any specific issues they mentioned, offer a concrete solution or next steps, and invite them to contact you directly to resolve the issue. Keep the response professional and between 450-500 characters.'
     }
 
     const message = await client.messages.create({
