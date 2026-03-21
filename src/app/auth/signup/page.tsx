@@ -55,7 +55,6 @@ export default function SignupPage() {
                 email,
                 name,
                 subscription_plan: 'pending',
-                terms_accepted_at: new Date().toISOString(),
               },
             ],
             { onConflict: 'id' }
@@ -66,6 +65,12 @@ export default function SignupPage() {
           setLoading(false)
           return
         }
+
+        // Record terms acceptance timestamp (non-blocking)
+        await supabase
+          .from('users')
+          .update({ terms_accepted_at: new Date().toISOString() })
+          .eq('id', data.user.id)
 
         // Store signup data and redirect to checkout
         const signupData = {

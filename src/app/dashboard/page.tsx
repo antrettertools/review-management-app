@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useSession } from 'next-auth/react'
+import Link from 'next/link'
+import { Star, TrendingUp, MessageSquare, AlertTriangle, ThumbsUp, ThumbsDown, ArrowRight, Zap } from 'lucide-react'
 
 export default function DashboardPage() {
   const { data: session } = useSession()
@@ -71,70 +73,169 @@ export default function DashboardPage() {
     }
   }
 
+  const responseRate = stats.totalReviews > 0
+    ? Math.round((stats.respondedReviews / stats.totalReviews) * 100)
+    : 0
+
   if (loading) {
-    return <div className="text-center py-8 text-slate-500">Loading...</div>
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-blue-900 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-slate-500">Loading dashboard...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-slate-900 mb-8">Dashboard</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
+        <Link
+          href="/dashboard/reviews"
+          className="group flex items-center gap-2 text-sm font-medium text-blue-700 hover:text-blue-900 transition-colors"
+        >
+          View all reviews
+          <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+        </Link>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-6 border border-slate-100">
-          <p className="text-sm text-slate-600 font-medium">Total Reviews</p>
-          <p className="text-4xl font-bold text-slate-900 mt-3">{stats.totalReviews}</p>
+      {/* Stat Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+        <div className="stat-card bg-white rounded-2xl shadow-md p-6 border border-slate-100 animate-fade-in-up">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm text-slate-500 font-medium">Total Reviews</p>
+            <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+              <MessageSquare size={18} className="text-blue-700" />
+            </div>
+          </div>
+          <p className="text-4xl font-bold text-slate-900">{stats.totalReviews}</p>
+          <p className="text-xs text-slate-400 mt-2">Across all platforms</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-6 border border-slate-100">
-          <p className="text-sm text-slate-600 font-medium">Average Rating</p>
-          <p className="text-4xl font-bold text-slate-900 mt-3">{stats.averageRating}</p>
+        <div className="stat-card bg-white rounded-2xl shadow-md p-6 border border-slate-100 animate-fade-in-up delay-100">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm text-slate-500 font-medium">Average Rating</p>
+            <div className="w-10 h-10 bg-yellow-50 rounded-xl flex items-center justify-center">
+              <Star size={18} className="text-yellow-600" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <p className="text-4xl font-bold text-slate-900">{stats.averageRating}</p>
+            <span className="text-sm text-slate-400">/ 5.0</span>
+          </div>
+          <div className="flex items-center gap-1 mt-2">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                size={14}
+                className={star <= Math.round(stats.averageRating) ? 'text-yellow-500 fill-yellow-500' : 'text-slate-200'}
+              />
+            ))}
+          </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-6 border border-slate-100">
-          <p className="text-sm text-slate-600 font-medium">Response Rate</p>
-          <p className="text-4xl font-bold text-blue-600 mt-3">
-            {stats.totalReviews > 0
-              ? Math.round((stats.respondedReviews / stats.totalReviews) * 100)
-              : 0}%
+        <div className="stat-card bg-white rounded-2xl shadow-md p-6 border border-slate-100 animate-fade-in-up delay-200">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm text-slate-500 font-medium">Response Rate</p>
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${responseRate >= 80 ? 'bg-green-50' : responseRate >= 50 ? 'bg-yellow-50' : 'bg-red-50'}`}>
+              <TrendingUp size={18} className={responseRate >= 80 ? 'text-green-600' : responseRate >= 50 ? 'text-yellow-600' : 'text-red-600'} />
+            </div>
+          </div>
+          <p className={`text-4xl font-bold ${responseRate >= 80 ? 'text-green-600' : responseRate >= 50 ? 'text-yellow-600' : 'text-slate-900'}`}>
+            {responseRate}%
           </p>
+          <div className="w-full bg-slate-100 rounded-full h-2 mt-3">
+            <div
+              className={`h-2 rounded-full transition-all duration-1000 animate-fill-bar ${responseRate >= 80 ? 'bg-green-500' : responseRate >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
+              style={{ width: `${responseRate}%` }}
+            />
+          </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-6 border border-slate-100">
-          <p className="text-sm text-slate-600 font-medium">Positive Reviews</p>
-          <p className="text-4xl font-bold text-green-600 mt-3">{stats.positiveReviews}</p>
+        <div className="stat-card bg-white rounded-2xl shadow-md p-6 border border-slate-100 animate-fade-in-up delay-300">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm text-slate-500 font-medium">Positive Reviews</p>
+            <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center">
+              <ThumbsUp size={18} className="text-green-600" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-3">
+            <p className="text-4xl font-bold text-green-600">{stats.positiveReviews}</p>
+            <span className="text-sm font-medium text-green-500 bg-green-50 px-2 py-0.5 rounded-md">
+              {stats.totalReviews > 0 ? Math.round((stats.positiveReviews / stats.totalReviews) * 100) : 0}%
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 mt-2">4-5 star ratings</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-6 border border-slate-100">
-          <p className="text-sm text-slate-600 font-medium">Negative Reviews</p>
-          <p className="text-4xl font-bold text-red-600 mt-3">{stats.negativeReviews}</p>
+        <div className="stat-card bg-white rounded-2xl shadow-md p-6 border border-slate-100 animate-fade-in-up delay-400">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm text-slate-500 font-medium">Negative Reviews</p>
+            <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
+              <ThumbsDown size={18} className="text-red-600" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-3">
+            <p className="text-4xl font-bold text-red-600">{stats.negativeReviews}</p>
+            <span className="text-sm font-medium text-red-500 bg-red-50 px-2 py-0.5 rounded-md">
+              {stats.totalReviews > 0 ? Math.round((stats.negativeReviews / stats.totalReviews) * 100) : 0}%
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 mt-2">1-2 star ratings</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-6 border border-slate-100">
-          <p className="text-sm text-slate-600 font-medium">Urgent Reviews</p>
-          <p className="text-4xl font-bold text-orange-600 mt-3">{stats.urgentReviews}</p>
+        <div className={`stat-card bg-white rounded-2xl shadow-md p-6 border animate-fade-in-up delay-500 ${stats.urgentReviews > 0 ? 'border-orange-200 bg-gradient-to-br from-white to-orange-50' : 'border-slate-100'}`}>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm text-slate-500 font-medium">Urgent Reviews</p>
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stats.urgentReviews > 0 ? 'bg-orange-100' : 'bg-slate-50'}`}>
+              <AlertTriangle size={18} className={stats.urgentReviews > 0 ? 'text-orange-600 animate-pulse-soft' : 'text-slate-400'} />
+            </div>
+          </div>
+          <p className={`text-4xl font-bold ${stats.urgentReviews > 0 ? 'text-orange-600' : 'text-slate-900'}`}>{stats.urgentReviews}</p>
+          <p className="text-xs text-slate-400 mt-2">{stats.urgentReviews > 0 ? 'Needs immediate attention' : 'No urgent reviews'}</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100">
-        <h2 className="text-xl font-semibold text-slate-900 mb-6">Getting Started</h2>
-        <ul className="space-y-4 text-slate-700">
-          <li className="flex items-start gap-3">
-            <span className="text-green-600 font-bold mt-0.5">✓</span>
-            <span>Connect your Google Business account in Settings</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="text-green-600 font-bold mt-0.5">✓</span>
-            <span>View all customer reviews from Google and other platforms</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="text-green-600 font-bold mt-0.5">✓</span>
-            <span>Respond to reviews with AI-powered suggestions</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="text-green-600 font-bold mt-0.5">✓</span>
-            <span>Track your analytics and improvement over time</span>
-          </li>
-        </ul>
+      {/* Getting Started */}
+      <div className="bg-white rounded-2xl shadow-md p-8 border border-slate-100 animate-fade-in-up delay-600">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+            <Zap size={18} className="text-blue-700" />
+          </div>
+          <h2 className="text-xl font-semibold text-slate-900">Getting Started</h2>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Link href="/dashboard/settings" className="group flex items-start gap-3 p-4 rounded-xl hover:bg-slate-50 transition-colors">
+            <span className="text-green-600 font-bold mt-0.5 text-lg">1</span>
+            <div>
+              <p className="font-medium text-slate-900 group-hover:text-blue-900 transition-colors">Connect your Google Business account</p>
+              <p className="text-sm text-slate-500 mt-0.5">Go to Settings to link your platforms</p>
+            </div>
+          </Link>
+          <Link href="/dashboard/reviews" className="group flex items-start gap-3 p-4 rounded-xl hover:bg-slate-50 transition-colors">
+            <span className="text-green-600 font-bold mt-0.5 text-lg">2</span>
+            <div>
+              <p className="font-medium text-slate-900 group-hover:text-blue-900 transition-colors">View all customer reviews</p>
+              <p className="text-sm text-slate-500 mt-0.5">See reviews from Google and other platforms</p>
+            </div>
+          </Link>
+          <Link href="/dashboard/reviews" className="group flex items-start gap-3 p-4 rounded-xl hover:bg-slate-50 transition-colors">
+            <span className="text-green-600 font-bold mt-0.5 text-lg">3</span>
+            <div>
+              <p className="font-medium text-slate-900 group-hover:text-blue-900 transition-colors">Respond with AI-powered suggestions</p>
+              <p className="text-sm text-slate-500 mt-0.5">Click Reply on any review for AI help</p>
+            </div>
+          </Link>
+          <Link href="/dashboard/analytics" className="group flex items-start gap-3 p-4 rounded-xl hover:bg-slate-50 transition-colors">
+            <span className="text-green-600 font-bold mt-0.5 text-lg">4</span>
+            <div>
+              <p className="font-medium text-slate-900 group-hover:text-blue-900 transition-colors">Track your analytics</p>
+              <p className="text-sm text-slate-500 mt-0.5">Monitor improvement over time</p>
+            </div>
+          </Link>
+        </div>
       </div>
     </div>
   )
