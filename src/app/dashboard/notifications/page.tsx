@@ -17,16 +17,16 @@ export default function NotificationsPage() {
       case 'urgent_batch':
         return { bg: 'bg-red-50/50', border: 'border-red-100', icon: AlertTriangle, iconColor: 'text-red-600', iconBg: 'bg-red-100' }
       case 'system':
-        return { bg: 'bg-slate-50/50', border: 'border-slate-200/60', icon: Info, iconColor: 'text-slate-600', iconBg: 'bg-slate-100' }
+        return { bg: 'bg-slate-50/50', border: 'border-slate-200', icon: Info, iconColor: 'text-slate-600', iconBg: 'bg-slate-100' }
       default:
-        return { bg: 'bg-slate-50/50', border: 'border-slate-200/60', icon: Bell, iconColor: 'text-slate-600', iconBg: 'bg-slate-100' }
+        return { bg: 'bg-slate-50/50', border: 'border-slate-200', icon: Bell, iconColor: 'text-slate-600', iconBg: 'bg-slate-100' }
     }
   }
 
   return (
-    <div className="max-w-3xl">
-      <div className="mb-8">
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Notifications</h1>
+    <div>
+      <div className="mb-6">
+        <h1 className="text-xl font-bold text-slate-900">Notifications</h1>
         <p className="text-sm text-slate-400 mt-1">Stay up to date with your reviews</p>
       </div>
 
@@ -38,8 +38,8 @@ export default function NotificationsPage() {
           </div>
         </div>
       ) : notifications.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-2xl border border-slate-200/60">
-          <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="text-center py-20 bg-white rounded-lg border border-slate-200">
+          <div className="w-14 h-14 bg-slate-100 rounded-lg flex items-center justify-center mx-auto mb-4">
             <Bell size={24} className="text-slate-300" />
           </div>
           <p className="text-slate-900 font-semibold">No notifications yet</p>

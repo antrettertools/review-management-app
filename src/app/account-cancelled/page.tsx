@@ -88,44 +88,44 @@ export default function AccountCancelledPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Header */}
-      <header className="border-b border-slate-200/60 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+      <header className="border-b border-slate-100 bg-white sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <Link href="/" className="flex items-center gap-2.5 w-fit">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-900 to-indigo-700 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-blue-800 rounded-lg flex items-center justify-center">
               <Star size={16} className="text-white fill-white" />
             </div>
-            <span className="text-xl font-bold text-slate-900 tracking-tight">ReviewHub</span>
+            <span className="text-xl font-bold text-slate-900 tracking-tight">ReviewInzight</span>
           </Link>
         </div>
       </header>
 
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-2xl">
-          <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200/60 overflow-hidden animate-fade-in-up">
+          <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden animate-fade-in-up">
             {/* Header */}
             <div className="p-8 text-center border-b border-slate-100">
               <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <AlertCircle size={32} className="text-orange-500" />
               </div>
-              <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight mb-2">
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">
                 Your Subscription Has Been Cancelled
               </h1>
               <p className="text-sm text-slate-500 max-w-md mx-auto">
-                Your access to ReviewHub has been paused. All your data is safely stored and will be restored when you reactivate.
+                Your access to ReviewInzight has been paused. All your data is safely stored and will be restored when you reactivate.
               </p>
             </div>
 
             <div className="p-8">
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 text-sm font-medium">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm font-medium">
                   {error}
                 </div>
               )}
 
               {/* Features You're Missing */}
-              <div className="mb-8 p-5 bg-slate-50 rounded-xl border border-slate-200/60">
+              <div className="mb-8 p-5 bg-slate-50 rounded-lg border border-slate-200">
                 <h2 className="text-sm font-bold text-slate-900 mb-4">You're Missing Out On:</h2>
                 <div className="space-y-3">
                   {[
@@ -153,7 +153,7 @@ export default function AccountCancelledPage() {
               <div className="grid md:grid-cols-2 gap-4 mb-6">
                 <Link
                   href="/reactivate"
-                  className="group p-5 bg-gradient-to-br from-blue-50/80 to-indigo-50/80 border-2 border-blue-200 rounded-xl hover:shadow-md hover:border-blue-300 transition-all"
+                  className="group p-5 bg-blue-50 border-2 border-blue-200 rounded-lg hover:shadow-md hover:border-blue-300 transition-all"
                 >
                   <h3 className="text-sm font-bold text-blue-900 mb-1">Reactivate Subscription</h3>
                   <p className="text-xs text-blue-700/70">
@@ -166,7 +166,7 @@ export default function AccountCancelledPage() {
 
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="p-5 bg-gradient-to-br from-red-50/80 to-red-100/80 border-2 border-red-200 rounded-xl hover:shadow-md hover:border-red-300 transition-all text-left"
+                  className="p-5 bg-red-50 border-2 border-red-200 rounded-lg hover:shadow-md hover:border-red-300 transition-all text-left"
                 >
                   <h3 className="text-sm font-bold text-red-900 mb-1">Delete Account</h3>
                   <p className="text-xs text-red-700/70">
@@ -180,7 +180,7 @@ export default function AccountCancelledPage() {
 
               <p className="text-center text-xs text-slate-400">
                 Need help?{' '}
-                <a href="mailto:support@reviewhub.com" className="text-blue-600 hover:text-blue-800 font-semibold">Contact support</a>
+                <a href="mailto:support@reviewinzight.com" className="text-blue-600 hover:text-blue-800 font-semibold">Contact support</a>
               </p>
             </div>
           </div>
@@ -189,8 +189,8 @@ export default function AccountCancelledPage() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-2xl p-7 max-w-md w-full animate-scale-in border border-slate-200/60">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-white rounded-lg shadow-lg p-7 max-w-md w-full animate-scale-in border border-slate-200">
             <div className="flex items-center justify-center mb-4">
               <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center">
                 <Trash2 size={26} className="text-red-600" />
@@ -202,7 +202,7 @@ export default function AccountCancelledPage() {
               This action cannot be undone. All your data will be permanently deleted.
             </p>
 
-            <div className="flex items-start gap-3 mb-5 p-3.5 bg-red-50 border border-red-200 rounded-xl">
+            <div className="flex items-start gap-3 mb-5 p-3.5 bg-red-50 border border-red-200 rounded-lg">
               <input
                 type="checkbox" id="deletion-terms" checked={deletionTermsAccepted}
                 onChange={(e) => setDeletionTermsAccepted(e.target.checked)}
@@ -218,11 +218,11 @@ export default function AccountCancelledPage() {
 
             <div className="space-y-2">
               <button onClick={handleDeleteAccount} disabled={deleting || !deletionTermsAccepted}
-                className="w-full py-2.5 px-4 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 disabled:opacity-50 transition-colors text-sm">
+                className="w-full py-2.5 px-4 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 transition-colors text-sm">
                 {deleting ? 'Deleting...' : 'Yes, Delete Everything'}
               </button>
               <button onClick={() => { setShowDeleteConfirm(false); setDeletionTermsAccepted(false) }} disabled={deleting}
-                className="w-full py-2.5 px-4 border border-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 disabled:opacity-50 transition-colors text-sm">
+                className="w-full py-2.5 px-4 border border-slate-200 text-slate-700 rounded-lg font-semibold hover:bg-slate-50 disabled:opacity-50 transition-colors text-sm">
                 Cancel
               </button>
             </div>

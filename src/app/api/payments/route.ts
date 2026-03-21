@@ -7,7 +7,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '')
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { planId, priceId, userId, cancelUrl } = body
+    const { planId, priceId, userId, cancelUrl, isNewSignup } = body
 
     if (!planId || !priceId || !userId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     // Get user from database
     const { data: user, error: userError } = await supabase
       .from('users')
-      .select('email, stripe_customer_id')
+      .select('email, stripe_customer_id, subscription_plan')
       .eq('id', userId)
       .single()
 
@@ -39,7 +39,11 @@ export async function POST(request: NextRequest) {
         .eq('id', userId)
     }
 
-    const checkoutSession = await stripe.checkout.sessions.create({
+    // Only new signups get the 7-day free trial
+    // Reactivated accounts (previously cancelled) pay immediately
+    const shouldTrial = isNewSignup === true && user.subscription_plan !== 'cancelled'
+
+    const sessionConfig: Stripe.Checkout.SessionCreateParams = {
       mode: 'subscription',
       payment_method_types: ['card'],
       customer: customerId,
@@ -54,8 +58,18 @@ export async function POST(request: NextRequest) {
       metadata: {
         planId,
         userId,
+        isNewSignup: shouldTrial ? 'true' : 'false',
       },
-    })
+    }
+
+    // Add 7-day trial for new signups only
+    if (shouldTrial) {
+      sessionConfig.subscription_data = {
+        trial_period_days: 7,
+      }
+    }
+
+    const checkoutSession = await stripe.checkout.sessions.create(sessionConfig)
 
     return NextResponse.json({ url: checkoutSession.url })
   } catch (error) {

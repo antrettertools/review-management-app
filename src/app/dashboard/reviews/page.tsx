@@ -102,22 +102,22 @@ export default function ReviewsPage() {
   ]
 
   return (
-    <div className="max-w-5xl">
+    <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Reviews</h1>
+          <h1 className="text-xl font-bold text-slate-900">Reviews</h1>
           <p className="text-sm text-slate-400 mt-1">Manage and respond to your customer reviews</p>
         </div>
         {!loading && (
-          <div className="text-sm text-slate-400 font-medium bg-white px-3.5 py-2 rounded-lg border border-slate-200/60">
+          <div className="text-sm text-slate-400 font-medium bg-white px-3.5 py-2 rounded-lg border border-slate-200">
             {reviews.length} review{reviews.length !== 1 ? 's' : ''}
           </div>
         )}
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl border border-slate-200/60 p-1.5 mb-6 inline-flex gap-1 animate-fade-in-up">
+      <div className="bg-white rounded-xl border border-slate-200 p-1.5 mb-6 inline-flex gap-1 animate-fade-in-up">
         {filters.map((f) => (
           <button
             key={f.key}
@@ -125,8 +125,8 @@ export default function ReviewsPage() {
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               filter === f.key
                 ? f.key === 'urgent'
-                  ? 'bg-red-600 text-white shadow-md shadow-red-600/20'
-                  : 'bg-gradient-to-b from-blue-800 to-blue-900 text-white shadow-md shadow-blue-900/20'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-blue-800 text-white'
                 : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
             }`}
           >
@@ -144,8 +144,8 @@ export default function ReviewsPage() {
           </div>
         </div>
       ) : reviews.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-2xl border border-slate-200/60">
-          <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="text-center py-20 bg-white rounded-lg border border-slate-200">
+          <div className="w-14 h-14 bg-slate-100 rounded-lg flex items-center justify-center mx-auto mb-4">
             <MessageSquare size={24} className="text-slate-300" />
           </div>
           <p className="text-slate-900 font-semibold">No reviews found</p>
@@ -161,7 +161,7 @@ export default function ReviewsPage() {
               className={`bg-white rounded-xl hover:shadow-md transition-all p-5 border animate-fade-in-up ${
                 review.urgency_level === 'critical'
                   ? 'border-orange-200/80 bg-gradient-to-r from-white to-orange-50/30'
-                  : 'border-slate-200/60'
+                  : 'border-slate-200'
               }`}
               style={{ animationDelay: `${Math.min(index * 40, 300)}ms` }}
             >
@@ -214,7 +214,7 @@ export default function ReviewsPage() {
               <div className="flex gap-2 ml-12">
                 <button
                   onClick={() => handleReplyClick(review)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-b from-blue-800 to-blue-900 text-white rounded-lg text-xs font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-sm shadow-blue-900/20"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-blue-800 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors"
                 >
                   <MessageSquare size={13} />
                   {review.is_responded ? 'View Response' : 'Reply'}
@@ -222,7 +222,7 @@ export default function ReviewsPage() {
                 {review.urgency_level !== 'critical' && (
                   <button
                     onClick={() => handleMarkUrgent(review.id)}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-50 text-slate-600 rounded-lg text-xs font-semibold hover:bg-slate-100 transition-colors border border-slate-200/60"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-50 text-slate-600 rounded-lg text-xs font-semibold hover:bg-slate-100 transition-colors border border-slate-200"
                   >
                     <AlertTriangle size={13} />
                     Mark Urgent

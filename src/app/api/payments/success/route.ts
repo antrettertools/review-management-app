@@ -12,34 +12,43 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/dashboard`)
     }
 
-    // Retrieve the checkout session from Stripe to verify payment
-    const session = await stripe.checkout.sessions.retrieve(sessionId)
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ['subscription'],
+    })
 
-    // Only proceed if payment was successful
-    if (session.payment_status === 'paid') {
-      const userId = session.metadata?.userId
-      const planId = session.metadata?.planId || 'pro'
+    const userId = session.metadata?.userId
+    const isNewSignup = session.metadata?.isNewSignup === 'true'
 
-      if (userId) {
-        // Update subscription_plan in database
-        // This ensures the subscription is active even if webhooks don't fire
-        const { error } = await supabase
+    if (userId) {
+      if (isNewSignup && session.subscription) {
+        // New signup with trial - set trialing status
+        const subscription = session.subscription as Stripe.Subscription
+        const trialEnd = subscription.trial_end
+          ? new Date(subscription.trial_end * 1000).toISOString()
+          : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+
+        await supabase
           .from('users')
-          .update({ subscription_plan: planId })
+          .update({
+            subscription_plan: 'trialing',
+            trial_ends_at: trialEnd,
+          })
           .eq('id', userId)
-
-        if (error) {
-          console.error('Error updating subscription after payment:', error)
-          // Still redirect even on error - user can refresh to see updated status
-        }
+      } else if (session.payment_status === 'paid') {
+        // Reactivation or non-trial - set active immediately
+        await supabase
+          .from('users')
+          .update({
+            subscription_plan: 'pro',
+            trial_ends_at: null,
+          })
+          .eq('id', userId)
       }
     }
 
-    // Redirect to dashboard regardless of payment status
     return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/dashboard`)
   } catch (error) {
     console.error('Payment success handler error:', error)
-    // Always redirect to dashboard on error
     return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/dashboard`)
   }
 }

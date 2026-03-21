@@ -3,7 +3,7 @@ export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY
 
 export const PRO_PLAN = {
   id: 'pro',
-  name: 'ReviewHub Pro',
+  name: 'ReviewInzight Pro',
   price: 39.99,
   priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
   features: [

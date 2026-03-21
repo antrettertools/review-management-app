@@ -24,15 +24,11 @@ export default function AISuggestion({
     try {
       const response = await fetch('/api/responses/ai-generate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reviewId }),
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to generate response')
-      }
+      if (!response.ok) throw new Error('Failed to generate response')
 
       const data = await response.json()
       setEditedResponse(data.response)
@@ -48,34 +44,27 @@ export default function AISuggestion({
   }, [reviewId])
 
   return (
-    <div className="bg-gradient-to-br from-indigo-50/80 to-blue-50/80 rounded-xl border border-indigo-200/60 p-5 animate-slide-down">
-      <div className="flex items-center justify-between mb-4">
-        <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-          <div className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-md flex items-center justify-center">
-            <Sparkles size={12} className="text-white" />
-          </div>
+    <div className="bg-blue-50 rounded-lg border border-blue-100 p-4 animate-slide-down">
+      <div className="flex items-center justify-between mb-3">
+        <h4 className="font-medium text-slate-900 text-sm flex items-center gap-2">
+          <Sparkles size={14} className="text-blue-600" />
           AI Response Suggestion
         </h4>
-        <button
-          onClick={onClose}
-          className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-white/60 transition-all"
-        >
+        <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
           <X size={15} />
         </button>
       </div>
 
       {loading ? (
-        <div className="text-center py-6">
-          <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-          <p className="text-xs text-slate-500 font-medium">Generating response...</p>
+        <div className="text-center py-5">
+          <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+          <p className="text-xs text-slate-500">Generating response...</p>
         </div>
       ) : error ? (
-        <div className="text-center py-4">
-          <p className="text-red-600 text-sm mb-3 font-medium">{error}</p>
-          <button
-            onClick={fetchSuggestion}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors font-semibold border border-red-200/60"
-          >
+        <div className="text-center py-3">
+          <p className="text-red-600 text-sm mb-2">{error}</p>
+          <button onClick={fetchSuggestion}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors font-medium border border-red-200">
             <RefreshCw size={12} />
             Retry
           </button>
@@ -85,22 +74,17 @@ export default function AISuggestion({
           <textarea
             value={editedResponse}
             onChange={(e) => setEditedResponse(e.target.value)}
-            className="w-full px-3.5 py-3 border border-indigo-200/60 rounded-xl text-sm mb-3 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all bg-white/80 resize-none leading-relaxed"
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm mb-3 focus:border-blue-800 bg-white resize-none leading-relaxed"
             rows={4}
           />
-
           <div className="flex gap-2">
-            <button
-              onClick={() => onUse(editedResponse)}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 text-xs bg-gradient-to-b from-emerald-500 to-emerald-600 text-white rounded-lg hover:from-emerald-400 hover:to-emerald-500 transition-all font-semibold shadow-sm shadow-emerald-600/20"
-            >
+            <button onClick={() => onUse(editedResponse)}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 transition-colors font-medium">
               <Check size={13} />
               Use This Response
             </button>
-            <button
-              onClick={fetchSuggestion}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs bg-white text-slate-600 rounded-lg hover:bg-slate-50 transition-all font-semibold border border-slate-200/60"
-            >
+            <button onClick={fetchSuggestion}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs bg-white text-slate-600 rounded-lg hover:bg-slate-50 transition-colors font-medium border border-slate-200">
               <RefreshCw size={12} />
               Regenerate
             </button>

@@ -49,12 +49,9 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
-  console.log('Checkout session completed:', session.id)
-  console.log('Session metadata:', session.metadata)
-  console.log('Session customer:', session.customer)
-
   const userId = session.metadata?.userId
   const planId = session.metadata?.planId
+  const isNewSignup = session.metadata?.isNewSignup === 'true'
 
   if (!userId || !planId) {
     console.error('Missing userId or planId in metadata')
@@ -63,38 +60,34 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
   const customerId = session.customer as string
 
-  console.log('Updating user:', userId, 'with plan:', planId, 'and customer:', customerId)
+  const updateData: Record<string, any> = {
+    stripe_customer_id: customerId,
+  }
 
-  // Update user with subscription plan and customer ID
-  const { error, data } = await supabase
+  if (isNewSignup) {
+    // Trial user - set trialing status
+    updateData.subscription_plan = 'trialing'
+    updateData.trial_ends_at = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+  } else {
+    // Reactivation - active immediately
+    updateData.subscription_plan = planId
+    updateData.trial_ends_at = null
+  }
+
+  const { error } = await supabase
     .from('users')
-    .update({
-      subscription_plan: planId,
-      stripe_customer_id: customerId,
-    })
+    .update(updateData)
     .eq('id', userId)
-    .select()
 
   if (error) {
     console.error('Error updating user:', error)
-  } else {
-    console.log('User updated successfully:', data)
   }
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  console.log('Subscription updated:', subscription.id)
-  console.log('Customer ID:', subscription.customer)
-
   const customerId = subscription.customer as string
-
-  // Get the price ID from subscription items
   const priceId = subscription.items.data[0]?.price.id
 
-  console.log('Price ID:', priceId)
-  console.log('Advanced price ID env:', process.env.NEXT_PUBLIC_STRIPE_ADVANCED_PRICE_ID)
-
-  // Determine plan based on price ID
   let planId = 'starter'
   if (
     priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_ID ||
@@ -108,9 +101,6 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     planId = 'advanced'
   }
 
-  console.log('Determined plan:', planId)
-
-  // Find user by stripe_customer_id and update
   const { data: user, error: findError } = await supabase
     .from('users')
     .select('id')
@@ -122,26 +112,34 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     return
   }
 
-  console.log('Updating user:', user.id, 'to plan:', planId)
+  // Check if trial just ended (subscription moved from trialing to active)
+  const subscriptionStatus = subscription.status
+  const updateData: Record<string, any> = { subscription_plan: planId }
+
+  if (subscriptionStatus === 'active') {
+    // Trial ended, now paying - clear trial data
+    updateData.trial_ends_at = null
+  } else if (subscriptionStatus === 'trialing') {
+    // Still in trial
+    updateData.subscription_plan = 'trialing'
+    if (subscription.trial_end) {
+      updateData.trial_ends_at = new Date(subscription.trial_end * 1000).toISOString()
+    }
+  }
 
   const { error: updateError } = await supabase
     .from('users')
-    .update({ subscription_plan: planId })
+    .update(updateData)
     .eq('id', user.id)
 
   if (updateError) {
     console.error('Error updating subscription:', updateError)
-  } else {
-    console.log('Subscription updated to plan:', planId)
   }
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  console.log('Subscription deleted:', subscription.id)
-
   const customerId = subscription.customer as string
 
-  // Find user and downgrade to starter
   const { data: user, error: findError } = await supabase
     .from('users')
     .select('id')
@@ -153,16 +151,12 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     return
   }
 
-  console.log('Downgrading user:', user.id, 'to starter')
-
   const { error: updateError } = await supabase
     .from('users')
-    .update({ subscription_plan: 'starter' })
+    .update({ subscription_plan: 'cancelled', trial_ends_at: null })
     .eq('id', user.id)
 
   if (updateError) {
-    console.error('Error downgrading user:', updateError)
-  } else {
-    console.log('User downgraded to starter plan')
+    console.error('Error cancelling user:', updateError)
   }
 }

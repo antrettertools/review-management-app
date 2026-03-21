@@ -144,25 +144,25 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="max-w-6xl">
+    <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Analytics</h1>
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Analytics</h1>
         <p className="text-sm text-slate-400 mt-1">Insights into your review performance</p>
       </div>
 
       {/* Core Stat Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-        <div className="stat-card bg-white rounded-2xl p-6 border border-slate-200/60 animate-fade-in-up">
+        <div className="bg-white rounded-lg p-6 border border-slate-200 animate-fade-in-up">
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Reviews</p>
             <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center">
               <MessageSquare size={16} className="text-blue-700" />
             </div>
           </div>
-          <p className="text-3xl font-extrabold text-slate-900 tracking-tight">{stats.totalReviews}</p>
+          <p className="text-3xl font-bold text-slate-900 tracking-tight">{stats.totalReviews}</p>
         </div>
 
-        <div className="stat-card bg-white rounded-2xl p-6 border border-slate-200/60 animate-fade-in-up delay-100">
+        <div className="bg-white rounded-lg p-6 border border-slate-200 animate-fade-in-up delay-100">
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Average Rating</p>
             <div className="w-9 h-9 bg-amber-50 rounded-xl flex items-center justify-center">
@@ -170,7 +170,7 @@ export default function AnalyticsPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <p className="text-3xl font-extrabold text-slate-900 tracking-tight">{stats.averageRating}</p>
+            <p className="text-3xl font-bold text-slate-900 tracking-tight">{stats.averageRating}</p>
             <span className="text-sm text-slate-300 font-medium">/ 5.0</span>
           </div>
           <div className="flex items-center gap-0.5 mt-2">
@@ -180,14 +180,14 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        <div className="stat-card bg-white rounded-2xl p-6 border border-slate-200/60 animate-fade-in-up delay-200">
+        <div className="bg-white rounded-lg p-6 border border-slate-200 animate-fade-in-up delay-200">
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Response Rate</p>
             <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${responseRate >= 80 ? 'bg-emerald-50' : responseRate >= 50 ? 'bg-amber-50' : 'bg-red-50'}`}>
               <TrendingUp size={16} className={responseRate >= 80 ? 'text-emerald-600' : responseRate >= 50 ? 'text-amber-600' : 'text-red-600'} />
             </div>
           </div>
-          <p className={`text-3xl font-extrabold tracking-tight ${responseRate >= 80 ? 'text-emerald-600' : responseRate >= 50 ? 'text-amber-600' : 'text-slate-900'}`}>
+          <p className={`text-3xl font-bold tracking-tight ${responseRate >= 80 ? 'text-emerald-600' : responseRate >= 50 ? 'text-amber-600' : 'text-slate-900'}`}>
             {responseRate}%
           </p>
           <div className="w-full bg-slate-100 rounded-full h-1.5 mt-3">
@@ -198,7 +198,7 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        <div className="stat-card bg-white rounded-2xl p-6 border border-slate-200/60 animate-fade-in-up delay-300">
+        <div className="bg-white rounded-lg p-6 border border-slate-200 animate-fade-in-up delay-300">
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Positive (4-5)</p>
             <div className="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center">
@@ -206,14 +206,14 @@ export default function AnalyticsPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2.5">
-            <p className="text-3xl font-extrabold text-emerald-600 tracking-tight">{stats.positiveReviews}</p>
+            <p className="text-3xl font-bold text-emerald-600 tracking-tight">{stats.positiveReviews}</p>
             <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
               {stats.totalReviews > 0 ? Math.round((stats.positiveReviews / stats.totalReviews) * 100) : 0}%
             </span>
           </div>
         </div>
 
-        <div className="stat-card bg-white rounded-2xl p-6 border border-slate-200/60 animate-fade-in-up delay-400">
+        <div className="bg-white rounded-lg p-6 border border-slate-200 animate-fade-in-up delay-400">
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Negative (1-2)</p>
             <div className="w-9 h-9 bg-red-50 rounded-xl flex items-center justify-center">
@@ -221,30 +221,30 @@ export default function AnalyticsPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2.5">
-            <p className="text-3xl font-extrabold text-red-600 tracking-tight">{stats.negativeReviews}</p>
+            <p className="text-3xl font-bold text-red-600 tracking-tight">{stats.negativeReviews}</p>
             <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-md border border-red-100">
               {stats.totalReviews > 0 ? Math.round((stats.negativeReviews / stats.totalReviews) * 100) : 0}%
             </span>
           </div>
         </div>
 
-        <div className={`stat-card bg-white rounded-2xl p-6 border animate-fade-in-up delay-500 ${stats.urgentReviews > 0 ? 'border-orange-200 bg-gradient-to-br from-white to-orange-50/50' : 'border-slate-200/60'}`}>
+        <div className={`bg-white rounded-lg p-6 border animate-fade-in-up delay-500 ${stats.urgentReviews > 0 ? 'border-orange-200 bg-orange-50/50' : 'border-slate-200'}`}>
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Urgent Reviews</p>
             <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${stats.urgentReviews > 0 ? 'bg-orange-100' : 'bg-slate-50'}`}>
               <AlertTriangle size={16} className={stats.urgentReviews > 0 ? 'text-orange-600 animate-pulse-soft' : 'text-slate-400'} />
             </div>
           </div>
-          <p className={`text-3xl font-extrabold tracking-tight ${stats.urgentReviews > 0 ? 'text-orange-600' : 'text-slate-900'}`}>{stats.urgentReviews}</p>
+          <p className={`text-3xl font-bold tracking-tight ${stats.urgentReviews > 0 ? 'text-orange-600' : 'text-slate-900'}`}>{stats.urgentReviews}</p>
         </div>
       </div>
 
       {/* Advanced Analytics Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8">
         {/* Reputation Score */}
-        <div className="bg-white rounded-2xl p-7 border border-slate-200/60 animate-fade-in-up delay-300">
+        <div className="bg-white rounded-lg p-7 border border-slate-200 animate-fade-in-up delay-300">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-9 h-9 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-xl flex items-center justify-center">
+            <div className="w-9 h-9 bg-indigo-50 rounded-xl flex items-center justify-center">
               <Shield size={16} className="text-indigo-700" />
             </div>
             <div>
@@ -277,7 +277,7 @@ export default function AnalyticsPage() {
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className={`text-3xl font-extrabold ${scoreStyle.text}`}>{reputationScore}</span>
+                  <span className={`text-3xl font-bold ${scoreStyle.text}`}>{reputationScore}</span>
                   <span className="text-[10px] text-slate-400 font-medium">/ 100</span>
                 </div>
               </div>
@@ -310,9 +310,9 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Rating Distribution */}
-        <div className="bg-white rounded-2xl p-7 border border-slate-200/60 animate-fade-in-up delay-400">
+        <div className="bg-white rounded-lg p-7 border border-slate-200 animate-fade-in-up delay-400">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-9 h-9 bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl flex items-center justify-center">
+            <div className="w-9 h-9 bg-amber-50 rounded-xl flex items-center justify-center">
               <BarChart3 size={16} className="text-amber-700" />
             </div>
             <div>
@@ -374,7 +374,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Summary */}
-      <div className="bg-white rounded-2xl p-7 border border-slate-200/60 animate-fade-in-up delay-500">
+      <div className="bg-white rounded-lg p-7 border border-slate-200 animate-fade-in-up delay-500">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center">
             <Activity size={16} className="text-slate-600" />

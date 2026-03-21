@@ -189,12 +189,12 @@ export default function ResponseModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scale-in border border-slate-200/60">
+    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4 animate-fade-in">
+      <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scale-in border border-slate-200">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 text-white p-5 flex justify-between items-center z-10">
+        <div className="sticky top-0 bg-blue-800 text-white p-5 flex justify-between items-center z-10">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center border border-white/10">
+            <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center">
               <MessageSquare size={17} />
             </div>
             <div>
@@ -212,10 +212,10 @@ export default function ResponseModal({
 
         <div className="p-6 space-y-5">
           {/* Original Review Card */}
-          <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-5 space-y-3">
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-3">
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 bg-gradient-to-br from-slate-200 to-slate-300 rounded-full flex items-center justify-center text-slate-600 text-sm font-bold flex-shrink-0">
+                <div className="w-9 h-9 bg-slate-200 rounded-full flex items-center justify-center text-slate-600 text-sm font-bold flex-shrink-0">
                   {review.author_name?.charAt(0)?.toUpperCase() || '?'}
                 </div>
                 <div>
@@ -241,7 +241,7 @@ export default function ResponseModal({
             <p className="text-slate-600 text-sm leading-relaxed">{review.content}</p>
 
             {review.created_at && (
-              <p className="text-[11px] text-slate-400 flex items-center gap-1 pt-2 border-t border-slate-200/60">
+              <p className="text-[11px] text-slate-400 flex items-center gap-1 pt-2 border-t border-slate-200">
                 <Clock size={10} />
                 Posted on {formatDate(review.created_at)}
               </p>
@@ -375,14 +375,14 @@ export default function ResponseModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors font-semibold text-xs border border-slate-200/60"
+                  className="px-4 py-2 text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors font-semibold text-xs border border-slate-200"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !responseContent.trim()}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 bg-gradient-to-b from-emerald-500 to-emerald-600 text-white rounded-lg hover:from-emerald-400 hover:to-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-semibold text-xs shadow-sm shadow-emerald-600/20"
+                  className="inline-flex items-center gap-1.5 px-5 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-xs"
                 >
                   <Send size={13} />
                   {loading ? 'Saving...' : 'Save Response'}
@@ -395,8 +395,8 @@ export default function ResponseModal({
 
       {/* Delete Review Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[60] p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4 animate-scale-in border border-slate-200/60">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-[60] p-4 animate-fade-in">
+          <div className="bg-white rounded-lg shadow-lg max-w-sm w-full p-6 space-y-4 animate-scale-in border border-slate-200">
             <div className="flex items-center justify-center w-12 h-12 bg-red-100 rounded-full mx-auto">
               <AlertTriangle size={22} className="text-red-600" />
             </div>

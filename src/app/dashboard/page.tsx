@@ -4,7 +4,15 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { Star, TrendingUp, MessageSquare, AlertTriangle, ThumbsUp, ThumbsDown, ArrowRight, Sparkles } from 'lucide-react'
+import { Star, TrendingUp, MessageSquare, AlertTriangle, ThumbsUp, ThumbsDown, ArrowRight } from 'lucide-react'
+
+const SETUP_STEPS = [
+  { key: 'add_business', label: 'Add your first business', desc: 'Go to Settings and add a business', href: '/dashboard/settings' },
+  { key: 'connect_google', label: 'Connect Google Business Profile', desc: 'Link your Google account to sync reviews', href: '/dashboard/settings' },
+  { key: 'view_reviews', label: 'View your reviews', desc: 'Check the Reviews tab once synced', href: '/dashboard/reviews' },
+  { key: 'respond_review', label: 'Respond to a review with AI', desc: 'Click Reply on any review for AI suggestions', href: '/dashboard/reviews' },
+  { key: 'check_analytics', label: 'Check your analytics', desc: 'See your reputation trends and insights', href: '/dashboard/analytics' },
+]
 
 export default function DashboardPage() {
   const { data: session } = useSession()
@@ -17,12 +25,47 @@ export default function DashboardPage() {
     urgentReviews: 0,
   })
   const [loading, setLoading] = useState(true)
+  const [completedSteps, setCompletedSteps] = useState<string[]>([])
+  const [setupDismissed, setSetupDismissed] = useState(false)
 
   useEffect(() => {
     if ((session?.user as any)?.id) {
       fetchStats()
+      loadSetupProgress()
     }
   }, [session])
+
+  const loadSetupProgress = () => {
+    const userId = (session?.user as any)?.id
+    if (!userId) return
+    const saved = localStorage.getItem(`setup_${userId}`)
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      setCompletedSteps(parsed.completed || [])
+      setSetupDismissed(parsed.dismissed || false)
+    }
+  }
+
+  const saveSetupProgress = (completed: string[], dismissed: boolean) => {
+    const userId = (session?.user as any)?.id
+    if (!userId) return
+    localStorage.setItem(`setup_${userId}`, JSON.stringify({ completed, dismissed }))
+  }
+
+  const toggleStep = (key: string) => {
+    const updated = completedSteps.includes(key)
+      ? completedSteps.filter(s => s !== key)
+      : [...completedSteps, key]
+    setCompletedSteps(updated)
+
+    // Auto-dismiss when all steps are completed
+    if (updated.length === SETUP_STEPS.length) {
+      setSetupDismissed(true)
+      saveSetupProgress(updated, true)
+    } else {
+      saveSetupProgress(updated, false)
+    }
+  }
 
   const fetchStats = async () => {
     setLoading(true)
@@ -34,7 +77,6 @@ export default function DashboardPage() {
 
       if (businesses && businesses.length > 0) {
         const businessIds = businesses.map((b) => b.id)
-
         const { data: reviews } = await supabase
           .from('reviews')
           .select('*')
@@ -45,25 +87,12 @@ export default function DashboardPage() {
           const positiveReviews = reviews.filter((r) => r.rating >= 4).length
           const negativeReviews = reviews.filter((r) => r.rating <= 2).length
           const respondedReviews = reviews.filter((r) => r.is_responded).length
-          const urgentReviews = reviews.filter(
-            (r) => r.urgency_level === 'critical'
-          ).length
-          const averageRating =
-            totalReviews > 0
-              ? (
-                  reviews.reduce((sum: number, r: any) => sum + r.rating, 0) /
-                  totalReviews
-                ).toFixed(1)
-              : 0
+          const urgentReviews = reviews.filter((r) => r.urgency_level === 'critical').length
+          const averageRating = totalReviews > 0
+            ? parseFloat((reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / totalReviews).toFixed(1))
+            : 0
 
-          setStats({
-            totalReviews,
-            averageRating: parseFloat(averageRating as string),
-            positiveReviews,
-            negativeReviews,
-            respondedReviews,
-            urgentReviews,
-          })
+          setStats({ totalReviews, averageRating, positiveReviews, negativeReviews, respondedReviews, urgentReviews })
         }
       }
     } catch (error) {
@@ -80,166 +109,152 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-blue-900 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-slate-400 text-sm">Loading dashboard...</p>
-        </div>
+        <div className="w-7 h-7 border-2 border-blue-800 border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="max-w-6xl">
-      {/* Page Header */}
-      <div className="flex items-center justify-between mb-8">
+    <div>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Dashboard</h1>
-          <p className="text-sm text-slate-400 mt-1">Overview of your review performance</p>
+          <h1 className="text-xl font-bold text-slate-900">Dashboard</h1>
+          <p className="text-sm text-slate-400 mt-0.5">Overview of your review performance</p>
         </div>
         <Link
           href="/dashboard/reviews"
-          className="group flex items-center gap-1.5 text-sm font-semibold text-blue-700 hover:text-blue-900 transition-colors"
+          className="group flex items-center gap-1.5 text-sm font-medium text-blue-700 hover:text-blue-800 transition-colors"
         >
           View all reviews
-          <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+          <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
         </Link>
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-        {/* Total Reviews */}
-        <div className="stat-card bg-white rounded-2xl p-6 border border-slate-200/60 animate-fade-in-up">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Reviews</p>
-            <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center">
-              <MessageSquare size={16} className="text-blue-700" />
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <div className="bg-white rounded-lg p-5 border border-slate-200 animate-fade-in-up">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Reviews</p>
+            <MessageSquare size={16} className="text-blue-600" />
           </div>
-          <p className="text-3xl font-extrabold text-slate-900 tracking-tight">{stats.totalReviews}</p>
-          <p className="text-xs text-slate-400 mt-1.5">Across all platforms</p>
+          <p className="text-2xl font-bold text-slate-900">{stats.totalReviews}</p>
+          <p className="text-xs text-slate-400 mt-1">Across all platforms</p>
         </div>
 
-        {/* Average Rating */}
-        <div className="stat-card bg-white rounded-2xl p-6 border border-slate-200/60 animate-fade-in-up delay-100">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Average Rating</p>
-            <div className="w-9 h-9 bg-amber-50 rounded-xl flex items-center justify-center">
-              <Star size={16} className="text-amber-600" />
-            </div>
+        <div className="bg-white rounded-lg p-5 border border-slate-200 animate-fade-in-up delay-100">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Average Rating</p>
+            <Star size={16} className="text-amber-500" />
           </div>
           <div className="flex items-baseline gap-2">
-            <p className="text-3xl font-extrabold text-slate-900 tracking-tight">{stats.averageRating}</p>
-            <span className="text-sm text-slate-300 font-medium">/ 5.0</span>
+            <p className="text-2xl font-bold text-slate-900">{stats.averageRating}</p>
+            <span className="text-sm text-slate-300">/ 5.0</span>
           </div>
-          <div className="flex items-center gap-0.5 mt-2">
+          <div className="flex items-center gap-0.5 mt-1.5">
             {[1, 2, 3, 4, 5].map((star) => (
-              <Star
-                key={star}
-                size={13}
-                className={star <= Math.round(stats.averageRating) ? 'text-amber-400 fill-amber-400' : 'text-slate-200'}
-              />
+              <Star key={star} size={12} className={star <= Math.round(stats.averageRating) ? 'text-amber-400 fill-amber-400' : 'text-slate-200'} />
             ))}
           </div>
         </div>
 
-        {/* Response Rate */}
-        <div className="stat-card bg-white rounded-2xl p-6 border border-slate-200/60 animate-fade-in-up delay-200">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Response Rate</p>
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${responseRate >= 80 ? 'bg-emerald-50' : responseRate >= 50 ? 'bg-amber-50' : 'bg-red-50'}`}>
-              <TrendingUp size={16} className={responseRate >= 80 ? 'text-emerald-600' : responseRate >= 50 ? 'text-amber-600' : 'text-red-600'} />
-            </div>
+        <div className="bg-white rounded-lg p-5 border border-slate-200 animate-fade-in-up delay-200">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Response Rate</p>
+            <TrendingUp size={16} className={responseRate >= 80 ? 'text-emerald-500' : responseRate >= 50 ? 'text-amber-500' : 'text-slate-400'} />
           </div>
-          <p className={`text-3xl font-extrabold tracking-tight ${responseRate >= 80 ? 'text-emerald-600' : responseRate >= 50 ? 'text-amber-600' : 'text-slate-900'}`}>
+          <p className={`text-2xl font-bold ${responseRate >= 80 ? 'text-emerald-600' : responseRate >= 50 ? 'text-amber-600' : 'text-slate-900'}`}>
             {responseRate}%
           </p>
-          <div className="w-full bg-slate-100 rounded-full h-1.5 mt-3">
+          <div className="w-full bg-slate-100 rounded-full h-1.5 mt-2">
             <div
-              className={`h-1.5 rounded-full transition-all duration-1000 animate-fill-bar ${responseRate >= 80 ? 'bg-emerald-500' : responseRate >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
+              className={`h-1.5 rounded-full transition-all animate-fill-bar ${responseRate >= 80 ? 'bg-emerald-500' : responseRate >= 50 ? 'bg-amber-500' : 'bg-slate-300'}`}
               style={{ width: `${responseRate}%` }}
             />
           </div>
         </div>
 
-        {/* Positive Reviews */}
-        <div className="stat-card bg-white rounded-2xl p-6 border border-slate-200/60 animate-fade-in-up delay-300">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Positive Reviews</p>
-            <div className="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center">
-              <ThumbsUp size={16} className="text-emerald-600" />
-            </div>
+        <div className="bg-white rounded-lg p-5 border border-slate-200 animate-fade-in-up delay-300">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Positive</p>
+            <ThumbsUp size={16} className="text-emerald-500" />
           </div>
-          <div className="flex items-baseline gap-2.5">
-            <p className="text-3xl font-extrabold text-emerald-600 tracking-tight">{stats.positiveReviews}</p>
-            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-bold text-emerald-600">{stats.positiveReviews}</p>
+            <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
               {stats.totalReviews > 0 ? Math.round((stats.positiveReviews / stats.totalReviews) * 100) : 0}%
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1.5">4-5 star ratings</p>
+          <p className="text-xs text-slate-400 mt-1">4-5 star ratings</p>
         </div>
 
-        {/* Negative Reviews */}
-        <div className="stat-card bg-white rounded-2xl p-6 border border-slate-200/60 animate-fade-in-up delay-400">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Negative Reviews</p>
-            <div className="w-9 h-9 bg-red-50 rounded-xl flex items-center justify-center">
-              <ThumbsDown size={16} className="text-red-600" />
-            </div>
+        <div className="bg-white rounded-lg p-5 border border-slate-200 animate-fade-in-up delay-400">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Negative</p>
+            <ThumbsDown size={16} className="text-red-500" />
           </div>
-          <div className="flex items-baseline gap-2.5">
-            <p className="text-3xl font-extrabold text-red-600 tracking-tight">{stats.negativeReviews}</p>
-            <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-md border border-red-100">
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-bold text-red-600">{stats.negativeReviews}</p>
+            <span className="text-xs font-medium text-red-600 bg-red-50 px-1.5 py-0.5 rounded">
               {stats.totalReviews > 0 ? Math.round((stats.negativeReviews / stats.totalReviews) * 100) : 0}%
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1.5">1-2 star ratings</p>
+          <p className="text-xs text-slate-400 mt-1">1-2 star ratings</p>
         </div>
 
-        {/* Urgent Reviews */}
-        <div className={`stat-card bg-white rounded-2xl p-6 border animate-fade-in-up delay-500 ${stats.urgentReviews > 0 ? 'border-orange-200 bg-gradient-to-br from-white to-orange-50/50' : 'border-slate-200/60'}`}>
+        <div className={`bg-white rounded-lg p-5 border animate-fade-in-up delay-500 ${stats.urgentReviews > 0 ? 'border-orange-200' : 'border-slate-200'}`}>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Urgent</p>
+            <AlertTriangle size={16} className={stats.urgentReviews > 0 ? 'text-orange-500 animate-pulse-soft' : 'text-slate-300'} />
+          </div>
+          <p className={`text-2xl font-bold ${stats.urgentReviews > 0 ? 'text-orange-600' : 'text-slate-900'}`}>{stats.urgentReviews}</p>
+          <p className="text-xs text-slate-400 mt-1">{stats.urgentReviews > 0 ? 'Needs attention' : 'No urgent reviews'}</p>
+        </div>
+      </div>
+
+      {/* Getting Started Checklist */}
+      {!setupDismissed && (
+        <div className="bg-white rounded-lg p-6 border border-slate-200 animate-fade-in-up delay-600">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Urgent Reviews</p>
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${stats.urgentReviews > 0 ? 'bg-orange-100' : 'bg-slate-50'}`}>
-              <AlertTriangle size={16} className={stats.urgentReviews > 0 ? 'text-orange-600 animate-pulse-soft' : 'text-slate-400'} />
+            <div>
+              <h2 className="text-base font-semibold text-slate-900">Getting Started</h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {completedSteps.length} of {SETUP_STEPS.length} steps completed
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-24 bg-slate-100 rounded-full h-1.5">
+                <div
+                  className="h-1.5 rounded-full bg-blue-600 transition-all duration-300"
+                  style={{ width: `${(completedSteps.length / SETUP_STEPS.length) * 100}%` }}
+                />
+              </div>
+              <span className="text-xs text-slate-400 font-medium">{Math.round((completedSteps.length / SETUP_STEPS.length) * 100)}%</span>
             </div>
           </div>
-          <p className={`text-3xl font-extrabold tracking-tight ${stats.urgentReviews > 0 ? 'text-orange-600' : 'text-slate-900'}`}>{stats.urgentReviews}</p>
-          <p className="text-xs text-slate-400 mt-1.5">{stats.urgentReviews > 0 ? 'Needs immediate attention' : 'No urgent reviews'}</p>
-        </div>
-      </div>
-
-      {/* Getting Started */}
-      <div className="bg-white rounded-2xl p-8 border border-slate-200/60 animate-fade-in-up delay-600">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-9 h-9 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center">
-            <Sparkles size={16} className="text-blue-700" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-slate-900 tracking-tight">Getting Started</h2>
-            <p className="text-xs text-slate-400">Follow these steps to set up your account</p>
-          </div>
-        </div>
-        <div className="grid sm:grid-cols-2 gap-3">
-          {[
-            { href: '/dashboard/settings', num: '1', title: 'Connect your Google Business account', desc: 'Go to Settings to link your platforms' },
-            { href: '/dashboard/reviews', num: '2', title: 'View all customer reviews', desc: 'See reviews from Google and other platforms' },
-            { href: '/dashboard/reviews', num: '3', title: 'Respond with AI-powered suggestions', desc: 'Click Reply on any review for AI help' },
-            { href: '/dashboard/analytics', num: '4', title: 'Track your analytics', desc: 'Monitor improvement over time' },
-          ].map((step) => {
-            return (
-              <Link key={step.num} href={step.href} className="group flex items-start gap-3.5 p-4 rounded-xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100">
-                <div className="w-7 h-7 bg-gradient-to-br from-blue-800 to-blue-900 text-white rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 shadow-sm mt-0.5">
-                  {step.num}
+          <div className="space-y-1">
+            {SETUP_STEPS.map((step) => {
+              const done = completedSteps.includes(step.key)
+              return (
+                <div key={step.key} className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={done}
+                    onChange={() => toggleStep(step.key)}
+                    className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-800 focus:ring-blue-800 cursor-pointer"
+                  />
+                  <Link href={step.href} className="flex-1 min-w-0">
+                    <p className={`text-sm font-medium transition-colors ${done ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
+                      {step.label}
+                    </p>
+                    <p className="text-xs text-slate-400 mt-0.5">{step.desc}</p>
+                  </Link>
                 </div>
-                <div>
-                  <p className="font-semibold text-slate-900 text-sm group-hover:text-blue-900 transition-colors">{step.title}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">{step.desc}</p>
-                </div>
-              </Link>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
