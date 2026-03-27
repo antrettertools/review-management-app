@@ -332,9 +332,9 @@ export default function ResponseModal({
               />
               <div className="flex justify-between items-center mt-1.5">
                 <p className="text-[11px] text-slate-400">
-                  {responseContent.length} / 500 characters
+                  {responseContent.length} / 4,000 characters
                 </p>
-                {responseContent.length > 450 && (
+                {responseContent.length > 3500 && (
                   <p className="text-[11px] text-orange-600 font-semibold">Getting close to limit</p>
                 )}
               </div>
