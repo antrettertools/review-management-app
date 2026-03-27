@@ -5,7 +5,8 @@ import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import { Star, ArrowRight, Eye, EyeOff } from 'lucide-react'
+import { LogoIcon } from '@/components/Logo'
+import { ArrowRight, Eye, EyeOff } from 'lucide-react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -53,9 +54,7 @@ export default function LoginPage() {
       <header className="border-b border-slate-100 bg-white sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-blue-800 rounded-lg flex items-center justify-center">
-              <Star size={14} className="text-white fill-white" />
-            </div>
+            <LogoIcon size={28} />
             <span className="text-lg font-bold text-slate-900">ReviewInzight</span>
           </Link>
           <Link href="/auth/signup" className="px-4 py-2 bg-blue-800 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-sm">

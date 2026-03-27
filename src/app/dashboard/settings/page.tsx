@@ -672,8 +672,8 @@ export default function SettingsPage() {
                 <h3 className="text-sm font-semibold text-slate-900 mb-1">Need More Help?</h3>
                 <p className="text-sm text-slate-500 leading-relaxed">
                   Contact us at{' '}
-                  <a href="mailto:support@reviewinzight.com" className="text-blue-700 hover:text-blue-800 font-medium">
-                    support@reviewinzight.com
+                  <a href="mailto:reviewinzight@gmail.com" className="text-blue-700 hover:text-blue-800 font-medium">
+                    reviewinzight@gmail.com
                   </a>
                 </p>
               </div>
@@ -689,3 +689,4 @@ export default function SettingsPage() {
     </div>
   )
 }
+

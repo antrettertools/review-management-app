@@ -180,7 +180,7 @@ export default function AccountCancelledPage() {
 
               <p className="text-center text-xs text-slate-400">
                 Need help?{' '}
-                <a href="mailto:support@reviewinzight.com" className="text-blue-600 hover:text-blue-800 font-semibold">Contact support</a>
+                <a href="mailto:reviewinzight@gmail.com" className="text-blue-600 hover:text-blue-800 font-semibold">Contact support</a>
               </p>
             </div>
           </div>

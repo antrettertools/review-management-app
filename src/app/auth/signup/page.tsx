@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import { Star, ArrowRight, Eye, EyeOff, Shield } from 'lucide-react'
+import { LogoIcon } from '@/components/Logo'
+import { ArrowRight, Eye, EyeOff, Shield } from 'lucide-react'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -72,9 +73,7 @@ export default function SignupPage() {
       <header className="border-b border-slate-100 bg-white sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-blue-800 rounded-lg flex items-center justify-center">
-              <Star size={14} className="text-white fill-white" />
-            </div>
+            <LogoIcon size={28} />
             <span className="text-lg font-bold text-slate-900">ReviewInzight</span>
           </Link>
           <Link href="/auth/login" className="px-4 py-2 text-slate-600 font-medium hover:text-slate-900 rounded-lg transition-colors text-sm">

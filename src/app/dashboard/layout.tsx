@@ -6,7 +6,8 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { signOut } from 'next-auth/react'
 import NotificationBell from '@/components/layout/NotificationBell'
-import { LayoutDashboard, MessageSquareText, BarChart3, Bell, Settings, LogOut, Menu, Star } from 'lucide-react'
+import { LogoIcon } from '@/components/Logo'
+import { LayoutDashboard, MessageSquareText, BarChart3, Bell, Settings, LogOut, Menu, HelpCircle, Mail, X } from 'lucide-react'
 
 export default function DashboardLayout({
   children,
@@ -17,6 +18,7 @@ export default function DashboardLayout({
   const router = useRouter()
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [showHelpGuide, setShowHelpGuide] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -58,9 +60,7 @@ export default function DashboardLayout({
           {/* Logo */}
           <div className="mb-6 px-1">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 bg-blue-800 rounded-lg flex items-center justify-center">
-                <Star size={14} className="text-white fill-white" />
-              </div>
+              <LogoIcon size={28} />
               <h1 className="text-base font-bold text-slate-900 leading-none">ReviewInzight</h1>
             </div>
           </div>
@@ -89,6 +89,20 @@ export default function DashboardLayout({
 
           {/* Bottom section */}
           <div className="border-t border-slate-100 pt-3 mt-3">
+            {/* Help Guide Box */}
+            <button
+              onClick={() => setShowHelpGuide(true)}
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 mb-2 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors text-left"
+            >
+              <div className="w-7 h-7 bg-blue-100 rounded-md flex items-center justify-center flex-shrink-0">
+                <HelpCircle size={14} className="text-blue-700" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-blue-900">Need Help?</p>
+                <p className="text-[10px] text-blue-600/70 truncate">View guide & support</p>
+              </div>
+            </button>
+
             <div className="bg-slate-50 rounded-lg p-3 mb-2">
               <div className="flex items-center gap-2.5">
                 <div className="w-7 h-7 bg-blue-800 rounded-md flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
@@ -117,6 +131,80 @@ export default function DashboardLayout({
           className="fixed inset-0 bg-black/20 lg:hidden z-30"
           onClick={() => setSidebarOpen(false)}
         />
+      )}
+
+      {/* Help Guide Modal */}
+      {showHelpGuide && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full animate-scale-in border border-slate-200 max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex items-center gap-2">
+                <HelpCircle size={18} className="text-blue-700" />
+                <h2 className="text-base font-semibold text-slate-900">Help Guide</h2>
+              </div>
+              <button onClick={() => setShowHelpGuide(false)} className="text-slate-400 hover:text-slate-600">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 mb-1">Getting Started</h3>
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  Add a business, connect your Google Business Profile, and start managing your reviews all from one place.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 mb-1">Connecting Google</h3>
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  Go to Settings and click &ldquo;Connect Google Account&rdquo; in the Businesses section. You&apos;ll be redirected to Google to authorize access. Once connected, reviews will sync automatically.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 mb-1">Managing Reviews</h3>
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  Go to the Reviews tab to see all your reviews. Click &ldquo;Reply&rdquo; on any review to get AI-powered response suggestions. You can edit the suggestion before posting.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 mb-1">AI Responses</h3>
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  Our AI analyzes each review and generates a professional, context-aware response. You can regenerate, edit, or post the response directly.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 mb-1">Analytics</h3>
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  The Analytics page shows your reputation score, rating distribution, response rates, and trends over time.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 mb-1">Billing & Subscription</h3>
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  Your subscription is managed through Stripe. You can cancel anytime from the Settings page. If you cancel, your data is preserved and you can reactivate later.
+                </p>
+              </div>
+              <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                <h3 className="text-sm font-semibold text-blue-900 mb-1">Need More Help?</h3>
+                <p className="text-sm text-blue-700/80 leading-relaxed">
+                  Contact our support team at{' '}
+                  <a href="mailto:reviewinzight@gmail.com" className="text-blue-700 hover:text-blue-800 font-medium underline">
+                    reviewinzight@gmail.com
+                  </a>
+                </p>
+                <div className="flex items-center gap-1.5 mt-2">
+                  <Mail size={13} className="text-blue-600" />
+                  <span className="text-xs text-blue-600/70">We typically respond within 24 hours</span>
+                </div>
+              </div>
+            </div>
+
+            <button onClick={() => setShowHelpGuide(false)}
+              className="w-full mt-5 px-4 py-2.5 bg-blue-800 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm">
+              Close
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Main Content */}

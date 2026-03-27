@@ -35,14 +35,46 @@ export default function DashboardPage() {
     }
   }, [session])
 
-  const loadSetupProgress = () => {
+  const loadSetupProgress = async () => {
     const userId = (session?.user as any)?.id
     if (!userId) return
+
+    // Check database first for permanent dismissal
+    try {
+      const { data } = await supabase
+        .from('users')
+        .select('onboarding_completed')
+        .eq('id', userId)
+        .single()
+
+      if (data?.onboarding_completed) {
+        setSetupDismissed(true)
+        return
+      }
+    } catch {
+      // Column may not exist yet, fall through to localStorage
+    }
+
     const saved = localStorage.getItem(`setup_${userId}`)
     if (saved) {
       const parsed = JSON.parse(saved)
       setCompletedSteps(parsed.completed || [])
-      setSetupDismissed(parsed.dismissed || false)
+      if (parsed.dismissed) {
+        setSetupDismissed(true)
+        // Persist to database so it's permanent
+        markOnboardingComplete(userId)
+      }
+    }
+  }
+
+  const markOnboardingComplete = async (userId: string) => {
+    try {
+      await supabase
+        .from('users')
+        .update({ onboarding_completed: true })
+        .eq('id', userId)
+    } catch {
+      // If column doesn't exist, localStorage still handles it
     }
   }
 
@@ -58,10 +90,12 @@ export default function DashboardPage() {
       : [...completedSteps, key]
     setCompletedSteps(updated)
 
-    // Auto-dismiss when all steps are completed
+    // Auto-dismiss permanently when all steps are completed
     if (updated.length === SETUP_STEPS.length) {
       setSetupDismissed(true)
       saveSetupProgress(updated, true)
+      const userId = (session?.user as any)?.id
+      if (userId) markOnboardingComplete(userId)
     } else {
       saveSetupProgress(updated, false)
     }

@@ -221,7 +221,7 @@ export default function TermsPage() {
                   <strong>Class Action Waiver:</strong> TO THE FULLEST EXTENT PERMITTED BY LAW, YOU AGREE THAT ANY DISPUTE RESOLUTION PROCEEDINGS WILL BE CONDUCTED ONLY ON AN INDIVIDUAL BASIS AND NOT IN A CLASS, CONSOLIDATED, OR REPRESENTATIVE ACTION.
                 </p>
                 <p>
-                  <strong>Informal Resolution:</strong> Before initiating any arbitration, you agree to first contact us at support@reviewinzight.com and attempt to resolve the dispute informally for at least thirty (30) days.
+                  <strong>Informal Resolution:</strong> Before initiating any arbitration, you agree to first contact us at reviewinzight@gmail.com and attempt to resolve the dispute informally for at least thirty (30) days.
                 </p>
               </section>
 
@@ -309,7 +309,7 @@ export default function TermsPage() {
                 <p>If you have any questions about these Terms, please contact us at:</p>
                 <p className="mt-2">
                   <strong>ReviewInzight</strong><br />
-                  Email: <a href="mailto:support@reviewinzight.com" className="text-blue-600 hover:underline">support@reviewinzight.com</a>
+                  Email: <a href="mailto:reviewinzight@gmail.com" className="text-blue-600 hover:underline">reviewinzight@gmail.com</a>
                 </p>
               </section>
 
