@@ -3,23 +3,46 @@ export function LogoIcon({ size = 28, className = '' }: { size?: number; classNa
     <svg
       width={size}
       height={size}
-      viewBox="0 0 32 32"
+      viewBox="0 0 40 40"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
-      {/* Speech bubble body */}
-      <rect x="2" y="3" width="28" height="21" rx="5" fill="#1e3a8a" />
-      {/* Speech bubble tail */}
-      <path d="M8 24L13 28.5L18 24" fill="#1e3a8a" />
-      {/* Star */}
+      <defs>
+        <linearGradient id="logoGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#2563eb" />
+          <stop offset="100%" stopColor="#1e3a8a" />
+        </linearGradient>
+      </defs>
+
+      {/* Rounded square background */}
+      <rect width="40" height="40" rx="10" fill="url(#logoGrad)" />
+
+      {/* Speech bubble shape — subtle fill */}
       <path
-        d="M16 7.5L18.1 12.1L23 12.7L19.5 16L20.3 20.8L16 18.5L11.7 20.8L12.5 16L9 12.7L13.9 12.1L16 7.5Z"
+        d="M7 10 Q7 7 10 7 H30 Q33 7 33 10 V23 Q33 26 30 26 H21 L16 31 L15 26 H10 Q7 26 7 23 Z"
         fill="white"
+        opacity="0.12"
       />
-      {/* Subtle sparkle accent */}
-      <circle cx="25" cy="7" r="1.5" fill="#60a5fa" opacity="0.8" />
-      <circle cx="27" cy="5" r="0.8" fill="#93c5fd" opacity="0.6" />
+
+      {/* Three ascending bar chart bars */}
+      <rect x="10" y="22" width="5" height="2" rx="1" fill="white" opacity="0.5" />
+      <rect x="10" y="19" width="5" height="5" rx="1" fill="white" opacity="0.5" />
+
+      <rect x="18" y="22" width="5" height="2" rx="1" fill="white" opacity="0.75" />
+      <rect x="18" y="16" width="5" height="8" rx="1" fill="white" opacity="0.75" />
+
+      <rect x="26" y="22" width="5" height="2" rx="1" fill="white" />
+      <rect x="26" y="11" width="5" height="13" rx="1" fill="white" />
+
+      {/* Upward tick / arrow accent above tallest bar */}
+      <path
+        d="M27 10 L28.5 8 L30 10"
+        stroke="#93c5fd"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   )
 }
