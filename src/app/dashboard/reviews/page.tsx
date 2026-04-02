@@ -11,7 +11,7 @@ export default function ReviewsPage() {
   const [reviews, setReviews] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
-  const [platformFilter, setPlatformFilter] = useState<'all' | 'google' | 'facebook'>('all')
+  const [platformFilter, setPlatformFilter] = useState<'all' | 'google' | 'facebook' | 'tripadvisor' | 'trustpilot'>('all')
   const [selectedReview, setSelectedReview] = useState<any>(null)
   const [showModal, setShowModal] = useState(false)
 
@@ -129,6 +129,8 @@ export default function ReviewsPage() {
             { key: 'all', label: 'All Platforms' },
             { key: 'google', label: 'Google' },
             { key: 'facebook', label: 'Facebook' },
+            { key: 'tripadvisor', label: 'TripAdvisor' },
+            { key: 'trustpilot', label: 'Trustpilot' },
           ].map((p) => (
             <button
               key={p.key}
