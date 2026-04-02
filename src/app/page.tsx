@@ -515,7 +515,7 @@ export default function Home() {
                   Start Your Free Trial
                   <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
                 </Link>
-                <p className="text-xs text-slate-500 text-center mt-3">No charge for 7 days. Then $39.99/month.</p>
+                <p className="text-xs text-slate-500 text-center mt-3">No charge for 14 days. Then $39.99/month.</p>
               </div>
             </div>
             </div>
