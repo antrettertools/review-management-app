@@ -8,7 +8,7 @@ import { LogoIcon } from '@/components/Logo'
 import { BarChart3, Zap, Shield, ArrowRight, CheckCircle, MessageSquare, TrendingUp, Clock, Users, Globe, Bell, Sparkles, Lock, Headphones } from 'lucide-react'
 
 // Hook to detect when element enters viewport
-function useInView(ref: React.RefObject<HTMLElement>, threshold = 0.15) {
+function useInView(ref: React.RefObject<HTMLDivElement | null>, threshold = 0.15) {
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
