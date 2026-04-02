@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { X, Plus, Trash2, CheckCircle, Pencil, Globe, CreditCard, User, Building2, Link2, HelpCircle } from 'lucide-react'
+import { X, Plus, Trash2, CheckCircle, Pencil, Globe, CreditCard, User, Building2, Link2, HelpCircle, Clock } from 'lucide-react'
 
 interface UserProfile {
   id: string
