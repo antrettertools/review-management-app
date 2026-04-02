@@ -514,10 +514,10 @@ export default function SettingsPage() {
             {!isFacebookConnected && (
               <button
                 onClick={handleConnectFacebook}
-                disabled={facebookConnecting}
+                disabled={true}
                 className="mt-3 px-4 py-2 bg-blue-800 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors text-xs"
               >
-                {facebookConnecting ? 'Connecting...' : 'Connect Facebook Account'}
+                Connect Facebook Account (Coming Soon)
               </button>
             )}
           </div>
