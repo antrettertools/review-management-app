@@ -2,10 +2,65 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { LogoIcon } from '@/components/Logo'
 import { BarChart3, Zap, Shield, ArrowRight, CheckCircle, MessageSquare, TrendingUp, Clock, Users, Globe, Bell, Sparkles, Lock, Headphones } from 'lucide-react'
+
+// Hook to detect when element enters viewport
+function useInView(ref: React.RefObject<HTMLElement>, threshold = 0.15) {
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.unobserve(entry.target)
+        }
+      },
+      { threshold }
+    )
+
+    if (ref.current) {
+      observer.observe(ref.current)
+    }
+
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current)
+      }
+    }
+  }, [ref, threshold])
+
+  return isVisible
+}
+
+// Wrapper component for scroll animations
+function AnimateOnScroll({
+  children,
+  delay = 0,
+}: {
+  children: React.ReactNode
+  delay?: number
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const isVisible = useInView(ref)
+
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-700 ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+      }`}
+      style={{
+        transitionDelay: isVisible ? `${delay}ms` : '0ms',
+      }}
+    >
+      {children}
+    </div>
+  )
+}
 
 export default function Home() {
   const { data: session, status } = useSession()
@@ -52,6 +107,7 @@ export default function Home() {
       {/* Hero */}
       <section className="py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6 text-center">
+          <AnimateOnScroll>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-100 rounded-full text-sm font-medium text-blue-700 mb-8">
             <Zap size={14} />
             AI-Powered Review Management
@@ -83,13 +139,15 @@ export default function Home() {
             </Link>
           </div>
           <p className="text-sm text-slate-400 mt-4">No charge for 7 days. Then $39.99/month. Cancel anytime.</p>
+          </AnimateOnScroll>
         </div>
       </section>
 
       {/* Why Reviews Matter */}
       <section className="py-14 bg-slate-50 border-y border-slate-100">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <AnimateOnScroll>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-2xl font-bold text-slate-900 mb-4">Online reviews matter more than ever</h2>
               <p className="text-slate-600 mb-4 leading-relaxed">
@@ -100,35 +158,45 @@ export default function Home() {
               </p>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white rounded-lg p-6 border border-slate-200">
-                <Globe size={24} className="text-blue-600 mb-3" />
-                <h3 className="font-semibold text-slate-900 mb-1">Centralized View</h3>
-                <p className="text-sm text-slate-500">See all your reviews in one dashboard instead of checking multiple platforms</p>
-              </div>
-              <div className="bg-white rounded-lg p-6 border border-slate-200">
-                <Clock size={24} className="text-blue-600 mb-3" />
-                <h3 className="font-semibold text-slate-900 mb-1">Save Time</h3>
-                <p className="text-sm text-slate-500">Spend less time copying between platforms and more time running your business</p>
-              </div>
-              <div className="bg-white rounded-lg p-6 border border-slate-200">
-                <MessageSquare size={24} className="text-blue-600 mb-3" />
-                <h3 className="font-semibold text-slate-900 mb-1">Better Responses</h3>
-                <p className="text-sm text-slate-500">Get suggestions for professional, thoughtful replies to every review</p>
-              </div>
-              <div className="bg-white rounded-lg p-6 border border-slate-200">
-                <TrendingUp size={24} className="text-blue-600 mb-3" />
-                <h3 className="font-semibold text-slate-900 mb-1">Track Progress</h3>
-                <p className="text-sm text-slate-500">Monitor your review trends and response activity over time</p>
-              </div>
+              <AnimateOnScroll delay={100}>
+                <div className="bg-white rounded-lg p-6 border border-slate-200">
+                  <Globe size={24} className="text-blue-600 mb-3" />
+                  <h3 className="font-semibold text-slate-900 mb-1">Centralized View</h3>
+                  <p className="text-sm text-slate-500">See all your reviews in one dashboard instead of checking multiple platforms</p>
+                </div>
+              </AnimateOnScroll>
+              <AnimateOnScroll delay={200}>
+                <div className="bg-white rounded-lg p-6 border border-slate-200">
+                  <Clock size={24} className="text-blue-600 mb-3" />
+                  <h3 className="font-semibold text-slate-900 mb-1">Save Time</h3>
+                  <p className="text-sm text-slate-500">Spend less time copying between platforms and more time running your business</p>
+                </div>
+              </AnimateOnScroll>
+              <AnimateOnScroll delay={300}>
+                <div className="bg-white rounded-lg p-6 border border-slate-200">
+                  <MessageSquare size={24} className="text-blue-600 mb-3" />
+                  <h3 className="font-semibold text-slate-900 mb-1">Better Responses</h3>
+                  <p className="text-sm text-slate-500">Get suggestions for professional, thoughtful replies to every review</p>
+                </div>
+              </AnimateOnScroll>
+              <AnimateOnScroll delay={400}>
+                <div className="bg-white rounded-lg p-6 border border-slate-200">
+                  <TrendingUp size={24} className="text-blue-600 mb-3" />
+                  <h3 className="font-semibold text-slate-900 mb-1">Track Progress</h3>
+                  <p className="text-sm text-slate-500">Monitor your review trends and response activity over time</p>
+                </div>
+              </AnimateOnScroll>
             </div>
-          </div>
+            </div>
+          </AnimateOnScroll>
         </div>
       </section>
 
       {/* Problem / Solution */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <AnimateOnScroll>
+            <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-3">The Challenge</p>
               <h2 className="text-3xl font-bold text-slate-900 mb-5">Managing reviews can be overwhelming</h2>
@@ -181,18 +249,21 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </div>
+            </div>
+          </AnimateOnScroll>
         </div>
       </section>
 
       {/* Features */}
       <section id="features" className="py-20 bg-slate-50">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">Features</p>
-            <h2 className="text-3xl font-bold text-slate-900 mb-3">What ReviewInzight Offers</h2>
-            <p className="text-slate-500 max-w-xl mx-auto">A complete toolkit for managing your online reputation and staying connected with customer feedback.</p>
-          </div>
+          <AnimateOnScroll>
+            <div className="text-center mb-14">
+              <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">Features</p>
+              <h2 className="text-3xl font-bold text-slate-900 mb-3">What ReviewInzight Offers</h2>
+              <p className="text-slate-500 max-w-xl mx-auto">A complete toolkit for managing your online reputation and staying connected with customer feedback.</p>
+            </div>
+          </AnimateOnScroll>
 
           <div className="grid md:grid-cols-3 gap-6">
             {[
@@ -202,16 +273,18 @@ export default function Home() {
               { icon: Bell, title: 'Notifications', desc: 'Stay informed about new reviews as they come in. Configure notifications so you\'re aware of feedback when it matters most for your business.' },
               { icon: Globe, title: 'Multi-Business Support', desc: 'If you manage multiple locations or businesses, ReviewInzight allows you to set up and organize each one separately within your account.' },
               { icon: Sparkles, title: 'One-Platform Posting', desc: 'Review and post responses directly from ReviewInzight, streamlining your workflow and reducing the need to switch between multiple websites.' },
-            ].map((feature) => {
+            ].map((feature, index) => {
               const Icon = feature.icon
               return (
-                <div key={feature.title} className="bg-white rounded-xl p-7 border border-slate-200 hover:shadow-md transition-shadow">
-                  <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mb-4">
-                    <Icon size={20} className="text-blue-700" />
+                <AnimateOnScroll key={feature.title} delay={index * 100}>
+                  <div className="bg-white rounded-xl p-7 border border-slate-200 hover:shadow-md transition-shadow">
+                    <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mb-4">
+                      <Icon size={20} className="text-blue-700" />
+                    </div>
+                    <h3 className="text-base font-semibold text-slate-900 mb-2">{feature.title}</h3>
+                    <p className="text-sm text-slate-500 leading-relaxed">{feature.desc}</p>
                   </div>
-                  <h3 className="text-base font-semibold text-slate-900 mb-2">{feature.title}</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed">{feature.desc}</p>
-                </div>
+                </AnimateOnScroll>
               )
             })}
           </div>
@@ -221,25 +294,29 @@ export default function Home() {
       {/* How It Works */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">Getting Started</p>
-            <h2 className="text-3xl font-bold text-slate-900 mb-3">Simple Setup Process</h2>
-            <p className="text-slate-500 max-w-xl mx-auto">Getting started with ReviewInzight is straightforward. Here's how the process works.</p>
-          </div>
+          <AnimateOnScroll>
+            <div className="text-center mb-14">
+              <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">Getting Started</p>
+              <h2 className="text-3xl font-bold text-slate-900 mb-3">Simple Setup Process</h2>
+              <p className="text-slate-500 max-w-xl mx-auto">Getting started with ReviewInzight is straightforward. Here's how the process works.</p>
+            </div>
+          </AnimateOnScroll>
 
           <div className="grid md:grid-cols-3 gap-10">
             {[
               { num: '1', title: 'Create Your Account', desc: 'Sign up with your email and set up your account in just a few minutes. You\'ll have access to your dashboard right away to start exploring the platform.' },
               { num: '2', title: 'Connect Your Business', desc: 'Add your business information and connect it to your Google Business Profile to start syncing reviews. The connection process uses secure authentication to protect your data.' },
               { num: '3', title: 'Start Managing Reviews', desc: 'Once connected, your reviews will appear in your dashboard. You can browse feedback, generate response suggestions, and manage your review activity all in one place.' },
-            ].map((step) => (
-              <div key={step.num} className="text-center">
-                <div className="w-12 h-12 bg-blue-800 text-white rounded-xl flex items-center justify-center text-lg font-bold mx-auto mb-4">
-                  {step.num}
+            ].map((step, index) => (
+              <AnimateOnScroll key={step.num} delay={index * 100}>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-blue-800 text-white rounded-xl flex items-center justify-center text-lg font-bold mx-auto mb-4">
+                    {step.num}
+                  </div>
+                  <h3 className="text-base font-semibold text-slate-900 mb-2">{step.title}</h3>
+                  <p className="text-sm text-slate-500 leading-relaxed">{step.desc}</p>
                 </div>
-                <h3 className="text-base font-semibold text-slate-900 mb-2">{step.title}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">{step.desc}</p>
-              </div>
+              </AnimateOnScroll>
             ))}
           </div>
         </div>
@@ -248,13 +325,15 @@ export default function Home() {
       {/* Why ReviewInzight */}
       <section className="py-20 bg-slate-50">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">Why Choose ReviewInzight</p>
-            <h2 className="text-3xl font-bold text-slate-900 mb-3">Built with business owners in mind</h2>
-            <p className="text-slate-500 max-w-2xl mx-auto">
-              ReviewInzight is designed to be straightforward and practical. Whether you're a single-location business or managing multiple locations, the platform adapts to your needs.
-            </p>
-          </div>
+          <AnimateOnScroll>
+            <div className="text-center mb-14">
+              <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">Why Choose ReviewInzight</p>
+              <h2 className="text-3xl font-bold text-slate-900 mb-3">Built with business owners in mind</h2>
+              <p className="text-slate-500 max-w-2xl mx-auto">
+                ReviewInzight is designed to be straightforward and practical. Whether you're a single-location business or managing multiple locations, the platform adapts to your needs.
+              </p>
+            </div>
+          </AnimateOnScroll>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
@@ -262,16 +341,18 @@ export default function Home() {
               { icon: Users, title: 'For Growing Businesses', desc: 'Whether you\'re just starting out or managing multiple locations, ReviewInzight scales with your business and your review management needs.' },
               { icon: Lock, title: 'Data Security', desc: 'Your information is important. ReviewInzight uses industry-standard security practices and secure authentication to protect your data.' },
               { icon: Headphones, title: 'Customer Support', desc: 'If you have questions or need help, our support team is available to assist you via email at reviewinzight@gmail.com.' },
-            ].map((item) => {
+            ].map((item, index) => {
               const Icon = item.icon
               return (
-                <div key={item.title} className="bg-white rounded-xl p-6 border border-slate-200">
-                  <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center mb-3">
-                    <Icon size={18} className="text-blue-700" />
+                <AnimateOnScroll key={item.title} delay={index * 100}>
+                  <div className="bg-white rounded-xl p-6 border border-slate-200">
+                    <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center mb-3">
+                      <Icon size={18} className="text-blue-700" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-slate-900 mb-1.5">{item.title}</h3>
+                    <p className="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
                   </div>
-                  <h3 className="text-sm font-semibold text-slate-900 mb-1.5">{item.title}</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
-                </div>
+                </AnimateOnScroll>
               )
             })}
           </div>
@@ -281,46 +362,58 @@ export default function Home() {
       {/* About the App */}
       <section className="py-20">
         <div className="max-w-3xl mx-auto px-6">
-          <div className="text-center mb-10">
-            <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">About ReviewInzight</p>
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">How it works</h2>
-          </div>
+          <AnimateOnScroll>
+            <div className="text-center mb-10">
+              <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">About ReviewInzight</p>
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">How it works</h2>
+            </div>
+          </AnimateOnScroll>
 
           <div className="space-y-6">
-            <div className="bg-white rounded-xl p-6 border border-slate-200">
-              <h3 className="text-base font-semibold text-slate-900 mb-2">Review Collection</h3>
-              <p className="text-slate-600 leading-relaxed">
-                ReviewInzight connects to your Google Business Profile to retrieve your reviews. Once connected, the app regularly checks for new reviews and updates your dashboard so you always have current information about your feedback.
-              </p>
-            </div>
+            <AnimateOnScroll delay={0}>
+              <div className="bg-white rounded-xl p-6 border border-slate-200">
+                <h3 className="text-base font-semibold text-slate-900 mb-2">Review Collection</h3>
+                <p className="text-slate-600 leading-relaxed">
+                  ReviewInzight connects to your Google Business Profile to retrieve your reviews. Once connected, the app regularly checks for new reviews and updates your dashboard so you always have current information about your feedback.
+                </p>
+              </div>
+            </AnimateOnScroll>
 
-            <div className="bg-white rounded-xl p-6 border border-slate-200">
-              <h3 className="text-base font-semibold text-slate-900 mb-2">AI-Assisted Responses</h3>
-              <p className="text-slate-600 leading-relaxed">
-                For each review, ReviewInzight can generate a suggested response using AI technology. These suggestions are intended as a starting point to help you craft your reply. You have complete control over any responses before they're posted—you can edit them, regenerate new suggestions, or write your own response from scratch.
-              </p>
-            </div>
+            <AnimateOnScroll delay={100}>
+              <div className="bg-white rounded-xl p-6 border border-slate-200">
+                <h3 className="text-base font-semibold text-slate-900 mb-2">AI-Assisted Responses</h3>
+                <p className="text-slate-600 leading-relaxed">
+                  For each review, ReviewInzight can generate a suggested response using AI technology. These suggestions are intended as a starting point to help you craft your reply. You have complete control over any responses before they're posted—you can edit them, regenerate new suggestions, or write your own response from scratch.
+                </p>
+              </div>
+            </AnimateOnScroll>
 
-            <div className="bg-white rounded-xl p-6 border border-slate-200">
-              <h3 className="text-base font-semibold text-slate-900 mb-2">Dashboard Organization</h3>
-              <p className="text-slate-600 leading-relaxed">
-                All your reviews appear in a clean, organized dashboard where you can browse, search, and manage your feedback. Information is presented clearly so you can quickly understand your review activity and respond to customer feedback effectively.
-              </p>
-            </div>
+            <AnimateOnScroll delay={200}>
+              <div className="bg-white rounded-xl p-6 border border-slate-200">
+                <h3 className="text-base font-semibold text-slate-900 mb-2">Dashboard Organization</h3>
+                <p className="text-slate-600 leading-relaxed">
+                  All your reviews appear in a clean, organized dashboard where you can browse, search, and manage your feedback. Information is presented clearly so you can quickly understand your review activity and respond to customer feedback effectively.
+                </p>
+              </div>
+            </AnimateOnScroll>
 
-            <div className="bg-white rounded-xl p-6 border border-slate-200">
-              <h3 className="text-base font-semibold text-slate-900 mb-2">Analytics & Tracking</h3>
-              <p className="text-slate-600 leading-relaxed">
-                ReviewInzight provides basic analytics and tracking of your review data, including information about your reviews over time. This information can help you understand trends in customer feedback and track your response activity.
-              </p>
-            </div>
+            <AnimateOnScroll delay={300}>
+              <div className="bg-white rounded-xl p-6 border border-slate-200">
+                <h3 className="text-base font-semibold text-slate-900 mb-2">Analytics & Tracking</h3>
+                <p className="text-slate-600 leading-relaxed">
+                  ReviewInzight provides basic analytics and tracking of your review data, including information about your reviews over time. This information can help you understand trends in customer feedback and track your response activity.
+                </p>
+              </div>
+            </AnimateOnScroll>
 
-            <div className="bg-white rounded-xl p-6 border border-slate-200">
-              <h3 className="text-base font-semibold text-slate-900 mb-2">Multi-Location Support</h3>
-              <p className="text-slate-600 leading-relaxed">
-                If you operate multiple businesses or locations, you can add and manage each one within ReviewInzight. Each business gets its own set of reviews and management interface, making it easier to handle multiple properties from a single account.
-              </p>
-            </div>
+            <AnimateOnScroll delay={400}>
+              <div className="bg-white rounded-xl p-6 border border-slate-200">
+                <h3 className="text-base font-semibold text-slate-900 mb-2">Multi-Location Support</h3>
+                <p className="text-slate-600 leading-relaxed">
+                  If you operate multiple businesses or locations, you can add and manage each one within ReviewInzight. Each business gets its own set of reviews and management interface, making it easier to handle multiple properties from a single account.
+                </p>
+              </div>
+            </AnimateOnScroll>
           </div>
         </div>
       </section>
@@ -328,11 +421,13 @@ export default function Home() {
       {/* FAQ */}
       <section className="py-20 bg-slate-50">
         <div className="max-w-3xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">FAQ</p>
-            <h2 className="text-3xl font-bold text-slate-900 mb-3">Common Questions</h2>
-            <p className="text-slate-500">Here are some questions people often ask about ReviewInzight.</p>
-          </div>
+          <AnimateOnScroll>
+            <div className="text-center mb-14">
+              <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">FAQ</p>
+              <h2 className="text-3xl font-bold text-slate-900 mb-3">Common Questions</h2>
+              <p className="text-slate-500">Here are some questions people often ask about ReviewInzight.</p>
+            </div>
+          </AnimateOnScroll>
 
           <div className="space-y-4">
             {[
@@ -368,11 +463,13 @@ export default function Home() {
                 q: 'How can I get support?',
                 a: 'If you have questions or run into issues, you can reach our support team at reviewinzight@gmail.com. We\'ll do our best to help you get the most out of ReviewInzight.',
               },
-            ].map((faq) => (
-              <div key={faq.q} className="bg-white rounded-xl p-6 border border-slate-200">
-                <h3 className="text-sm font-semibold text-slate-900 mb-2">{faq.q}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">{faq.a}</p>
-              </div>
+            ].map((faq, index) => (
+              <AnimateOnScroll key={faq.q} delay={index * 50}>
+                <div className="bg-white rounded-xl p-6 border border-slate-200">
+                  <h3 className="text-sm font-semibold text-slate-900 mb-2">{faq.q}</h3>
+                  <p className="text-sm text-slate-500 leading-relaxed">{faq.a}</p>
+                </div>
+              </AnimateOnScroll>
             ))}
           </div>
         </div>
@@ -381,13 +478,16 @@ export default function Home() {
       {/* Pricing */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-10">
-            <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">Pricing</p>
-            <h2 className="text-3xl font-bold text-slate-900 mb-3">One Simple Plan</h2>
-            <p className="text-slate-500 max-w-lg mx-auto">ReviewInzight offers straightforward pricing with no hidden fees. Start with a 7-day free trial to see if it works for your business.</p>
-          </div>
+          <AnimateOnScroll>
+            <div className="text-center mb-10">
+              <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">Pricing</p>
+              <h2 className="text-3xl font-bold text-slate-900 mb-3">One Simple Plan</h2>
+              <p className="text-slate-500 max-w-lg mx-auto">ReviewInzight offers straightforward pricing with no hidden fees. Start with a 7-day free trial to see if it works for your business.</p>
+            </div>
+          </AnimateOnScroll>
 
-          <div className="max-w-md mx-auto">
+          <AnimateOnScroll>
+            <div className="max-w-md mx-auto">
             <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
               <div className="bg-blue-800 p-8 text-center">
                 <p className="text-blue-200 font-medium text-sm uppercase tracking-wider mb-2">ReviewInzight</p>
@@ -418,13 +518,15 @@ export default function Home() {
                 <p className="text-xs text-slate-500 text-center mt-3">No charge for 7 days. Then $39.99/month.</p>
               </div>
             </div>
-          </div>
+            </div>
+          </AnimateOnScroll>
         </div>
       </section>
 
       {/* CTA */}
       <section className="py-20 px-6">
-        <div className="max-w-3xl mx-auto bg-blue-800 rounded-2xl p-12 md:p-14 text-center">
+        <AnimateOnScroll>
+          <div className="max-w-3xl mx-auto bg-blue-800 rounded-2xl p-12 md:p-14 text-center">
           <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mx-auto mb-5">
             <Shield size={24} className="text-blue-200" />
           </div>
@@ -438,7 +540,8 @@ export default function Home() {
             Start Free Trial
             <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
           </Link>
-        </div>
+          </div>
+        </AnimateOnScroll>
       </section>
 
       {/* Footer */}

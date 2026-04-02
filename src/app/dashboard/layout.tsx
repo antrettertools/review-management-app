@@ -59,10 +59,10 @@ export default function DashboardLayout({
         <div className="p-4 w-56 h-full flex flex-col">
           {/* Logo */}
           <div className="mb-6 px-1">
-            <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <LogoIcon size={28} />
               <h1 className="text-base font-bold text-slate-900 leading-none">ReviewInzight</h1>
-            </div>
+            </Link>
           </div>
 
           {/* Navigation */}
