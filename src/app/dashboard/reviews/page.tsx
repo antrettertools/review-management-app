@@ -11,6 +11,7 @@ export default function ReviewsPage() {
   const [reviews, setReviews] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
+  const [platformFilter, setPlatformFilter] = useState<'all' | 'google' | 'facebook'>('all')
   const [selectedReview, setSelectedReview] = useState<any>(null)
   const [showModal, setShowModal] = useState(false)
 
@@ -18,7 +19,7 @@ export default function ReviewsPage() {
     if ((session?.user as any)?.id) {
       fetchReviews()
     }
-  }, [session, filter])
+  }, [session, filter, platformFilter])
 
   const fetchReviews = async () => {
     setLoading(true)
@@ -42,6 +43,10 @@ export default function ReviewsPage() {
           query = query.eq('is_responded', false)
         } else if (filter === 'urgent') {
           query = query.eq('urgency_level', 'critical')
+        }
+
+        if (platformFilter !== 'all') {
+          query = query.eq('platform', platformFilter)
         }
 
         const { data } = await query.order('created_at', { ascending: false })
@@ -114,6 +119,30 @@ export default function ReviewsPage() {
             {reviews.length} review{reviews.length !== 1 ? 's' : ''}
           </div>
         )}
+      </div>
+
+      {/* Platform Filter */}
+      <div className="mb-4">
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Platform</p>
+        <div className="bg-white rounded-xl border border-slate-200 p-1.5 inline-flex gap-1 animate-fade-in-up">
+          {[
+            { key: 'all', label: 'All Platforms' },
+            { key: 'google', label: 'Google' },
+            { key: 'facebook', label: 'Facebook' },
+          ].map((p) => (
+            <button
+              key={p.key}
+              onClick={() => setPlatformFilter(p.key as any)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                platformFilter === p.key
+                  ? 'bg-blue-800 text-white'
+                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Filters */}

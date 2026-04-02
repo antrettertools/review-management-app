@@ -53,9 +53,12 @@ export default function SettingsPage() {
 
   const [googleConnecting, setGoogleConnecting] = useState(false)
   const [showGoogleConnectSuccess, setShowGoogleConnectSuccess] = useState(false)
+  const [facebookConnecting, setFacebookConnecting] = useState(false)
+  const [showFacebookConnectSuccess, setShowFacebookConnectSuccess] = useState(false)
   const [showHelpGuide, setShowHelpGuide] = useState(false)
 
   const isGoogleConnected = businesses.some(b => b.platform_connections?.google?.accessToken)
+  const isFacebookConnected = businesses.some(b => b.platform_connections?.facebook?.pageAccessToken)
 
   const isTrialing = user?.subscription_plan === 'trialing'
   const trialDaysLeft = user?.trial_ends_at
@@ -75,8 +78,14 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const googleConnected = searchParams.get('google')
+    const facebookConnected = searchParams.get('facebook')
     if (googleConnected === 'connected') {
       setShowGoogleConnectSuccess(true)
+      loadBusinesses()
+      window.history.replaceState({}, '', '/dashboard/settings')
+    }
+    if (facebookConnected === 'connected') {
+      setShowFacebookConnectSuccess(true)
       loadBusinesses()
       window.history.replaceState({}, '', '/dashboard/settings')
     }
@@ -180,6 +189,35 @@ export default function SettingsPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
       setGoogleConnecting(false)
+    }
+  }
+
+  const handleConnectFacebook = async () => {
+    if (!user) return
+    setFacebookConnecting(true)
+    setError('')
+    try {
+      let businessId = businesses[0]?.id
+      if (!businessId) {
+        const { data: newBiz, error: bizError } = await supabase
+          .from('businesses')
+          .insert([{ user_id: user.id, name: 'My Business', platform_connections: {} }])
+          .select().single()
+        if (bizError || !newBiz) { setError('Failed to set up Facebook connection'); setFacebookConnecting(false); return }
+        businessId = newBiz.id
+        await loadBusinesses()
+      }
+      const response = await fetch('/api/integrations/facebook/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ businessId, userId: user.id }),
+      })
+      if (!response.ok) throw new Error('Failed to generate auth URL')
+      const data = await response.json()
+      if (data.url) window.location.href = data.url
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+      setFacebookConnecting(false)
     }
   }
 
@@ -452,6 +490,37 @@ export default function SettingsPage() {
             )}
           </div>
 
+          {/* Facebook Connection */}
+          <div className="mb-5 p-4 bg-blue-50 border border-blue-100 rounded-lg">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-2.5">
+                <Link2 size={16} className="text-blue-700 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h3 className="text-sm font-semibold text-blue-900 mb-0.5">Facebook Business Connection</h3>
+                  <p className="text-xs text-blue-600/70">
+                    {isFacebookConnected ? 'Connected. Reviews sync automatically.' : 'Connect to sync and manage reviews.'}
+                  </p>
+                </div>
+              </div>
+              {isFacebookConnected && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 border border-emerald-200 rounded text-[11px] font-medium text-emerald-700 flex-shrink-0">
+                  <CheckCircle size={11} />
+                  Connected
+                </span>
+              )}
+            </div>
+
+            {!isFacebookConnected && (
+              <button
+                onClick={handleConnectFacebook}
+                disabled={facebookConnecting}
+                className="mt-3 px-4 py-2 bg-blue-800 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors text-xs"
+              >
+                {facebookConnecting ? 'Connecting...' : 'Connect Facebook Account'}
+              </button>
+            )}
+          </div>
+
           {/* Add Business Form */}
           {showAddBusiness && (
             <div className="mb-5 p-4 bg-slate-50 border border-slate-200 rounded-lg animate-slide-down">
@@ -603,6 +672,27 @@ export default function SettingsPage() {
                 Your Google Business account has been connected. Reviews will sync automatically.
               </p>
               <button onClick={() => setShowGoogleConnectSuccess(false)}
+                className="w-full px-4 py-2.5 bg-blue-800 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm">
+                Got it!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Facebook Connection Success Modal */}
+      {showFacebookConnectSuccess && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full animate-scale-in border border-slate-200">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-3">
+                <CheckCircle size={24} className="text-emerald-600" />
+              </div>
+              <h2 className="text-base font-semibold text-slate-900 mb-1">Facebook Reviews Connected!</h2>
+              <p className="text-sm text-slate-500 mb-5">
+                Your Facebook Business account has been connected. Reviews will sync automatically.
+              </p>
+              <button onClick={() => setShowFacebookConnectSuccess(false)}
                 className="w-full px-4 py-2.5 bg-blue-800 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm">
                 Got it!
               </button>

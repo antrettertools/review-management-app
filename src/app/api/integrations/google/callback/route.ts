@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { getGoogleAccessToken } from '@/lib/api-clients/google-reviews'
+import { mergePlatformConnection } from '@/lib/platform-connections'
 
 export async function GET(request: NextRequest) {
   try {
@@ -34,23 +35,16 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Save token to business.platform_connections
-    const { error } = await supabase
-      .from('businesses')
-      .update({
-        platform_connections: {
-          google: {
-            accessToken: tokenResult.accessToken,
-            refreshToken: tokenResult.refreshToken,
-            connectedAt: new Date().toISOString(),
-          },
-        },
-      })
-      .eq('id', businessId)
+    // Save token to business.platform_connections (merges with existing platforms)
+    const { success, error } = await mergePlatformConnection(businessId, 'google', {
+      accessToken: tokenResult.accessToken,
+      refreshToken: tokenResult.refreshToken,
+      connectedAt: new Date().toISOString(),
+    })
 
-    if (error) {
+    if (!success) {
       return NextResponse.json(
-        { error: 'Failed to save connection' },
+        { error: error || 'Failed to save connection' },
         { status: 500 }
       )
     }
