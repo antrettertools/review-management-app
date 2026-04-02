@@ -128,7 +128,7 @@ export default function Home() {
               href="/auth/signup"
               className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-blue-800 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
             >
-              Start 7-Day Free Trial
+              Start 14-Day Free Trial
               <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
