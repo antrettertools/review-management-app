@@ -86,7 +86,7 @@ export default function SignupPage() {
         <div className="w-full max-w-md">
           <div className="text-center mb-7">
             <h1 className="text-2xl font-bold text-slate-900 mb-1">Create Your Account</h1>
-            <p className="text-sm text-slate-500">Start your 7-day free trial</p>
+            <p className="text-sm text-slate-500">Start your 14-day free trial</p>
           </div>
 
           <div className="bg-white rounded-lg border border-slate-200 p-7">
@@ -159,7 +159,7 @@ export default function SignupPage() {
 
           <div className="mt-3 flex items-center justify-center gap-1.5 text-sm text-slate-400">
             <Shield size={13} />
-            <span>7-day free trial. Credit card required. Then $39.99/mo.</span>
+            <span>14-day free trial. Credit card required. Then $39.99/mo.</span>
           </div>
         </div>
       </div>

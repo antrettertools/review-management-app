@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
         .eq('id', userId)
     }
 
-    // Only new signups get the 7-day free trial
+    // Only new signups get the 14-day free trial
     // Reactivated accounts (previously cancelled) pay immediately
     const shouldTrial = isNewSignup === true && user.subscription_plan !== 'cancelled'
 
@@ -62,10 +62,10 @@ export async function POST(request: NextRequest) {
       },
     }
 
-    // Add 7-day trial for new signups only
+    // Add 14-day trial for new signups only
     if (shouldTrial) {
       sessionConfig.subscription_data = {
-        trial_period_days: 7,
+        trial_period_days: 14,
       }
     }
 

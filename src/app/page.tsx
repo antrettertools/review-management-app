@@ -138,7 +138,7 @@ export default function Home() {
               Learn More
             </Link>
           </div>
-          <p className="text-sm text-slate-400 mt-4">No charge for 7 days. Then $39.99/month. Cancel anytime.</p>
+          <p className="text-sm text-slate-400 mt-4">No charge for 14 days. Then $39.99/month. Cancel anytime.</p>
           </AnimateOnScroll>
         </div>
       </section>
@@ -433,7 +433,7 @@ export default function Home() {
             {[
               {
                 q: 'How does the free trial work?',
-                a: 'The free trial gives you full access to ReviewInzight for 7 days. We require a credit card to start the trial, but you won\'t be charged during this period. You can explore all the features and decide if ReviewInzight is right for your business. You can cancel anytime.',
+                a: 'The free trial gives you full access to ReviewInzight for 14 days. We require a credit card to start the trial, but you won\'t be charged during this period. You can explore all the features and decide if ReviewInzight is right for your business. You can cancel anytime.',
               },
               {
                 q: 'What review platforms does ReviewInzight support?',
@@ -482,7 +482,7 @@ export default function Home() {
             <div className="text-center mb-10">
               <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">Pricing</p>
               <h2 className="text-3xl font-bold text-slate-900 mb-3">One Simple Plan</h2>
-              <p className="text-slate-500 max-w-lg mx-auto">ReviewInzight offers straightforward pricing with no hidden fees. Start with a 7-day free trial to see if it works for your business.</p>
+              <p className="text-slate-500 max-w-lg mx-auto">ReviewInzight offers straightforward pricing with no hidden fees. Start with a 14-day free trial to see if it works for your business.</p>
             </div>
           </AnimateOnScroll>
 
@@ -495,7 +495,7 @@ export default function Home() {
                   <span className="text-4xl font-bold text-white">$39.99</span>
                   <span className="text-blue-200">/month</span>
                 </div>
-                <p className="text-blue-200/80 text-sm mt-3">Includes 7-day free trial</p>
+                <p className="text-blue-200/80 text-sm mt-3">Includes 14-day free trial</p>
               </div>
 
               <div className="p-7">
@@ -532,7 +532,7 @@ export default function Home() {
           </div>
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Ready to simplify your review management?</h2>
           <p className="text-blue-200 mb-4 max-w-lg mx-auto">ReviewInzight makes it easier to stay on top of customer feedback and manage your online reputation from one dashboard.</p>
-          <p className="text-blue-300/80 text-sm mb-8 max-w-md mx-auto">Try it free for 7 days to see how ReviewInzight can help you manage your reviews more effectively.</p>
+          <p className="text-blue-300/80 text-sm mb-8 max-w-md mx-auto">Try it free for 14 days to see how ReviewInzight can help you manage your reviews more effectively.</p>
           <Link
             href="/auth/signup"
             className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-white text-blue-800 font-bold rounded-lg hover:bg-blue-50 transition-colors"

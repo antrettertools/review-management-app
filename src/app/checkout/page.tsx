@@ -89,7 +89,7 @@ export default function CheckoutPage() {
         <div className="w-full max-w-md">
           <div className="text-center mb-7">
             <h1 className="text-2xl font-bold text-slate-900 mb-1">Start Your Free Trial</h1>
-            <p className="text-sm text-slate-500">7 days free, then $39.99/month</p>
+            <p className="text-sm text-slate-500">14 days free, then $39.99/month</p>
           </div>
 
           <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
@@ -99,7 +99,7 @@ export default function CheckoutPage() {
                 <span className="text-3xl font-bold text-white">$39.99</span>
                 <span className="text-blue-200">/month</span>
               </div>
-              <p className="text-blue-200/80 text-sm mt-1">after 7-day free trial</p>
+              <p className="text-blue-200/80 text-sm mt-1">after 14-day free trial</p>
             </div>
 
             <div className="p-6">
@@ -126,7 +126,7 @@ export default function CheckoutPage() {
 
               <div className="bg-blue-50 border border-blue-100 rounded-lg p-3.5 mb-5">
                 <p className="text-sm text-blue-800 font-medium">Your card will not be charged today.</p>
-                <p className="text-xs text-blue-600 mt-0.5">Your 7-day free trial starts after entering payment details. Cancel anytime during the trial.</p>
+                <p className="text-xs text-blue-600 mt-0.5">Your 14-day free trial starts after entering payment details. Cancel anytime during the trial.</p>
               </div>
 
               <button
