@@ -55,20 +55,10 @@ export default function SettingsPage() {
   const [showGoogleConnectSuccess, setShowGoogleConnectSuccess] = useState(false)
   const [facebookConnecting, setFacebookConnecting] = useState(false)
   const [showFacebookConnectSuccess, setShowFacebookConnectSuccess] = useState(false)
-  const [tripadvisorConnecting, setTripadvisorConnecting] = useState(false)
-  const [tripadvisorInput, setTripadvisorInput] = useState('')
-  const [showTripadvisorInput, setShowTripadvisorInput] = useState(false)
-  const [showTripadvisorSuccess, setShowTripadvisorSuccess] = useState(false)
-  const [trustpilotConnecting, setTrustpilotConnecting] = useState(false)
-  const [trustpilotInput, setTrustpilotInput] = useState('')
-  const [showTrustpilotInput, setShowTrustpilotInput] = useState(false)
-  const [showTrustpilotSuccess, setShowTrustpilotSuccess] = useState(false)
   const [showHelpGuide, setShowHelpGuide] = useState(false)
 
   const isGoogleConnected = businesses.some(b => b.platform_connections?.google?.accessToken)
   const isFacebookConnected = businesses.some(b => b.platform_connections?.facebook?.pageAccessToken)
-  const isTripAdvisorConnected = businesses.some(b => b.platform_connections?.tripadvisor?.locationId)
-  const isTrustpilotConnected = businesses.some(b => b.platform_connections?.trustpilot?.businessUnitId)
 
   const isTrialing = user?.subscription_plan === 'trialing'
   const trialDaysLeft = user?.trial_ends_at
@@ -101,81 +91,6 @@ export default function SettingsPage() {
     }
   }, [searchParams])
 
-  const handleConnectTripAdvisor = async () => {
-    if (!user || !tripadvisorInput.trim()) {
-      setError('Please enter a TripAdvisor Location ID')
-      return
-    }
-    setTripadvisorConnecting(true)
-    setError('')
-    try {
-      let businessId = businesses[0]?.id
-      if (!businessId) {
-        const { data: newBiz, error: bizError } = await supabase
-          .from('businesses')
-          .insert([{ user_id: user.id, name: 'My Business', platform_connections: {} }])
-          .select().single()
-        if (bizError || !newBiz) { setError('Failed to set up TripAdvisor connection'); setTripadvisorConnecting(false); return }
-        businessId = newBiz.id
-        await loadBusinesses()
-      }
-      const response = await fetch('/api/integrations/tripadvisor/connect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ businessId, userId: user.id, locationId: tripadvisorInput.trim() }),
-      })
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to connect')
-      }
-      setShowTripadvisorSuccess(true)
-      setTripadvisorInput('')
-      setShowTripadvisorInput(false)
-      await loadBusinesses()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-    } finally {
-      setTripadvisorConnecting(false)
-    }
-  }
-
-  const handleConnectTrustpilot = async () => {
-    if (!user || !trustpilotInput.trim()) {
-      setError('Please enter your business domain')
-      return
-    }
-    setTrustpilotConnecting(true)
-    setError('')
-    try {
-      let businessId = businesses[0]?.id
-      if (!businessId) {
-        const { data: newBiz, error: bizError } = await supabase
-          .from('businesses')
-          .insert([{ user_id: user.id, name: 'My Business', platform_connections: {} }])
-          .select().single()
-        if (bizError || !newBiz) { setError('Failed to set up Trustpilot connection'); setTrustpilotConnecting(false); return }
-        businessId = newBiz.id
-        await loadBusinesses()
-      }
-      const response = await fetch('/api/integrations/trustpilot/connect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ businessId, userId: user.id, domain: trustpilotInput.trim() }),
-      })
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to connect')
-      }
-      setShowTrustpilotSuccess(true)
-      setTrustpilotInput('')
-      setShowTrustpilotInput(false)
-      await loadBusinesses()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-    } finally {
-      setTrustpilotConnecting(false)
-    }
-  }
 
   const loadUser = async () => {
     if (!session?.user) return
@@ -607,125 +522,6 @@ export default function SettingsPage() {
             )}
           </div>
 
-          {/* TripAdvisor Connection */}
-          <div className="mb-5 p-4 bg-blue-50 border border-blue-100 rounded-lg">
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-2.5">
-                <Link2 size={16} className="text-blue-700 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h3 className="text-sm font-semibold text-blue-900 mb-0.5">TripAdvisor Connection</h3>
-                  <p className="text-xs text-blue-600/70">
-                    {isTripAdvisorConnected ? 'Connected. Reviews sync automatically.' : 'Connect to sync and manage reviews.'}
-                  </p>
-                </div>
-              </div>
-              {isTripAdvisorConnected && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 border border-emerald-200 rounded text-[11px] font-medium text-emerald-700 flex-shrink-0">
-                  <CheckCircle size={11} />
-                  Connected
-                </span>
-              )}
-            </div>
-
-            {!isTripAdvisorConnected && (
-              <>
-                {!showTripadvisorInput ? (
-                  <button
-                    onClick={() => setShowTripadvisorInput(true)}
-                    className="mt-3 px-4 py-2 bg-blue-800 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors text-xs"
-                  >
-                    Connect TripAdvisor
-                  </button>
-                ) : (
-                  <div className="mt-3 space-y-2">
-                    <input
-                      type="text"
-                      value={tripadvisorInput}
-                      onChange={(e) => setTripadvisorInput(e.target.value)}
-                      placeholder="e.g., 12345678"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-800 text-sm"
-                    />
-                    <p className="text-xs text-slate-400">Find your Location ID in your TripAdvisor URL (d{'{locationId}'} or just the number)</p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleConnectTripAdvisor}
-                        disabled={tripadvisorConnecting || !tripadvisorInput.trim()}
-                        className="flex-1 px-3 py-2 bg-blue-800 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors text-xs"
-                      >
-                        {tripadvisorConnecting ? 'Connecting...' : 'Verify & Connect'}
-                      </button>
-                      <button
-                        onClick={() => { setShowTripadvisorInput(false); setTripadvisorInput('') }}
-                        className="px-3 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors text-xs"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* Trustpilot Connection */}
-          <div className="mb-5 p-4 bg-blue-50 border border-blue-100 rounded-lg">
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-2.5">
-                <Link2 size={16} className="text-blue-700 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h3 className="text-sm font-semibold text-blue-900 mb-0.5">Trustpilot Connection</h3>
-                  <p className="text-xs text-blue-600/70">
-                    {isTrustpilotConnected ? 'Connected. Reviews sync automatically.' : 'Connect to sync and manage reviews.'}
-                  </p>
-                </div>
-              </div>
-              {isTrustpilotConnected && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 border border-emerald-200 rounded text-[11px] font-medium text-emerald-700 flex-shrink-0">
-                  <CheckCircle size={11} />
-                  Connected
-                </span>
-              )}
-            </div>
-
-            {!isTrustpilotConnected && (
-              <>
-                {!showTrustpilotInput ? (
-                  <button
-                    onClick={() => setShowTrustpilotInput(true)}
-                    className="mt-3 px-4 py-2 bg-blue-800 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors text-xs"
-                  >
-                    Connect Trustpilot
-                  </button>
-                ) : (
-                  <div className="mt-3 space-y-2">
-                    <input
-                      type="text"
-                      value={trustpilotInput}
-                      onChange={(e) => setTrustpilotInput(e.target.value)}
-                      placeholder="e.g., yourbusiness.com"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-800 text-sm"
-                    />
-                    <p className="text-xs text-slate-400">Enter your business domain (e.g., yourbusiness.com or yourcompany.co.uk)</p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleConnectTrustpilot}
-                        disabled={trustpilotConnecting || !trustpilotInput.trim()}
-                        className="flex-1 px-3 py-2 bg-blue-800 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors text-xs"
-                      >
-                        {trustpilotConnecting ? 'Connecting...' : 'Verify & Connect'}
-                      </button>
-                      <button
-                        onClick={() => { setShowTrustpilotInput(false); setTrustpilotInput('') }}
-                        className="px-3 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors text-xs"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
 
           {/* Add Business Form */}
           {showAddBusiness && (
@@ -899,46 +695,6 @@ export default function SettingsPage() {
                 Your Facebook Business account has been connected. Reviews will sync automatically.
               </p>
               <button onClick={() => setShowFacebookConnectSuccess(false)}
-                className="w-full px-4 py-2.5 bg-blue-800 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm">
-                Got it!
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showTripadvisorSuccess && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full animate-scale-in border border-slate-200">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-3">
-                <CheckCircle size={24} className="text-emerald-600" />
-              </div>
-              <h2 className="text-base font-semibold text-slate-900 mb-1">TripAdvisor Connected!</h2>
-              <p className="text-sm text-slate-500 mb-5">
-                Your TripAdvisor location has been connected. Reviews will sync automatically.
-              </p>
-              <button onClick={() => setShowTripadvisorSuccess(false)}
-                className="w-full px-4 py-2.5 bg-blue-800 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm">
-                Got it!
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showTrustpilotSuccess && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full animate-scale-in border border-slate-200">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-3">
-                <CheckCircle size={24} className="text-emerald-600" />
-              </div>
-              <h2 className="text-base font-semibold text-slate-900 mb-1">Trustpilot Connected!</h2>
-              <p className="text-sm text-slate-500 mb-5">
-                Your Trustpilot business has been connected. Reviews will sync automatically.
-              </p>
-              <button onClick={() => setShowTrustpilotSuccess(false)}
                 className="w-full px-4 py-2.5 bg-blue-800 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm">
                 Got it!
               </button>
