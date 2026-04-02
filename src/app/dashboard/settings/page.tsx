@@ -65,6 +65,10 @@ export default function SettingsPage() {
     ? Math.max(0, Math.ceil((new Date(user.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : 0
 
+  const isNewAccount = user?.created_at
+    ? (Date.now() - new Date(user.created_at).getTime()) < (2 * 24 * 60 * 60 * 1000)
+    : false
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/login')
@@ -459,6 +463,21 @@ export default function SettingsPage() {
               Add Business
             </button>
           </div>
+
+          {/* New Account Sync Message */}
+          {isNewAccount && (
+            <div className="mb-5 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <Clock size={16} className="text-amber-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h3 className="text-sm font-semibold text-amber-900 mb-0.5">Reviews Syncing</h3>
+                  <p className="text-xs text-amber-700">
+                    Your reviews may take a bit of time to sync when starting out. This typically completes within 24-48 hours of connecting your first account.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Google Connection */}
           <div className="mb-5 p-4 bg-blue-50 border border-blue-100 rounded-lg">
