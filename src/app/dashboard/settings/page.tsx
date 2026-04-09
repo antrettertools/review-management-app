@@ -353,7 +353,7 @@ export default function SettingsPage() {
                 {isEditingName ? (
                   <div className="flex gap-2">
                     <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)}
-                      className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-800 text-sm" />
+                      className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-800 text-sm text-gray-900" />
                     <button onClick={handleUpdateProfile} disabled={saving}
                       className="px-3.5 py-2 bg-blue-800 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors text-xs font-medium">
                       {saving ? 'Saving...' : 'Save'}
@@ -376,7 +376,7 @@ export default function SettingsPage() {
                 {isEditingEmail ? (
                   <div className="flex gap-2">
                     <input type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)}
-                      className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-800 text-sm" />
+                      className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-800 text-sm text-gray-900" />
                     <button onClick={handleUpdateProfile} disabled={saving}
                       className="px-3.5 py-2 bg-blue-800 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors text-xs font-medium">
                       {saving ? 'Saving...' : 'Save'}
@@ -541,6 +541,27 @@ export default function SettingsPage() {
             )}
           </div>
 
+          {/* Yelp Connection */}
+          <div className="mb-5 p-4 bg-blue-50 border border-blue-100 rounded-lg">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-2.5">
+                <Link2 size={16} className="text-blue-700 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h3 className="text-sm font-semibold text-blue-900 mb-0.5">Yelp Business Connection</h3>
+                  <p className="text-xs text-blue-600/70">
+                    Connect your Yelp business profile to sync reviews and ratings.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <button
+              disabled={true}
+              className="mt-3 px-4 py-2 bg-blue-800 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors text-xs"
+            >
+              Connect Yelp Account (Coming Soon)
+            </button>
+          </div>
 
           {/* Add Business Form */}
           {showAddBusiness && (
@@ -551,13 +572,13 @@ export default function SettingsPage() {
                   <label className="block text-xs font-medium text-slate-500 mb-1">Business Name *</label>
                   <input type="text" value={newBusinessName} onChange={(e) => setNewBusinessName(e.target.value)}
                     placeholder="e.g., Main Location"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-800 text-sm" />
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-800 text-sm text-gray-900" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-500 mb-1">Website (Optional)</label>
                   <input type="url" value={newBusinessWebsite} onChange={(e) => setNewBusinessWebsite(e.target.value)}
                     placeholder="https://example.com"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-800 text-sm" />
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-800 text-sm text-gray-900" />
                 </div>
                 <div className="flex gap-2">
                   <button onClick={handleAddBusiness} disabled={savingBusiness || !newBusinessName.trim()}

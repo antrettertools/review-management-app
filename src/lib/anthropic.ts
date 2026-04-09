@@ -4,6 +4,54 @@ const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
+export async function generateReviewInsights(reviews: Array<{
+  content: string
+  rating: number
+  author_name: string
+  platform: string
+}>) {
+  try {
+    const reviewSummary = reviews.slice(0, 50).map((r, i) =>
+      `Review ${i + 1} (${r.rating} stars, ${r.platform}): "${r.content}"`
+    ).join('\n')
+
+    const systemPrompt = `You are a business intelligence analyst specializing in customer review analysis.
+Analyze the provided customer reviews and return a structured JSON response.
+Be concise, specific, and actionable. Base all insights strictly on the review content provided.
+Return ONLY valid JSON, no markdown, no explanation outside the JSON.`
+
+    const userPrompt = `Analyze these ${reviews.length} customer reviews and return a JSON object with exactly this structure:
+{
+  "topLoves": ["string", "string", "string"],
+  "topComplaints": ["string", "string", "string"],
+  "topRequests": ["string", "string", "string"],
+  "sentimentSummary": "string (2-3 sentences describing overall sentiment and customer satisfaction level)",
+  "keyInsights": ["string", "string", "string"]
+}
+
+Reviews to analyze:
+${reviewSummary}`
+
+    const message = await client.messages.create({
+      model: 'claude-opus-4-1-20250805',
+      max_tokens: 800,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
+    })
+
+    const text = message.content[0].type === 'text' ? message.content[0].text : ''
+    const parsed = JSON.parse(text)
+
+    return { success: true, insights: parsed }
+  } catch (error) {
+    console.error('Error generating insights:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
+  }
+}
+
 export async function generateReviewResponse(review: {
   content: string
   rating: number

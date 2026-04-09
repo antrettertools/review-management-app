@@ -82,7 +82,7 @@ export default function LoginPage() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
                 <input
                   type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg focus:border-blue-800 text-sm"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg focus:border-blue-800 text-sm text-gray-900"
                   placeholder="you@example.com" required
                 />
               </div>
@@ -92,7 +92,7 @@ export default function LoginPage() {
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg focus:border-blue-800 text-sm pr-10"
+                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg focus:border-blue-800 text-sm pr-10 text-gray-900"
                     placeholder="Enter your password" required
                   />
                   <button type="button" onClick={() => setShowPassword(!showPassword)}

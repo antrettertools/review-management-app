@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { Star, TrendingUp, MessageSquare, AlertTriangle, ThumbsUp, ThumbsDown, ArrowRight } from 'lucide-react'
+import { Star, TrendingUp, MessageSquare, AlertTriangle, ThumbsUp, ThumbsDown, ArrowRight, Shield, BarChart3, Sparkles } from 'lucide-react'
 
 const SETUP_STEPS = [
   { key: 'add_business', label: 'Add your first business', desc: 'Go to Settings and add a business', href: '/dashboard/settings' },
@@ -27,6 +27,16 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [completedSteps, setCompletedSteps] = useState<string[]>([])
   const [setupDismissed, setSetupDismissed] = useState(false)
+  const [reviews, setReviews] = useState<any[]>([])
+  const [insights, setInsights] = useState<{
+    topLoves: string[]
+    topComplaints: string[]
+    topRequests: string[]
+    sentimentSummary: string
+    keyInsights: string[]
+  } | null>(null)
+  const [insightsLoading, setInsightsLoading] = useState(false)
+  const [insightsError, setInsightsError] = useState('')
 
   useEffect(() => {
     if ((session?.user as any)?.id) {
@@ -127,6 +137,10 @@ export default function DashboardPage() {
             : 0
 
           setStats({ totalReviews, averageRating, positiveReviews, negativeReviews, respondedReviews, urgentReviews })
+          setReviews(reviews)
+          if (reviews.length > 0) {
+            fetchInsights(reviews)
+          }
         }
       }
     } catch (error) {
@@ -136,9 +150,65 @@ export default function DashboardPage() {
     }
   }
 
+  const fetchInsights = async (reviewData: any[]) => {
+    setInsightsLoading(true)
+    setInsightsError('')
+    try {
+      const res = await fetch('/api/insights', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reviews: reviewData.map((r) => ({
+            content: r.content || '',
+            rating: r.rating,
+            author_name: r.author_name || 'Customer',
+            platform: r.platform || 'unknown',
+          })),
+        }),
+      })
+      if (!res.ok) throw new Error('Failed to fetch insights')
+      const data = await res.json()
+      if (data.success) setInsights(data.insights)
+      else setInsightsError('Could not generate insights.')
+    } catch {
+      setInsightsError('Could not generate insights. Please try again later.')
+    } finally {
+      setInsightsLoading(false)
+    }
+  }
+
   const responseRate = stats.totalReviews > 0
     ? Math.round((stats.respondedReviews / stats.totalReviews) * 100)
     : 0
+
+  const computeReputationScore = () => {
+    if (stats.totalReviews === 0) return 0
+    const ratingScore = (stats.averageRating / 5) * 100
+    const respRate = (stats.respondedReviews / stats.totalReviews) * 100
+    const positiveRatio = (stats.positiveReviews / stats.totalReviews) * 100
+    const urgencyScore = ((stats.totalReviews - stats.urgentReviews) / stats.totalReviews) * 100
+    return Math.round(ratingScore * 0.4 + respRate * 0.3 + positiveRatio * 0.2 + urgencyScore * 0.1)
+  }
+
+  const getRatingDistribution = () => {
+    const distribution = [0, 0, 0, 0, 0]
+    reviews.forEach((r) => {
+      if (r.rating >= 1 && r.rating <= 5) distribution[r.rating - 1]++
+    })
+    return distribution
+  }
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return { text: 'text-emerald-600', label: 'Excellent', labelBg: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
+    if (score >= 60) return { text: 'text-blue-600', label: 'Good', labelBg: 'bg-blue-50 text-blue-700 border-blue-200' }
+    if (score >= 40) return { text: 'text-amber-600', label: 'Fair', labelBg: 'bg-amber-50 text-amber-700 border-amber-200' }
+    return { text: 'text-red-600', label: 'Needs Work', labelBg: 'bg-red-50 text-red-700 border-red-200' }
+  }
+
+  const reputationScore = computeReputationScore()
+  const ratingDistribution = getRatingDistribution()
+  const maxDistribution = Math.max(...ratingDistribution, 1)
+  const scoreStyle = getScoreColor(reputationScore)
 
   if (loading) {
     return (
@@ -245,6 +315,212 @@ export default function DashboardPage() {
           <p className="text-xs text-slate-400 mt-1">{stats.urgentReviews > 0 ? 'Needs attention' : 'No urgent reviews'}</p>
         </div>
       </div>
+
+      {/* Analytics Panels — Reputation Score + Rating Distribution */}
+      {stats.totalReviews > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+          {/* Reputation Score */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6 animate-fade-in-up">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-8 h-8 bg-indigo-50 rounded-lg flex items-center justify-center">
+                <Shield size={15} className="text-indigo-700" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">Reputation Score</h2>
+                <p className="text-[11px] text-slate-400">Based on ratings, responses & sentiment</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-6">
+              <div className="relative flex-shrink-0">
+                <svg width="110" height="110" viewBox="0 0 130 130">
+                  <circle cx="65" cy="65" r="56" fill="none" stroke="#f1f5f9" strokeWidth="9" />
+                  <circle
+                    cx="65" cy="65" r="56" fill="none"
+                    stroke={reputationScore >= 80 ? '#10b981' : reputationScore >= 60 ? '#3b82f6' : reputationScore >= 40 ? '#f59e0b' : '#ef4444'}
+                    strokeWidth="9" strokeLinecap="round"
+                    strokeDasharray={`${(reputationScore / 100) * 352} 352`}
+                    transform="rotate(-90 65 65)"
+                    className="transition-all duration-1000"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className={`text-2xl font-bold ${scoreStyle.text}`}>{reputationScore}</span>
+                  <span className="text-[10px] text-slate-400">/ 100</span>
+                </div>
+              </div>
+              <div className="flex-1 space-y-2.5">
+                {[
+                  { label: 'Avg. Rating', value: Math.round((stats.averageRating / 5) * 100), color: 'bg-amber-500' },
+                  { label: 'Response Rate', value: responseRate, color: 'bg-blue-500' },
+                  { label: 'Positive Ratio', value: stats.totalReviews > 0 ? Math.round((stats.positiveReviews / stats.totalReviews) * 100) : 0, color: 'bg-emerald-500' },
+                ].map((m) => (
+                  <div key={m.label}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-slate-500">{m.label}</span>
+                      <span className="font-bold text-slate-700">{m.value}%</span>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-1.5">
+                      <div className={`h-1.5 rounded-full ${m.color} animate-fill-bar`} style={{ width: `${m.value}%` }} />
+                    </div>
+                  </div>
+                ))}
+                <span className={`inline-flex items-center text-xs font-bold px-2 py-0.5 rounded-lg border ${scoreStyle.labelBg}`}>
+                  {scoreStyle.label}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Rating Distribution */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6 animate-fade-in-up">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
+                <BarChart3 size={15} className="text-amber-700" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">Rating Distribution</h2>
+                <p className="text-[11px] text-slate-400">Breakdown by star rating</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {[5, 4, 3, 2, 1].map((starLevel) => {
+                const count = ratingDistribution[starLevel - 1]
+                const pct = stats.totalReviews > 0 ? Math.round((count / stats.totalReviews) * 100) : 0
+                const barColor = starLevel >= 4 ? 'bg-emerald-500' : starLevel === 3 ? 'bg-amber-500' : 'bg-red-500'
+                return (
+                  <div key={starLevel} className="flex items-center gap-3">
+                    <div className="flex items-center gap-1 w-12 flex-shrink-0">
+                      <span className="text-xs font-bold text-slate-600 w-3">{starLevel}</span>
+                      <Star size={11} className="text-amber-400 fill-amber-400" />
+                    </div>
+                    <div className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden">
+                      <div className={`h-2 rounded-full ${barColor} animate-fill-bar`} style={{ width: `${maxDistribution > 0 ? (count / maxDistribution) * 100 : 0}%` }} />
+                    </div>
+                    <div className="w-16 text-right flex-shrink-0">
+                      <span className="text-xs font-bold text-slate-700">{count}</span>
+                      <span className="text-[10px] text-slate-400 ml-1">({pct}%)</span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Insights */}
+      {stats.totalReviews > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6 animate-fade-in-up">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+              <Sparkles size={15} className="text-blue-700" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-slate-900">AI Insights</h2>
+              <p className="text-[11px] text-slate-400">Powered by Claude — analyzing your customer feedback</p>
+            </div>
+          </div>
+
+          {insightsLoading ? (
+            <div className="space-y-4">
+              {/* Skeleton loader */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="h-3 bg-slate-100 rounded animate-pulse w-2/3" />
+                    <div className="h-2.5 bg-slate-100 rounded animate-pulse" />
+                    <div className="h-2.5 bg-slate-100 rounded animate-pulse w-5/6" />
+                    <div className="h-2.5 bg-slate-100 rounded animate-pulse w-4/6" />
+                  </div>
+                ))}
+              </div>
+              <div className="h-3 bg-slate-100 rounded animate-pulse w-full mt-2" />
+              <div className="h-3 bg-slate-100 rounded animate-pulse w-4/5" />
+            </div>
+          ) : insightsError ? (
+            <div className="text-center py-6">
+              <p className="text-sm text-slate-400">{insightsError}</p>
+              <button
+                onClick={() => reviews.length > 0 && fetchInsights(reviews)}
+                className="mt-3 text-xs text-blue-700 hover:text-blue-800 font-medium"
+              >
+                Try again
+              </button>
+            </div>
+          ) : insights ? (
+            <div className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Customers Love */}
+                <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-lg">
+                  <h3 className="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2.5">
+                    Customers Love
+                  </h3>
+                  <ul className="space-y-1.5">
+                    {insights.topLoves.map((item, i) => (
+                      <li key={i} className="text-xs text-emerald-700 flex items-start gap-1.5">
+                        <span className="text-emerald-500 mt-0.5 flex-shrink-0">+</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Top Complaints */}
+                <div className="p-4 bg-red-50 border border-red-100 rounded-lg">
+                  <h3 className="text-xs font-bold text-red-800 uppercase tracking-wider mb-2.5">
+                    Top Complaints
+                  </h3>
+                  <ul className="space-y-1.5">
+                    {insights.topComplaints.map((item, i) => (
+                      <li key={i} className="text-xs text-red-700 flex items-start gap-1.5">
+                        <span className="text-red-400 mt-0.5 flex-shrink-0">-</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Customer Requests */}
+                <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
+                  <h3 className="text-xs font-bold text-blue-800 uppercase tracking-wider mb-2.5">
+                    Customers Want
+                  </h3>
+                  <ul className="space-y-1.5">
+                    {insights.topRequests.map((item, i) => (
+                      <li key={i} className="text-xs text-blue-700 flex items-start gap-1.5">
+                        <span className="text-blue-400 mt-0.5 flex-shrink-0">→</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Sentiment Summary */}
+              <div className="p-4 bg-slate-50 border border-slate-100 rounded-lg">
+                <h3 className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+                  Overall Sentiment
+                </h3>
+                <p className="text-sm text-slate-700 leading-relaxed">{insights.sentimentSummary}</p>
+              </div>
+
+              {/* Key Business Insights */}
+              <div>
+                <h3 className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2.5">
+                  Key Business Insights
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  {insights.keyInsights.map((item, i) => (
+                    <div key={i} className="p-3 bg-white border border-slate-200 rounded-lg">
+                      <p className="text-xs text-slate-600">{item}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      )}
 
       {/* Getting Started Checklist */}
       {!setupDismissed && (
