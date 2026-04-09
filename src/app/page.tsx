@@ -405,8 +405,8 @@ export default function Home() {
           </AnimateOnScroll>
 
           <AnimateOnScroll>
-            <div className="max-w-2xl mx-auto px-4 sm:px-0">
-            <div className="bg-white rounded-2xl border-2 border-blue-800 overflow-hidden shadow-lg relative">
+            <div className="max-w-md mx-auto px-4 sm:px-0">
+            <div className="bg-white rounded-2xl border-2 border-blue-800 overflow-visible shadow-lg relative">
               {/* Most Popular Badge */}
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-800 text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">Most Popular</div>
 
