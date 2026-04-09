@@ -1,5 +1,5 @@
-import { SessionProvider } from 'next-auth/react'
 import './globals.css'
+import Providers from './providers'
 
 export const metadata = {
   title: 'ReviewInzight - Manage Customer Reviews in One Place',
@@ -21,9 +21,9 @@ export default function RootLayout({
         <link rel="alternate icon" href="/favicon.ico" />
       </head>
       <body>
-        <SessionProvider>
+        <Providers>
           {children}
-        </SessionProvider>
+        </Providers>
       </body>
     </html>
   )
