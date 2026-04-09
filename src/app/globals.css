@@ -3,6 +3,11 @@
 :root {
   --background: #ffffff;
   --foreground: #0f172a;
+  --primary: #1e3a8a;
+  --primary-light: #3b82f6;
+  --accent: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
 }
 
 @theme inline {
@@ -17,6 +22,10 @@
     --background: #0a0a0a;
     --foreground: #ededed;
   }
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -109,3 +118,30 @@ input:focus, textarea:focus, select:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
 }
+
+/* ── Shimmer loading animation ── */
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 50%, #f1f5f9 100%);
+  background-size: 200% 100%;
+}
+
+/* ── Gradient text utility ── */
+.bg-gradient-clip {
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── Visual depth utilities ── */
+.surface-1 { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04); }
+.surface-2 { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.02); }
+.surface-3 { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04); }
+
+/* ── Smooth transitions ── */
+.transition-smooth { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }

@@ -4,21 +4,60 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useSession } from 'next-auth/react'
 import ResponseModal from '@/components/reviews/ResponseModal'
-import { Star, MessageSquare, AlertTriangle, CheckCircle, Clock } from 'lucide-react'
+import { Star, MessageSquare, AlertTriangle, CheckCircle, Clock, Search, ArrowUpDown, Check } from 'lucide-react'
 
 export default function ReviewsPage() {
   const { data: session } = useSession()
   const [reviews, setReviews] = useState<any[]>([])
+  const [filteredReviews, setFilteredReviews] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
+  const [sort, setSort] = useState('newest')
+  const [searchQuery, setSearchQuery] = useState('')
   const [selectedReview, setSelectedReview] = useState<any>(null)
   const [showModal, setShowModal] = useState(false)
+  const [selectedReviews, setSelectedReviews] = useState<string[]>([])
 
   useEffect(() => {
     if ((session?.user as any)?.id) {
       fetchReviews()
     }
   }, [session, filter])
+
+  // Apply search and sort to reviews
+  useEffect(() => {
+    let result = [...reviews]
+
+    // Apply filter
+    if (filter === 'responded') {
+      result = result.filter(r => r.is_responded)
+    } else if (filter === 'not-responded') {
+      result = result.filter(r => !r.is_responded)
+    } else if (filter === 'urgent') {
+      result = result.filter(r => r.urgency_level === 'critical')
+    }
+
+    // Apply search
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      result = result.filter(r =>
+        (r.content || '').toLowerCase().includes(query) ||
+        (r.author_name || '').toLowerCase().includes(query)
+      )
+    }
+
+    // Apply sort
+    if (sort === 'oldest') {
+      result.reverse()
+    } else if (sort === 'highest-rated') {
+      result.sort((a, b) => b.rating - a.rating)
+    } else if (sort === 'lowest-rated') {
+      result.sort((a, b) => a.rating - b.rating)
+    }
+    // 'newest' is default (already in created_at DESC order)
+
+    setFilteredReviews(result)
+  }, [reviews, filter, searchQuery, sort])
 
   const fetchReviews = async () => {
     setLoading(true)
@@ -73,6 +112,38 @@ export default function ReviewsPage() {
     }
   }
 
+  const handleBulkMarkUrgent = async () => {
+    if (selectedReviews.length === 0) return
+    try {
+      await supabase
+        .from('reviews')
+        .update({ urgency_level: 'critical' })
+        .in('id', selectedReviews)
+
+      setSelectedReviews([])
+      fetchReviews()
+    } catch (error) {
+      console.error('Error marking urgent:', error)
+      alert('Failed to mark reviews as urgent')
+    }
+  }
+
+  const toggleSelectReview = (reviewId: string) => {
+    setSelectedReviews(prev =>
+      prev.includes(reviewId)
+        ? prev.filter(id => id !== reviewId)
+        : [...prev, reviewId]
+    )
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedReviews.length === filteredReviews.length) {
+      setSelectedReviews([])
+    } else {
+      setSelectedReviews(filteredReviews.map(r => r.id))
+    }
+  }
+
   const renderStars = (rating: number) => (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((star) => (
@@ -116,23 +187,73 @@ export default function ReviewsPage() {
         )}
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-xl border border-slate-200 p-1.5 mb-6 inline-flex gap-1 animate-fade-in-up">
-        {filters.map((f) => (
-          <button
-            key={f.key}
-            onClick={() => setFilter(f.key)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              filter === f.key
-                ? f.key === 'urgent'
-                  ? 'bg-red-600 text-white'
-                  : 'bg-blue-800 text-white'
-                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
-            }`}
+      {/* Filters, Search, and Sort */}
+      <div className="mb-6 space-y-4 animate-fade-in-up">
+        {/* Filter pills */}
+        <div className="bg-white rounded-xl border border-slate-200 p-1.5 inline-flex gap-1">
+          {filters.map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                filter === f.key
+                  ? f.key === 'urgent'
+                    ? 'bg-red-600 text-white'
+                    : 'bg-blue-800 text-white'
+                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Search and Sort */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* Search */}
+          <div className="relative flex-1">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search by author name or content..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent"
+            />
+          </div>
+
+          {/* Sort */}
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent"
           >
-            {f.label}
-          </button>
-        ))}
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="highest-rated">Highest rated</option>
+            <option value="lowest-rated">Lowest rated</option>
+          </select>
+        </div>
+
+        {/* Bulk actions */}
+        {selectedReviews.length > 0 && (
+          <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg animate-fade-in">
+            <Check size={18} className="text-blue-700" />
+            <span className="text-sm font-medium text-blue-900">{selectedReviews.length} selected</span>
+            <button
+              onClick={handleBulkMarkUrgent}
+              className="ml-auto text-sm px-3 py-1.5 bg-blue-700 text-white rounded font-medium hover:bg-blue-800 transition-colors"
+            >
+              Mark as Urgent
+            </button>
+            <button
+              onClick={() => setSelectedReviews([])}
+              className="text-sm px-3 py-1.5 border border-blue-200 text-blue-700 rounded font-medium hover:bg-blue-100 transition-colors"
+            >
+              Clear
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Reviews List */}
@@ -143,51 +264,66 @@ export default function ReviewsPage() {
             <p className="text-slate-400 text-sm">Loading reviews...</p>
           </div>
         </div>
-      ) : reviews.length === 0 ? (
+      ) : filteredReviews.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-lg border border-slate-200">
           <div className="w-14 h-14 bg-slate-100 rounded-lg flex items-center justify-center mx-auto mb-4">
             <MessageSquare size={24} className="text-slate-300" />
           </div>
           <p className="text-slate-900 font-semibold">No reviews found</p>
           <p className="text-sm text-slate-400 mt-1 max-w-xs mx-auto">
-            {filter !== 'all' ? 'Try changing the filter above.' : 'Connect your platforms to start seeing reviews.'}
+            {searchQuery ? 'Try a different search term.' : filter !== 'all' ? 'Try changing the filter above.' : 'Connect your platforms to start seeing reviews.'}
           </p>
         </div>
       ) : (
         <div className="space-y-3">
-          {reviews.map((review, index) => (
+          {/* Select All */}
+          {filteredReviews.length > 0 && (
+            <div className="flex items-center gap-2 px-4 py-2 text-xs text-slate-500">
+              <input
+                type="checkbox"
+                checked={selectedReviews.length === filteredReviews.length && filteredReviews.length > 0}
+                onChange={toggleSelectAll}
+                className="w-4 h-4 rounded border-slate-300 cursor-pointer"
+              />
+              <label className="cursor-pointer">Select all {filteredReviews.length} reviews</label>
+            </div>
+          )}
+
+          {filteredReviews.map((review, index) => (
             <div
               key={review.id}
-              className={`bg-white rounded-xl hover:shadow-md transition-all p-5 border animate-fade-in-up ${
+              className={`bg-white rounded-xl hover:shadow-md transition-all p-5 border-l-4 animate-fade-in-up ${
                 review.urgency_level === 'critical'
-                  ? 'border-orange-200/80 bg-gradient-to-r from-white to-orange-50/30'
-                  : 'border-slate-200'
-              }`}
+                  ? 'border-l-orange-500 border-orange-200 bg-orange-50/40'
+                  : 'border-l-slate-200 border-slate-200'
+              } ${selectedReviews.includes(review.id) ? 'bg-blue-50 border-blue-200 border-l-blue-500' : ''}`}
               style={{ animationDelay: `${Math.min(index * 40, 300)}ms` }}
             >
-              {/* Review header */}
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex items-start gap-3">
-                  {/* Author avatar */}
-                  <div className="w-9 h-9 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center text-slate-500 text-sm font-bold flex-shrink-0">
-                    {review.author_name?.charAt(0)?.toUpperCase() || '?'}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900 text-[15px] leading-tight">
-                      {review.author_name}
-                    </h3>
-                    <div className="flex items-center gap-2.5 mt-1">
-                      {renderStars(review.rating)}
-                      <span className="text-[11px] text-slate-400 font-medium uppercase tracking-wide">{review.platform}</span>
-                      {review.created_at && (
-                        <>
-                          <span className="text-slate-200">|</span>
+              {/* Top row: Checkbox + Header + Badges */}
+              <div className="flex items-start gap-3 mb-3">
+                <input
+                  type="checkbox"
+                  checked={selectedReviews.includes(review.id)}
+                  onChange={() => toggleSelectReview(review.id)}
+                  className="w-4 h-4 mt-1 rounded border-slate-300 cursor-pointer flex-shrink-0"
+                />
+                <div className="flex-1">
+                  <div className="flex items-start gap-2">
+                    <div className="w-9 h-9 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center text-slate-500 text-sm font-bold flex-shrink-0">
+                      {review.author_name?.charAt(0)?.toUpperCase() || '?'}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-slate-900 text-sm">{review.author_name}</h3>
+                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                        {renderStars(review.rating)}
+                        <span className="text-[11px] text-slate-400 font-medium uppercase tracking-wide">{review.platform}</span>
+                        {review.created_at && (
                           <span className="text-[11px] text-slate-400 flex items-center gap-1">
                             <Clock size={10} />
                             {formatDate(review.created_at)}
                           </span>
-                        </>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

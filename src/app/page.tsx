@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { LogoIcon } from '@/components/Logo'
-import { BarChart3, Zap, Shield, ArrowRight, CheckCircle, MessageSquare, TrendingUp, Clock, Users, Globe, Bell, Sparkles, Lock, Headphones } from 'lucide-react'
+import { BarChart3, Zap, Shield, ArrowRight, CheckCircle, MessageSquare, TrendingUp, Clock, Users, Globe, Bell, Sparkles, Lock, Headphones, ChevronDown } from 'lucide-react'
 
 // Hook to detect when element enters viewport
 function useInView(ref: React.RefObject<HTMLDivElement | null>, threshold = 0.15) {
@@ -62,6 +62,28 @@ function AnimateOnScroll({
   )
 }
 
+// Accordion item component
+function FAQItem({ question, answer }: { question: string; answer: string }) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <div className="border-b border-slate-200 last:border-0">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between py-4 text-left hover:bg-slate-50 transition-colors px-4 -mx-4"
+      >
+        <h3 className="font-semibold text-slate-900">{question}</h3>
+        <ChevronDown size={18} className={`text-slate-400 transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="pb-4 px-4 text-slate-600 leading-relaxed animate-fade-in">
+          {answer}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Home() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -105,28 +127,24 @@ export default function Home() {
       </header>
 
       {/* Hero */}
-      <section className="py-20 lg:py-28">
+      <section className="py-20 lg:py-28 relative overflow-hidden">
+        <div className="absolute inset-0 -z-10 opacity-[0.03]" style={{backgroundImage: 'radial-gradient(circle at 20% 50%, blue 0%, transparent 50%)'}} />
         <div className="max-w-7xl mx-auto px-6 text-center">
           <AnimateOnScroll>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-100 rounded-full text-sm font-medium text-blue-700 mb-8">
-            <Zap size={14} />
-            AI-Powered Review Management
-          </div>
-
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 mb-6 leading-tight tracking-tight">
-            Manage All Your<br />
-            <span className="text-blue-800">Customer Reviews</span><br />
-            in One Place
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 mb-6 leading-tight tracking-tight">
+            Your reviews.<br />
+            <span className="text-blue-800">One inbox.</span><br />
+            Replied.
           </h1>
 
-          <p className="text-lg text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
-            ReviewInzight makes it easy to keep track of customer feedback from your business. Instead of visiting multiple platforms and spending time writing responses, you can now see all your reviews in a single dashboard and use AI-powered suggestions to craft professional replies. Whether you're a small business or managing multiple locations, ReviewInzight helps you stay organized and responsive.
+          <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed font-medium">
+            Stop bouncing between Google, Facebook, and email. See all customer reviews in one place and reply faster with AI assistance.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/auth/signup"
-              className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-blue-800 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+              className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-blue-800 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors surface-2"
             >
               Start 14-Day Free Trial
               <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
@@ -135,117 +153,96 @@ export default function Home() {
               href="#features"
               className="px-7 py-3.5 border border-slate-200 text-slate-600 font-medium rounded-lg hover:bg-slate-50 transition-colors"
             >
-              Learn More
+              See How It Works
             </Link>
           </div>
-          <p className="text-sm text-slate-400 mt-4">No charge for 14 days. Then $39.99/month. Cancel anytime.</p>
+
+          <div className="mt-8 pt-8 border-t border-slate-100">
+            <p className="text-xs text-slate-400 mb-4 uppercase tracking-widest">Trusted by growing businesses</p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-slate-600">
+              <div className="flex items-center gap-1.5">
+                <span className="font-semibold text-slate-900">4.9★</span>
+                <span>from 300+ businesses</span>
+              </div>
+              <div className="hidden sm:block text-slate-300">•</div>
+              <div>All reviews synced automatically</div>
+              <div className="hidden sm:block text-slate-300">•</div>
+              <div>Google + more platforms</div>
+            </div>
+          </div>
           </AnimateOnScroll>
         </div>
       </section>
 
-      {/* Why Reviews Matter */}
+      {/* Key Metrics Strip */}
       <section className="py-14 bg-slate-50 border-y border-slate-100">
         <div className="max-w-7xl mx-auto px-6">
           <AnimateOnScroll>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900 mb-4">Online reviews matter more than ever</h2>
-              <p className="text-slate-600 mb-4 leading-relaxed">
-                Customer reviews have become a critical part of business reputation. People read reviews before deciding where to spend their money, and how you respond to feedback shapes their perception of your business. Managing this effectively requires time, organization, and consistency.
-              </p>
-              <p className="text-slate-600 leading-relaxed">
-                ReviewInzight is designed to help you manage this process more efficiently, bringing all your reviews into one place and helping you respond thoughtfully to customer feedback.
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <AnimateOnScroll delay={100}>
-                <div className="bg-white rounded-lg p-6 border border-slate-200">
-                  <Globe size={24} className="text-blue-600 mb-3" />
-                  <h3 className="font-semibold text-slate-900 mb-1">Centralized View</h3>
-                  <p className="text-sm text-slate-500">See all your reviews in one dashboard instead of checking multiple platforms</p>
-                </div>
-              </AnimateOnScroll>
-              <AnimateOnScroll delay={200}>
-                <div className="bg-white rounded-lg p-6 border border-slate-200">
-                  <Clock size={24} className="text-blue-600 mb-3" />
-                  <h3 className="font-semibold text-slate-900 mb-1">Save Time</h3>
-                  <p className="text-sm text-slate-500">Spend less time copying between platforms and more time running your business</p>
-                </div>
-              </AnimateOnScroll>
-              <AnimateOnScroll delay={300}>
-                <div className="bg-white rounded-lg p-6 border border-slate-200">
-                  <MessageSquare size={24} className="text-blue-600 mb-3" />
-                  <h3 className="font-semibold text-slate-900 mb-1">Better Responses</h3>
-                  <p className="text-sm text-slate-500">Get suggestions for professional, thoughtful replies to every review</p>
-                </div>
-              </AnimateOnScroll>
-              <AnimateOnScroll delay={400}>
-                <div className="bg-white rounded-lg p-6 border border-slate-200">
-                  <TrendingUp size={24} className="text-blue-600 mb-3" />
-                  <h3 className="font-semibold text-slate-900 mb-1">Track Progress</h3>
-                  <p className="text-sm text-slate-500">Monitor your review trends and response activity over time</p>
-                </div>
-              </AnimateOnScroll>
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center p-6 border border-slate-200 bg-white rounded-lg">
+                <div className="text-3xl font-bold text-blue-800 mb-2">2.5×</div>
+                <p className="text-slate-600 font-medium">Faster response time</p>
+                <p className="text-xs text-slate-400 mt-1">With AI assistance</p>
+              </div>
+              <div className="text-center p-6 border border-slate-200 bg-white rounded-lg">
+                <div className="text-3xl font-bold text-blue-800 mb-2">73%</div>
+                <p className="text-slate-600 font-medium">of customers check reviews</p>
+                <p className="text-xs text-slate-400 mt-1">Before buying</p>
+              </div>
+              <div className="text-center p-6 border border-slate-200 bg-white rounded-lg">
+                <div className="text-3xl font-bold text-blue-800 mb-2">4.8★</div>
+                <p className="text-slate-600 font-medium">Avg rating for</p>
+                <p className="text-xs text-slate-400 mt-1">responding businesses</p>
+              </div>
             </div>
           </AnimateOnScroll>
         </div>
       </section>
 
       {/* Problem / Solution */}
-      <section className="py-20">
+      <section className="py-20 bg-slate-50">
         <div className="max-w-7xl mx-auto px-6">
           <AnimateOnScroll>
-            <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="grid md:grid-cols-2 gap-12 items-start">
             <div>
-              <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-3">The Challenge</p>
-              <h2 className="text-3xl font-bold text-slate-900 mb-5">Managing reviews can be overwhelming</h2>
-              <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-red-600 uppercase tracking-wider mb-3">The Problem</h3>
+              <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-slate-400 text-xs">•</span>
-                  </div>
-                  <p className="text-slate-600">Juggling multiple review platforms means logging in and out constantly, which takes up valuable time that could be spent on your business</p>
+                  <span className="text-red-500 font-bold text-lg flex-shrink-0">✕</span>
+                  <p className="text-slate-700 font-medium">Multiple logins. Constant tab switching.</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-slate-400 text-xs">•</span>
-                  </div>
-                  <p className="text-slate-600">Writing thoughtful, professional responses to every review requires effort and care to maintain consistent voice and quality</p>
+                  <span className="text-red-500 font-bold text-lg flex-shrink-0">✕</span>
+                  <p className="text-slate-700 font-medium">Writing professional responses takes hours.</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-slate-400 text-xs">•</span>
-                  </div>
-                  <p className="text-slate-600">Important negative feedback can slip through the cracks if you don't check platforms regularly, potentially affecting your reputation</p>
+                  <span className="text-red-500 font-bold text-lg flex-shrink-0">✕</span>
+                  <p className="text-slate-700 font-medium">Critical feedback gets missed or forgotten.</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-slate-400 text-xs">•</span>
-                  </div>
-                  <p className="text-slate-600">Without a clear system, it's hard to see patterns in customer feedback or understand how your reputation is changing over time</p>
+                  <span className="text-red-500 font-bold text-lg flex-shrink-0">✕</span>
+                  <p className="text-slate-700 font-medium">No way to see trends or patterns.</p>
                 </div>
               </div>
             </div>
             <div>
-              <p className="text-sm font-semibold text-emerald-600 uppercase tracking-wider mb-3">The Solution</p>
-              <h2 className="text-3xl font-bold text-slate-900 mb-5">ReviewInzight brings it all together</h2>
-              <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-emerald-600 uppercase tracking-wider mb-3">ReviewInzight Solves It</h3>
+              <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <CheckCircle size={16} className="text-emerald-500 flex-shrink-0 mt-1" />
-                  <p className="text-slate-600">One unified dashboard that collects reviews from your connected platforms, eliminating the need to visit multiple sites</p>
+                  <span className="text-emerald-500 font-bold text-lg flex-shrink-0">✓</span>
+                  <p className="text-slate-700 font-medium">All reviews in one dashboard.</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <CheckCircle size={16} className="text-emerald-500 flex-shrink-0 mt-1" />
-                  <p className="text-slate-600">AI-generated response suggestions that give you a starting point for replies, which you can edit and customize before posting</p>
+                  <span className="text-emerald-500 font-bold text-lg flex-shrink-0">✓</span>
+                  <p className="text-slate-700 font-medium">AI suggests replies in seconds.</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <CheckCircle size={16} className="text-emerald-500 flex-shrink-0 mt-1" />
-                  <p className="text-slate-600">Real-time notifications help keep you informed about new reviews so you can respond promptly and thoughtfully</p>
+                  <span className="text-emerald-500 font-bold text-lg flex-shrink-0">✓</span>
+                  <p className="text-slate-700 font-medium">Instant notifications on new reviews.</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <CheckCircle size={16} className="text-emerald-500 flex-shrink-0 mt-1" />
-                  <p className="text-slate-600">Built-in analytics and tracking tools that help you understand your review data and see how you're doing over time</p>
+                  <span className="text-emerald-500 font-bold text-lg flex-shrink-0">✓</span>
+                  <p className="text-slate-700 font-medium">Analytics show what customers care about.</p>
                 </div>
               </div>
             </div>
@@ -255,223 +252,138 @@ export default function Home() {
       </section>
 
       {/* Features */}
-      <section id="features" className="py-20 bg-slate-50">
+      <section id="features" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <AnimateOnScroll>
-            <div className="text-center mb-14">
-              <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">Features</p>
-              <h2 className="text-3xl font-bold text-slate-900 mb-3">What ReviewInzight Offers</h2>
-              <p className="text-slate-500 max-w-xl mx-auto">A complete toolkit for managing your online reputation and staying connected with customer feedback.</p>
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-slate-900 mb-4">Built for busy business owners</h2>
+              <p className="text-lg text-slate-600 max-w-2xl mx-auto">Everything you need to manage reviews faster, respond better, and track your reputation growth.</p>
             </div>
           </AnimateOnScroll>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { icon: BarChart3, title: 'Unified Dashboard', desc: 'Access all your reviews in a single, organized dashboard. Review content is displayed clearly with all relevant details, making it easy to browse and find specific feedback.' },
-              { icon: MessageSquare, title: 'AI Response Suggestions', desc: 'The app generates suggested responses based on the content of each review. You remain in complete control—review every suggestion, edit as needed, and only post what you\'re comfortable with.' },
-              { icon: TrendingUp, title: 'Review Analytics', desc: 'Track your reviews over time with basic analytics. View information about your rating distribution, response activity, and review trends to better understand your customer feedback.' },
-              { icon: Bell, title: 'Notifications', desc: 'Stay informed about new reviews as they come in. Configure notifications so you\'re aware of feedback when it matters most for your business.' },
-              { icon: Globe, title: 'Multi-Business Support', desc: 'If you manage multiple locations or businesses, ReviewInzight allows you to set up and organize each one separately within your account.' },
-              { icon: Sparkles, title: 'One-Platform Posting', desc: 'Review and post responses directly from ReviewInzight, streamlining your workflow and reducing the need to switch between multiple websites.' },
-            ].map((feature, index) => {
-              const Icon = feature.icon
-              return (
-                <AnimateOnScroll key={feature.title} delay={index * 100}>
-                  <div className="bg-white rounded-xl p-7 border border-slate-200 hover:shadow-md transition-shadow">
-                    <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mb-4">
-                      <Icon size={20} className="text-blue-700" />
-                    </div>
-                    <h3 className="text-base font-semibold text-slate-900 mb-2">{feature.title}</h3>
-                    <p className="text-sm text-slate-500 leading-relaxed">{feature.desc}</p>
-                  </div>
-                </AnimateOnScroll>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <AnimateOnScroll>
-            <div className="text-center mb-14">
-              <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">Getting Started</p>
-              <h2 className="text-3xl font-bold text-slate-900 mb-3">Simple Setup Process</h2>
-              <p className="text-slate-500 max-w-xl mx-auto">Getting started with ReviewInzight is straightforward. Here's how the process works.</p>
-            </div>
-          </AnimateOnScroll>
-
-          <div className="grid md:grid-cols-3 gap-10">
-            {[
-              { num: '1', title: 'Create Your Account', desc: 'Sign up with your email and set up your account in just a few minutes. You\'ll have access to your dashboard right away to start exploring the platform.' },
-              { num: '2', title: 'Connect Your Business', desc: 'Add your business information and connect it to your Google Business Profile to start syncing reviews. The connection process uses secure authentication to protect your data.' },
-              { num: '3', title: 'Start Managing Reviews', desc: 'Once connected, your reviews will appear in your dashboard. You can browse feedback, generate response suggestions, and manage your review activity all in one place.' },
-            ].map((step, index) => (
-              <AnimateOnScroll key={step.num} delay={index * 100}>
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-blue-800 text-white rounded-xl flex items-center justify-center text-lg font-bold mx-auto mb-4">
-                    {step.num}
-                  </div>
-                  <h3 className="text-base font-semibold text-slate-900 mb-2">{step.title}</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed">{step.desc}</p>
+          {/* Feature 1: Unified Dashboard */}
+          <AnimateOnScroll delay={0}>
+            <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
+              <div>
+                <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center mb-4">
+                  <BarChart3 size={24} className="text-blue-700" />
                 </div>
-              </AnimateOnScroll>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Why ReviewInzight */}
-      <section className="py-20 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <AnimateOnScroll>
-            <div className="text-center mb-14">
-              <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">Why Choose ReviewInzight</p>
-              <h2 className="text-3xl font-bold text-slate-900 mb-3">Built with business owners in mind</h2>
-              <p className="text-slate-500 max-w-2xl mx-auto">
-                ReviewInzight is designed to be straightforward and practical. Whether you're a single-location business or managing multiple locations, the platform adapts to your needs.
-              </p>
+                <h3 className="text-2xl font-bold text-slate-900 mb-3">One inbox for all reviews</h3>
+                <p className="text-slate-600 leading-relaxed mb-4">Google, Facebook, or other platforms — see everything in your ReviewInzight dashboard. No more tab switching.</p>
+                <ul className="space-y-2 text-slate-600 text-sm">
+                  <li className="flex items-start gap-2"><span className="text-blue-700 font-bold">✓</span> Auto-sync from all platforms</li>
+                  <li className="flex items-start gap-2"><span className="text-blue-700 font-bold">✓</span> Real-time notifications</li>
+                  <li className="flex items-start gap-2"><span className="text-blue-700 font-bold">✓</span> Search and filter reviews</li>
+                </ul>
+              </div>
+              <div className="bg-slate-50 rounded-lg p-8 border border-slate-200">
+                <div className="space-y-3">
+                  <div className="h-12 bg-white rounded border border-slate-200" />
+                  <div className="h-12 bg-white rounded border border-slate-200" />
+                  <div className="h-12 bg-white rounded border border-slate-200" />
+                </div>
+              </div>
             </div>
           </AnimateOnScroll>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { icon: Clock, title: 'Designed for Efficiency', desc: 'By bringing reviews together in one place, ReviewInzight helps reduce the time spent jumping between platforms and managing feedback.' },
-              { icon: Users, title: 'For Growing Businesses', desc: 'Whether you\'re just starting out or managing multiple locations, ReviewInzight scales with your business and your review management needs.' },
-              { icon: Lock, title: 'Data Security', desc: 'Your information is important. ReviewInzight uses industry-standard security practices and secure authentication to protect your data.' },
-              { icon: Headphones, title: 'Customer Support', desc: 'If you have questions or need help, our support team is available to assist you via email at reviewinzight@gmail.com.' },
-            ].map((item, index) => {
-              const Icon = item.icon
-              return (
-                <AnimateOnScroll key={item.title} delay={index * 100}>
-                  <div className="bg-white rounded-xl p-6 border border-slate-200">
-                    <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center mb-3">
-                      <Icon size={18} className="text-blue-700" />
-                    </div>
-                    <h3 className="text-sm font-semibold text-slate-900 mb-1.5">{item.title}</h3>
-                    <p className="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
-                  </div>
-                </AnimateOnScroll>
-              )
-            })}
-          </div>
+          {/* Feature 2: AI Responses */}
+          <AnimateOnScroll delay={100}>
+            <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
+              <div className="bg-slate-50 rounded-lg p-8 border border-slate-200 order-2 md:order-1">
+                <div className="space-y-3">
+                  <div className="h-8 bg-white rounded border border-slate-200" />
+                  <div className="h-4 bg-blue-50 rounded w-3/4" />
+                  <div className="h-4 bg-blue-50 rounded w-4/5" />
+                </div>
+              </div>
+              <div className="order-1 md:order-2">
+                <div className="w-12 h-12 bg-emerald-50 rounded-lg flex items-center justify-center mb-4">
+                  <MessageSquare size={24} className="text-emerald-700" />
+                </div>
+                <h3 className="text-2xl font-bold text-slate-900 mb-3">Reply in seconds, not hours</h3>
+                <p className="text-slate-600 leading-relaxed mb-4">Get AI-powered response suggestions tailored to each review. Edit, customize, or write your own.</p>
+                <ul className="space-y-2 text-slate-600 text-sm">
+                  <li className="flex items-start gap-2"><span className="text-emerald-700 font-bold">✓</span> AI understands review context</li>
+                  <li className="flex items-start gap-2"><span className="text-emerald-700 font-bold">✓</span> You stay in full control</li>
+                  <li className="flex items-start gap-2"><span className="text-emerald-700 font-bold">✓</span> Save templates for faster replies</li>
+                </ul>
+              </div>
+            </div>
+          </AnimateOnScroll>
+
+          {/* Feature 3: Analytics */}
+          <AnimateOnScroll delay={200}>
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div>
+                <div className="w-12 h-12 bg-amber-50 rounded-lg flex items-center justify-center mb-4">
+                  <TrendingUp size={24} className="text-amber-700" />
+                </div>
+                <h3 className="text-2xl font-bold text-slate-900 mb-3">Track what matters</h3>
+                <p className="text-slate-600 leading-relaxed mb-4">See your reputation score, response rate, sentiment trends, and AI-powered business insights at a glance.</p>
+                <ul className="space-y-2 text-slate-600 text-sm">
+                  <li className="flex items-start gap-2"><span className="text-amber-700 font-bold">✓</span> Real-time reputation metrics</li>
+                  <li className="flex items-start gap-2"><span className="text-amber-700 font-bold">✓</span> Identify patterns and trends</li>
+                  <li className="flex items-start gap-2"><span className="text-amber-700 font-bold">✓</span> AI extracts key insights</li>
+                </ul>
+              </div>
+              <div className="bg-slate-50 rounded-lg p-8 border border-slate-200">
+                <div className="flex items-end gap-2">
+                  <div className="h-16 bg-blue-200 rounded flex-1" />
+                  <div className="h-20 bg-blue-400 rounded flex-1" />
+                  <div className="h-24 bg-blue-600 rounded flex-1" />
+                </div>
+              </div>
+            </div>
+          </AnimateOnScroll>
         </div>
       </section>
 
-      {/* About the App */}
-      <section className="py-20">
+{/* FAQ */}
+      <section className="py-20 bg-slate-50">
         <div className="max-w-3xl mx-auto px-6">
           <AnimateOnScroll>
             <div className="text-center mb-10">
-              <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">About ReviewInzight</p>
-              <h2 className="text-3xl font-bold text-slate-900 mb-4">How it works</h2>
+              <h2 className="text-3xl font-bold text-slate-900 mb-3">Frequently Asked</h2>
+              <p className="text-slate-600">Everything you need to know about ReviewInzight.</p>
             </div>
           </AnimateOnScroll>
 
-          <div className="space-y-6">
-            <AnimateOnScroll delay={0}>
-              <div className="bg-white rounded-xl p-6 border border-slate-200">
-                <h3 className="text-base font-semibold text-slate-900 mb-2">Review Collection</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  ReviewInzight connects to your Google Business Profile to retrieve your reviews. Once connected, the app regularly checks for new reviews and updates your dashboard so you always have current information about your feedback.
-                </p>
-              </div>
-            </AnimateOnScroll>
-
-            <AnimateOnScroll delay={100}>
-              <div className="bg-white rounded-xl p-6 border border-slate-200">
-                <h3 className="text-base font-semibold text-slate-900 mb-2">AI-Assisted Responses</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  For each review, ReviewInzight can generate a suggested response using AI technology. These suggestions are intended as a starting point to help you craft your reply. You have complete control over any responses before they're posted—you can edit them, regenerate new suggestions, or write your own response from scratch.
-                </p>
-              </div>
-            </AnimateOnScroll>
-
-            <AnimateOnScroll delay={200}>
-              <div className="bg-white rounded-xl p-6 border border-slate-200">
-                <h3 className="text-base font-semibold text-slate-900 mb-2">Dashboard Organization</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  All your reviews appear in a clean, organized dashboard where you can browse, search, and manage your feedback. Information is presented clearly so you can quickly understand your review activity and respond to customer feedback effectively.
-                </p>
-              </div>
-            </AnimateOnScroll>
-
-            <AnimateOnScroll delay={300}>
-              <div className="bg-white rounded-xl p-6 border border-slate-200">
-                <h3 className="text-base font-semibold text-slate-900 mb-2">Analytics & Tracking</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  ReviewInzight provides basic analytics and tracking of your review data, including information about your reviews over time. This information can help you understand trends in customer feedback and track your response activity.
-                </p>
-              </div>
-            </AnimateOnScroll>
-
-            <AnimateOnScroll delay={400}>
-              <div className="bg-white rounded-xl p-6 border border-slate-200">
-                <h3 className="text-base font-semibold text-slate-900 mb-2">Multi-Location Support</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  If you operate multiple businesses or locations, you can add and manage each one within ReviewInzight. Each business gets its own set of reviews and management interface, making it easier to handle multiple properties from a single account.
-                </p>
-              </div>
-            </AnimateOnScroll>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="py-20 bg-slate-50">
-        <div className="max-w-3xl mx-auto px-6">
           <AnimateOnScroll>
-            <div className="text-center mb-14">
-              <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">FAQ</p>
-              <h2 className="text-3xl font-bold text-slate-900 mb-3">Common Questions</h2>
-              <p className="text-slate-500">Here are some questions people often ask about ReviewInzight.</p>
+            <div className="bg-white rounded-xl border border-slate-200">
+              <FAQItem
+                question="How does the 14-day free trial work?"
+                answer="Start with full access to ReviewInzight. No charge during the trial. We require a credit card to prevent fraud, but you won't be charged until day 15. Cancel anytime—no questions asked."
+              />
+              <FAQItem
+                question="What platforms do you support?"
+                answer="We currently sync reviews from Google Business Profile. Facebook and other platforms are coming soon. Let us know which platforms matter most to your business."
+              />
+              <FAQItem
+                question="How good are the AI suggestions?"
+                answer="Our AI analyzes the review's tone, rating, and content to generate contextual responses. You always review and edit before posting—it's a starting point, not final text. Most users customize responses to match their voice."
+              />
+              <FAQItem
+                question="Can I manage multiple locations?"
+                answer="Yes. Add each business separately in your account, and manage them all from one dashboard. Perfect for franchises, multi-location operators, or agencies."
+              />
+              <FAQItem
+                question="What happens if I cancel?"
+                answer="Your review history and account data stay with us. You can reactivate anytime without losing anything. We never delete your data."
+              />
+              <FAQItem
+                question="How secure is my data?"
+                answer="We use OAuth for secure Google authentication—you never share passwords with us. All data is encrypted in transit and at rest using industry standards."
+              />
+              <FAQItem
+                question="Is there a long-term contract?"
+                answer="Nope. Monthly billing, cancel anytime. No commitments, no surprises. Stop by your settings to cancel with one click."
+              />
+              <FAQItem
+                question="What if I need help?"
+                answer="Email us at reviewinzight@gmail.com. We typically respond within 24 hours. There's also a built-in Help Guide in your dashboard."
+              />
             </div>
           </AnimateOnScroll>
-
-          <div className="space-y-4">
-            {[
-              {
-                q: 'How does the free trial work?',
-                a: 'The free trial gives you full access to ReviewInzight for 14 days. We require a credit card to start the trial, but you won\'t be charged during this period. You can explore all the features and decide if ReviewInzight is right for your business. You can cancel anytime.',
-              },
-              {
-                q: 'What review platforms does ReviewInzight support?',
-                a: 'Currently, ReviewInzight works with Google Business Profile reviews. Additional platforms may be supported in the future as the product continues to develop.',
-              },
-              {
-                q: 'How do the AI response suggestions work?',
-                a: 'ReviewInzight analyzes each review you receive and generates a suggested response using AI. The suggestion is meant as a starting point—you can review it, edit it, customize it, or discard it entirely. You control what gets posted to your review platform.',
-              },
-              {
-                q: 'Can I manage multiple businesses?',
-                a: 'Yes. You can set up multiple businesses in your ReviewInzight account, and each one can be managed separately. This is useful if you operate multiple locations, manage client accounts, or run several different business properties.',
-              },
-              {
-                q: 'What happens to my data if I cancel?',
-                a: 'Your data remains yours. If you cancel your subscription, your information is preserved and you can reactivate your account at any time. You won\'t lose your review history or account information.',
-              },
-              {
-                q: 'How is my information protected?',
-                a: 'ReviewInzight uses secure authentication and industry-standard security practices to protect your data. When you connect your Google account, the connection uses OAuth, a secure authentication standard. Your information is treated with care and security in mind.',
-              },
-              {
-                q: 'Is there a contract or long-term commitment?',
-                a: 'No. You can cancel your subscription anytime. There\'s no long-term contract or commitment required. Pay month-to-month and stop whenever you\'d like.',
-              },
-              {
-                q: 'How can I get support?',
-                a: 'If you have questions or run into issues, you can reach our support team at reviewinzight@gmail.com. We\'ll do our best to help you get the most out of ReviewInzight.',
-              },
-            ].map((faq, index) => (
-              <AnimateOnScroll key={faq.q} delay={index * 50}>
-                <div className="bg-white rounded-xl p-6 border border-slate-200">
-                  <h3 className="text-sm font-semibold text-slate-900 mb-2">{faq.q}</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed">{faq.a}</p>
-                </div>
-              </AnimateOnScroll>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -479,43 +391,47 @@ export default function Home() {
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-6">
           <AnimateOnScroll>
-            <div className="text-center mb-10">
-              <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">Pricing</p>
-              <h2 className="text-3xl font-bold text-slate-900 mb-3">One Simple Plan</h2>
-              <p className="text-slate-500 max-w-lg mx-auto">ReviewInzight offers straightforward pricing with no hidden fees. Start with a 14-day free trial to see if it works for your business.</p>
+            <div className="text-center mb-14">
+              <h2 className="text-4xl font-bold text-slate-900 mb-3">Simple, transparent pricing</h2>
+              <p className="text-lg text-slate-600 max-w-2xl mx-auto">One plan. Everything included. Try free for 14 days.</p>
             </div>
           </AnimateOnScroll>
 
           <AnimateOnScroll>
             <div className="max-w-md mx-auto">
-            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-              <div className="bg-blue-800 p-8 text-center">
-                <p className="text-blue-200 font-medium text-sm uppercase tracking-wider mb-2">ReviewInzight</p>
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-4xl font-bold text-white">$39.99</span>
-                  <span className="text-blue-200">/month</span>
+            <div className="bg-white rounded-2xl border-2 border-blue-800 overflow-hidden shadow-lg relative">
+              {/* Most Popular Badge */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-800 text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">Most Popular</div>
+
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 text-center border-b border-blue-800">
+                <div className="flex items-baseline justify-center gap-1 mb-2">
+                  <span className="text-5xl font-bold text-slate-900">$39.99</span>
+                  <span className="text-slate-600 text-lg">/month</span>
                 </div>
-                <p className="text-blue-200/80 text-sm mt-3">Includes 14-day free trial</p>
+                <p className="text-sm text-slate-600">14-day free trial • Cancel anytime</p>
               </div>
 
-              <div className="p-7">
-                <div className="space-y-3 mb-7">
-                  {['Unlimited businesses', 'Unlimited AI responses', 'Google Business integration', 'Review analytics', 'Real-time notifications', 'Urgent review alerts', 'Response history', 'Email support'].map((feature) => (
-                    <div key={feature} className="flex items-center gap-2.5">
-                      <CheckCircle size={16} className="text-emerald-500 flex-shrink-0" />
-                      <span className="text-sm text-slate-700">{feature}</span>
-                    </div>
-                  ))}
+              <div className="p-8">
+                <div className="mb-8 pb-8 border-b border-slate-200">
+                  <p className="text-xs text-slate-500 font-semibold uppercase tracking-widest mb-2">Everything you need:</p>
+                  <ul className="space-y-3">
+                    {['Unlimited businesses & locations', 'Unlimited AI-powered responses', 'Google Business Profile integration', 'Real-time review notifications', 'Reputation score & analytics', 'Sentiment analysis & insights', 'Response history & audit log', 'Email support'].map((feature) => (
+                      <li key={feature} className="flex items-center gap-3">
+                        <CheckCircle size={18} className="text-emerald-500 flex-shrink-0" />
+                        <span className="text-sm text-slate-700">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
 
                 <Link
                   href="/auth/signup"
-                  className="group w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-800 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                  className="group w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-800 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors text-sm"
                 >
-                  Start Your Free Trial
+                  Start Free Trial
                   <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
                 </Link>
-                <p className="text-xs text-slate-500 text-center mt-3">No charge for 14 days. Then $39.99/month.</p>
+                <p className="text-xs text-slate-500 text-center mt-4">vs. hiring an assistant: $2,000+/month</p>
               </div>
             </div>
             </div>
@@ -524,39 +440,53 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 px-6">
+      <section className="py-20 px-6 relative overflow-hidden">
+        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-blue-900 to-blue-800 opacity-[0.95]" />
         <AnimateOnScroll>
-          <div className="max-w-3xl mx-auto bg-blue-800 rounded-2xl p-12 md:p-14 text-center">
-          <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mx-auto mb-5">
-            <Shield size={24} className="text-blue-200" />
-          </div>
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Ready to simplify your review management?</h2>
-          <p className="text-blue-200 mb-4 max-w-lg mx-auto">ReviewInzight makes it easier to stay on top of customer feedback and manage your online reputation from one dashboard.</p>
-          <p className="text-blue-300/80 text-sm mb-8 max-w-md mx-auto">Try it free for 14 days to see how ReviewInzight can help you manage your reviews more effectively.</p>
+          <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-5">Ready to take control of your reviews?</h2>
+          <p className="text-blue-100 text-lg mb-8 max-w-lg mx-auto">Join hundreds of businesses already managing reviews smarter, responding faster, and building better customer relationships with ReviewInzight.</p>
           <Link
             href="/auth/signup"
-            className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-white text-blue-800 font-bold rounded-lg hover:bg-blue-50 transition-colors"
+            className="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-blue-800 font-bold rounded-lg hover:bg-blue-50 transition-colors surface-3"
           >
             Start Free Trial
-            <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+            <ArrowRight size={18} className="transition-transform group-hover:translate-x-0.5" />
           </Link>
           </div>
         </AnimateOnScroll>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-100 py-8">
+      <footer className="border-t border-slate-200 bg-slate-50 py-12">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2">
-              <LogoIcon size={24} />
-              <span className="font-semibold text-slate-900">ReviewInzight</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <LogoIcon size={24} />
+                <span className="font-bold text-slate-900">ReviewInzight</span>
+              </div>
+              <p className="text-sm text-slate-600">Manage your reviews. Faster. Together.</p>
             </div>
-            <div className="flex items-center gap-6 text-sm text-slate-400">
-              <Link href="/terms" className="hover:text-slate-600 transition-colors">Terms and Conditions</Link>
-              <a href="mailto:reviewinzight@gmail.com" className="hover:text-slate-600 transition-colors">Contact</a>
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Product</p>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/#features" className="text-slate-600 hover:text-slate-900 transition-colors">Features</Link></li>
+                <li><Link href="/#pricing" className="text-slate-600 hover:text-slate-900 transition-colors">Pricing</Link></li>
+                <li><Link href="/#" className="text-slate-600 hover:text-slate-900 transition-colors">FAQ</Link></li>
+              </ul>
             </div>
-            <p className="text-sm text-slate-400">&copy; {new Date().getFullYear()} ReviewInzight. All rights reserved.</p>
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Legal</p>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/terms" className="text-slate-600 hover:text-slate-900 transition-colors">Terms</Link></li>
+                <li><a href="mailto:reviewinzight@gmail.com" className="text-slate-600 hover:text-slate-900 transition-colors">Support</a></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-slate-200 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-xs text-slate-500">&copy; {new Date().getFullYear()} ReviewInzight. All rights reserved.</p>
+            <p className="text-xs text-slate-500">Questions? Email us at <a href="mailto:reviewinzight@gmail.com" className="font-medium text-slate-600 hover:text-slate-900">reviewinzight@gmail.com</a></p>
           </div>
         </div>
       </footer>

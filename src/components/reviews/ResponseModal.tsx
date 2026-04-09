@@ -310,7 +310,7 @@ export default function ResponseModal({
           {/* Response Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <div className="flex justify-between items-center mb-2">
+              <div className="flex justify-between items-center mb-3">
                 <label className="block text-sm font-semibold text-slate-900">
                   {existingResponses.length > 0 ? 'Write Another Response' : 'Your Response'}
                 </label>
@@ -322,6 +322,28 @@ export default function ResponseModal({
                   <Sparkles size={13} />
                   {showAISuggestion ? 'Hide AI Suggestion' : 'Get AI Suggestion'}
                 </button>
+              </div>
+
+              {/* Quick Templates */}
+              <div className="mb-3">
+                <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Quick Templates:</p>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { label: 'Thank You', text: 'Thank you for taking the time to share your feedback! We truly appreciate your review.' },
+                    { label: 'We\'re Sorry', text: 'We\'re sorry to hear about your experience. We\'d like to make things right. Please reach out to us directly so we can address your concerns.' },
+                    { label: 'Follow Up', text: 'We\'d love to hear more about your experience. Please feel free to contact us with any additional feedback.' },
+                    { label: 'Appreciation', text: 'We\'re so grateful for your kind words and for being a valued customer. Thank you!' },
+                  ].map((template) => (
+                    <button
+                      key={template.label}
+                      type="button"
+                      onClick={() => setResponseContent(template.text)}
+                      className="text-xs px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full border border-blue-200 hover:bg-blue-100 transition-colors font-medium"
+                    >
+                      {template.label}
+                    </button>
+                  ))}
+                </div>
               </div>
               <textarea
                 value={responseContent}

@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useNotifications } from '@/lib/hooks/useNotifications'
-import { Bell, ArrowRight } from 'lucide-react'
+import { Bell, ArrowRight, Check } from 'lucide-react'
+import { formatDistanceToNow } from 'date-fns'
 
 interface NotificationBellProps {
   userId: string | undefined
@@ -13,6 +14,14 @@ export default function NotificationBell({ userId }: NotificationBellProps) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const { notifications, unreadCount, markAsRead } = useNotifications(userId)
+
+  const markAllAsRead = async () => {
+    for (const notification of notifications) {
+      if (!notification.is_read) {
+        markAsRead(notification.id)
+      }
+    }
+  }
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -50,11 +59,22 @@ export default function NotificationBell({ userId }: NotificationBellProps) {
           {/* Header */}
           <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center">
             <h3 className="font-bold text-slate-900 text-sm">Notifications</h3>
-            {unreadCount > 0 && (
-              <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
-                {unreadCount} new
-              </span>
-            )}
+            <div className="flex items-center gap-2">
+              {unreadCount > 0 && (
+                <>
+                  <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
+                    {unreadCount} new
+                  </span>
+                  <button
+                    onClick={markAllAsRead}
+                    className="text-[11px] font-semibold text-blue-700 hover:text-blue-900 transition-colors flex items-center gap-1"
+                  >
+                    <Check size={12} />
+                    Mark all
+                  </button>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Notifications List */}
@@ -85,6 +105,11 @@ export default function NotificationBell({ userId }: NotificationBellProps) {
                       {notification.message && (
                         <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">
                           {notification.message}
+                        </p>
+                      )}
+                      {notification.created_at && (
+                        <p className="text-[11px] text-slate-400 mt-1">
+                          {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
                         </p>
                       )}
                     </div>

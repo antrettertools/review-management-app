@@ -122,6 +122,18 @@ export default function SignupPage() {
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
+                {password && (
+                  <div className="flex gap-1 mt-2">
+                    {[1, 2, 3, 4].map((i) => {
+                      const strength = Math.min(Math.ceil(password.length / 4), 4)
+                      const isFilled = i <= strength
+                      const color = strength === 1 ? 'bg-red-400' : strength === 2 ? 'bg-amber-400' : strength === 3 ? 'bg-blue-400' : 'bg-emerald-500'
+                      return (
+                        <div key={i} className={`h-1 flex-1 rounded-full ${isFilled ? color : 'bg-slate-200'} transition-colors`} />
+                      )
+                    })}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-start gap-2.5 pt-1">
