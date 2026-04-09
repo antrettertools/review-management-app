@@ -11,7 +11,7 @@ const SETUP_STEPS = [
   { key: 'connect_google', label: 'Connect Google Business Profile', desc: 'Link your Google account to sync reviews', href: '/dashboard/settings' },
   { key: 'view_reviews', label: 'View your reviews', desc: 'Check the Reviews tab once synced', href: '/dashboard/reviews' },
   { key: 'respond_review', label: 'Respond to a review with AI', desc: 'Click Reply on any review for AI suggestions', href: '/dashboard/reviews' },
-  { key: 'check_analytics', label: 'Check your analytics', desc: 'See your reputation trends and insights', href: '/dashboard/analytics' },
+  { key: 'check_analytics', label: 'Check your analytics', desc: 'View your reputation score and AI insights', href: '/dashboard' },
 ]
 
 export default function DashboardPage() {

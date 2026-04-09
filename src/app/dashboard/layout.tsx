@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { signOut } from 'next-auth/react'
 import NotificationBell from '@/components/layout/NotificationBell'
 import { LogoIcon } from '@/components/Logo'
-import { LayoutDashboard, MessageSquareText, BarChart3, Bell, Settings, LogOut, Menu, HelpCircle, Mail, X } from 'lucide-react'
+import { LayoutDashboard, MessageSquareText, Bell, Settings, LogOut, Menu, HelpCircle, Mail, X } from 'lucide-react'
 
 export default function DashboardLayout({
   children,
@@ -43,7 +43,6 @@ export default function DashboardLayout({
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/dashboard/reviews', label: 'Reviews', icon: MessageSquareText },
-    { href: '/dashboard/analytics', label: 'Analytics', icon: BarChart3 },
     { href: '/dashboard/notifications', label: 'Notifications', icon: Bell },
     { href: '/dashboard/settings', label: 'Settings', icon: Settings },
   ]
@@ -173,9 +172,9 @@ export default function DashboardLayout({
                 </p>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-slate-900 mb-1">Analytics</h3>
+                <h3 className="text-sm font-semibold text-slate-900 mb-1">Dashboard Analytics</h3>
                 <p className="text-sm text-slate-500 leading-relaxed">
-                  The Analytics page shows your reputation score, rating distribution, response rates, and trends over time.
+                  Your Dashboard shows your reputation score, rating distribution, AI insights, response rates, and trends all in one place.
                 </p>
               </div>
               <div>
