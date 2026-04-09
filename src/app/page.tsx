@@ -70,10 +70,10 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
     <div className="border-b border-slate-200 last:border-0">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between py-4 text-left hover:bg-slate-50 transition-colors px-4 -mx-4"
+        className="w-full flex items-center justify-between py-4 text-left hover:bg-slate-50 transition-colors px-4"
       >
         <h3 className="font-semibold text-slate-900">{question}</h3>
-        <ChevronDown size={18} className={`text-slate-400 transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown size={18} className={`text-slate-400 transition-transform flex-shrink-0 ml-2 ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
         <div className="pb-4 px-4 text-slate-600 leading-relaxed animate-fade-in">
@@ -158,41 +158,48 @@ export default function Home() {
           </div>
 
           <div className="mt-8 pt-8 border-t border-slate-100">
-            <p className="text-xs text-slate-400 mb-4 uppercase tracking-widest">Trusted by growing businesses</p>
+            <p className="text-xs text-slate-400 mb-4 uppercase tracking-widest">How it works</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-slate-600">
-              <div className="flex items-center gap-1.5">
-                <span className="font-semibold text-slate-900">4.9★</span>
-                <span>from 300+ businesses</span>
-              </div>
-              <div className="hidden sm:block text-slate-300">•</div>
               <div>All reviews synced automatically</div>
               <div className="hidden sm:block text-slate-300">•</div>
-              <div>Google + more platforms</div>
+              <div>Google Business Profile + more coming</div>
+              <div className="hidden sm:block text-slate-300">•</div>
+              <div>No manual work needed</div>
             </div>
           </div>
           </AnimateOnScroll>
         </div>
       </section>
 
-      {/* Key Metrics Strip */}
-      <section className="py-14 bg-slate-50 border-y border-slate-100">
+      {/* Key Benefits - Clear Selling Points */}
+      <section className="py-16 bg-white border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-6">
           <AnimateOnScroll>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center p-6 border border-slate-200 bg-white rounded-lg">
-                <div className="text-3xl font-bold text-blue-800 mb-2">2.5×</div>
-                <p className="text-slate-600 font-medium">Faster response time</p>
-                <p className="text-xs text-slate-400 mt-1">With AI assistance</p>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3">Why respond to reviews matters</h2>
+              <p className="text-slate-600 text-lg">Reviews influence 94% of purchasing decisions. ResponseTime drives results.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Bell size={32} className="text-blue-700" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">Build Trust Faster</h3>
+                <p className="text-slate-600">Responding to reviews shows you care. Businesses that reply see 25% higher trust scores from customers.</p>
               </div>
-              <div className="text-center p-6 border border-slate-200 bg-white rounded-lg">
-                <div className="text-3xl font-bold text-blue-800 mb-2">73%</div>
-                <p className="text-slate-600 font-medium">of customers check reviews</p>
-                <p className="text-xs text-slate-400 mt-1">Before buying</p>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <TrendingUp size={32} className="text-emerald-700" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">Stop Losing Customers</h3>
+                <p className="text-slate-600">50% of consumers don't return to businesses with unaddressed negative reviews. Quick responses save relationships.</p>
               </div>
-              <div className="text-center p-6 border border-slate-200 bg-white rounded-lg">
-                <div className="text-3xl font-bold text-blue-800 mb-2">4.8★</div>
-                <p className="text-slate-600 font-medium">Avg rating for</p>
-                <p className="text-xs text-slate-400 mt-1">responding businesses</p>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Clock size={32} className="text-amber-700" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">Stay Competitive</h3>
+                <p className="text-slate-600">Businesses that respond within 24 hours outrank competitors on Google. Speed matters.</p>
               </div>
             </div>
           </AnimateOnScroll>
@@ -398,7 +405,7 @@ export default function Home() {
           </AnimateOnScroll>
 
           <AnimateOnScroll>
-            <div className="max-w-md mx-auto">
+            <div className="max-w-2xl mx-auto px-4 sm:px-0">
             <div className="bg-white rounded-2xl border-2 border-blue-800 overflow-hidden shadow-lg relative">
               {/* Most Popular Badge */}
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-800 text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">Most Popular</div>
