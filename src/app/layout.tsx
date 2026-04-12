@@ -19,6 +19,8 @@ export default function RootLayout({
         <meta name="theme-color" content="#1e3a8a" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="alternate icon" href="/favicon.ico" />
+        {/* 100% privacy-first analytics */}
+        <script async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
       </head>
       <body>
         <Providers>
