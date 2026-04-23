@@ -51,7 +51,7 @@ export default function DashboardLayout({
     <div className="flex h-screen bg-slate-50">
       {/* Sidebar */}
       <div
-        className={`bg-white border-r border-slate-100 overflow-y-auto transition-all duration-200 flex-shrink-0 ${
+        className={`bg-white border-r border-slate-100 overflow-y-auto transition-all duration-200 flex-shrink-0 shadow-sm ${
           sidebarOpen ? 'w-56' : 'w-0'
         }`}
       >
@@ -76,10 +76,10 @@ export default function DashboardLayout({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                     active
                       ? 'bg-blue-50 text-blue-800 border-l-2 border-blue-800 pl-[11px]'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-l-2 border-transparent'
+                      : 'text-slate-600 hover:bg-slate-100 border-l-2 border-transparent'
                   }`}
                 >
                   <Icon size={16} strokeWidth={active ? 2.5 : 2} />
@@ -94,14 +94,14 @@ export default function DashboardLayout({
             {/* Help Guide Box */}
             <button
               onClick={() => setShowHelpGuide(true)}
-              className="w-full flex items-center gap-2.5 px-3 py-2.5 mb-2 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors text-left"
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 mb-2 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors text-left"
             >
-              <div className="w-7 h-7 bg-blue-100 rounded-md flex items-center justify-center flex-shrink-0">
-                <HelpCircle size={14} className="text-blue-700" />
+              <div className="w-7 h-7 bg-slate-200 rounded-md flex items-center justify-center flex-shrink-0">
+                <HelpCircle size={14} className="text-slate-600" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-semibold text-blue-900">Need Help?</p>
-                <p className="text-[10px] text-blue-600/70 truncate">View guide & support</p>
+                <p className="text-xs font-semibold text-slate-700">Need Help?</p>
+                <p className="text-[10px] text-slate-500 truncate">View guide & support</p>
               </div>
             </button>
 
@@ -118,7 +118,7 @@ export default function DashboardLayout({
             </div>
             <button
               onClick={() => signOut({ redirect: true, callbackUrl: '/auth/login' })}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-slate-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
             >
               <LogOut size={14} />
               Sign Out
