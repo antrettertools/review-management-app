@@ -349,7 +349,7 @@ export default function ResponseModal({
                 value={responseContent}
                 onChange={(e) => setResponseContent(e.target.value)}
                 placeholder="Write your response to this review..."
-                className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-900/20 focus:border-blue-900 transition-all min-h-[120px] resize-none text-sm bg-slate-50/50"
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-900/20 focus:border-blue-900 transition-all min-h-[120px] resize-none text-sm bg-slate-50/50 text-slate-900"
                 required
               />
               <div className="flex justify-between items-center mt-1.5">

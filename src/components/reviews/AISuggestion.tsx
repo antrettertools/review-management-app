@@ -113,7 +113,7 @@ export default function AISuggestion({
           <textarea
             value={editedResponse}
             onChange={(e) => setEditedResponse(e.target.value)}
-            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm mb-3 focus:border-blue-800 bg-white resize-none leading-relaxed"
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm mb-3 focus:border-blue-800 bg-white resize-none leading-relaxed text-slate-900"
             rows={5}
           />
           <div className="flex gap-2">
