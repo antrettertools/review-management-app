@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { getGoogleAccessToken } from '@/lib/api-clients/google-reviews'
 import { mergePlatformConnection } from '@/lib/platform-connections'
+import { verifyOAuthState } from '@/lib/oauth-state'
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,9 +17,14 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Decode state to get businessId and userId
-    const decodedState = JSON.parse(Buffer.from(decodeURIComponent(state), 'base64').toString())
-    const { businessId, userId } = decodedState
+    // Verify HMAC-signed state — prevents CSRF on the OAuth callback.
+    const verified = verifyOAuthState<{ businessId: string; userId: string }>(state)
+    if (!verified.ok) {
+      return NextResponse.redirect(
+        `${process.env.NEXTAUTH_URL}/dashboard/settings?google=invalid_state`
+      )
+    }
+    const { businessId, userId } = verified.payload
 
     // Get access token from Google
     const redirectUri = `${process.env.NEXTAUTH_URL}/api/integrations/google/callback`

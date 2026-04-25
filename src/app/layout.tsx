@@ -1,9 +1,85 @@
 import './globals.css'
+import type { Metadata, Viewport } from 'next'
 import Providers from './providers'
 
-export const metadata = {
-  title: 'ReviewInzight - Manage Customer Reviews in One Place',
-  description: 'Centralize reviews from all platforms, get AI-powered response suggestions, and track your reputation in one intuitive dashboard.',
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://reviewinzight.com'
+const OG_IMAGE = `${SITE_URL}/og-image.png`
+
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: 'ReviewInzight — One inbox for all your customer reviews',
+    template: '%s · ReviewInzight',
+  },
+  description:
+    'Centralize Google, Facebook & more in one dashboard. Reply in seconds with AI-drafted responses, track sentiment, and protect your reputation. 14-day free trial.',
+  keywords: [
+    'review management',
+    'review reply automation',
+    'AI review responses',
+    'Google review responder',
+    'reputation management',
+    'customer reviews dashboard',
+    'small business review tool',
+  ],
+  authors: [{ name: 'ReviewInzight' }],
+  applicationName: 'ReviewInzight',
+  generator: 'Next.js',
+  referrer: 'origin-when-cross-origin',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    type: 'website',
+    siteName: 'ReviewInzight',
+    title: 'ReviewInzight — One inbox for all your customer reviews',
+    description:
+      'See every review in one place. Reply in seconds with AI. Track your reputation. 14-day free trial.',
+    url: SITE_URL,
+    images: [
+      {
+        url: OG_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: 'ReviewInzight — Manage all your reviews from one inbox',
+      },
+    ],
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'ReviewInzight — One inbox for all your customer reviews',
+    description:
+      'See every review in one place. Reply in seconds with AI. Track your reputation.',
+    images: [OG_IMAGE],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  alternates: {
+    canonical: SITE_URL,
+  },
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico' },
+    ],
+  },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#1e3a8a',
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function RootLayout({
@@ -14,11 +90,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#1e3a8a" />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="alternate icon" href="/favicon.ico" />
         {/* 100% privacy-first analytics */}
         <script async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
       </head>

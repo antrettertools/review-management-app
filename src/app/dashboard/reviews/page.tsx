@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useSession } from 'next-auth/react'
+import Link from 'next/link'
 import ResponseModal from '@/components/reviews/ResponseModal'
-import { Star, MessageSquare, AlertTriangle, CheckCircle, Clock, Search, ArrowUpDown, Check } from 'lucide-react'
+import { Star, MessageSquare, AlertTriangle, CheckCircle, Clock, Search, ArrowUpDown, Check, Settings as SettingsIcon } from 'lucide-react'
 
 export default function ReviewsPage() {
   const { data: session } = useSession()
@@ -17,6 +18,8 @@ export default function ReviewsPage() {
   const [selectedReview, setSelectedReview] = useState<any>(null)
   const [showModal, setShowModal] = useState(false)
   const [selectedReviews, setSelectedReviews] = useState<string[]>([])
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 25
 
   useEffect(() => {
     if ((session?.user as any)?.id) {
@@ -57,7 +60,17 @@ export default function ReviewsPage() {
     // 'newest' is default (already in created_at DESC order)
 
     setFilteredReviews(result)
+    // Reset to first page whenever filters/search/sort change
+    setPage(1)
   }, [reviews, filter, searchQuery, sort])
+
+  // Compute paginated slice
+  const totalPages = Math.max(1, Math.ceil(filteredReviews.length / PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages)
+  const pagedReviews = filteredReviews.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  )
 
   const fetchReviews = async () => {
     setLoading(true)
@@ -137,10 +150,13 @@ export default function ReviewsPage() {
   }
 
   const toggleSelectAll = () => {
-    if (selectedReviews.length === filteredReviews.length) {
-      setSelectedReviews([])
+    // Toggles selection for the currently visible (paged) reviews only.
+    const pageIds = pagedReviews.map((r) => r.id)
+    const allOnPageSelected = pageIds.every((id) => selectedReviews.includes(id))
+    if (allOnPageSelected) {
+      setSelectedReviews((prev) => prev.filter((id) => !pageIds.includes(id)))
     } else {
-      setSelectedReviews(filteredReviews.map(r => r.id))
+      setSelectedReviews((prev) => Array.from(new Set([...prev, ...pageIds])))
     }
   }
 
@@ -271,25 +287,61 @@ export default function ReviewsPage() {
           </div>
           <p className="text-slate-900 font-semibold">No reviews found</p>
           <p className="text-sm text-slate-400 mt-1 max-w-xs mx-auto">
-            {searchQuery ? 'Try a different search term.' : filter !== 'all' ? 'Try changing the filter above.' : 'Connect your platforms to start seeing reviews.'}
+            {searchQuery
+              ? 'Try a different search term.'
+              : filter !== 'all'
+              ? 'Try changing the filter above.'
+              : reviews.length === 0
+              ? 'Connect Google Business Profile to start syncing reviews automatically. New reviews typically appear within 24 hours.'
+              : 'No reviews match this filter yet.'}
           </p>
+          {!searchQuery && filter === 'all' && reviews.length === 0 && (
+            <Link
+              href="/dashboard/settings"
+              className="inline-flex items-center gap-2 mt-5 px-4 py-2.5 bg-blue-800 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
+            >
+              <SettingsIcon size={14} />
+              Connect Google Business
+            </Link>
+          )}
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="inline-flex items-center gap-2 mt-5 px-4 py-2 border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
+            >
+              Clear search
+            </button>
+          )}
+          {filter !== 'all' && !searchQuery && (
+            <button
+              onClick={() => setFilter('all')}
+              className="inline-flex items-center gap-2 mt-5 px-4 py-2 border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
+            >
+              Show all reviews
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-3">
-          {/* Select All */}
-          {filteredReviews.length > 0 && (
+          {/* Select All on this page */}
+          {pagedReviews.length > 0 && (
             <div className="flex items-center gap-2 px-4 py-2 text-xs text-slate-500">
               <input
                 type="checkbox"
-                checked={selectedReviews.length === filteredReviews.length && filteredReviews.length > 0}
+                checked={
+                  pagedReviews.length > 0 &&
+                  pagedReviews.every((r) => selectedReviews.includes(r.id))
+                }
                 onChange={toggleSelectAll}
                 className="w-4 h-4 rounded border-slate-300 cursor-pointer"
               />
-              <label className="cursor-pointer">Select all {filteredReviews.length} reviews</label>
+              <label className="cursor-pointer">
+                Select all {pagedReviews.length} on this page
+              </label>
             </div>
           )}
 
-          {filteredReviews.map((review, index) => (
+          {pagedReviews.map((review, index) => (
             <div
               key={review.id}
               className={`bg-white rounded-xl hover:shadow-md transition-all p-5 border-l-4 animate-fade-in-up ${
@@ -367,6 +419,39 @@ export default function ReviewsPage() {
               </div>
             </div>
           ))}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-200">
+              <p className="text-xs text-slate-500">
+                Showing <span className="font-semibold text-slate-700">{(currentPage - 1) * PAGE_SIZE + 1}</span>
+                {'–'}
+                <span className="font-semibold text-slate-700">
+                  {Math.min(currentPage * PAGE_SIZE, filteredReviews.length)}
+                </span>{' '}
+                of <span className="font-semibold text-slate-700">{filteredReviews.length}</span>
+              </p>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  Previous
+                </button>
+                <span className="text-xs text-slate-500 px-2">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

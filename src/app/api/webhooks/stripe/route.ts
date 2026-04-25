@@ -65,9 +65,9 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   }
 
   if (isNewSignup) {
-    // Trial user - set trialing status
+    // Trial user - set trialing status (14-day trial as advertised on landing page)
     updateData.subscription_plan = 'trialing'
-    updateData.trial_ends_at = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+    updateData.trial_ends_at = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
   } else {
     // Reactivation - active immediately
     updateData.subscription_plan = planId

@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
-import { generateReviewResponse } from '@/lib/anthropic'
+import { generateReviewResponse, type ResponseTone } from '@/lib/anthropic'
+
+const VALID_TONES: ResponseTone[] = ['professional', 'friendly', 'casual', 'formal']
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { reviewId } = body
+    const { reviewId, tone } = body
 
     if (!reviewId) {
       return NextResponse.json(
@@ -14,10 +16,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Fetch the review
+    const safeTone: ResponseTone =
+      tone && VALID_TONES.includes(tone) ? tone : 'professional'
+
+    // Fetch the review (with business name for personalization)
     const { data: review, error: fetchError } = await supabase
       .from('reviews')
-      .select('*')
+      .select('*, businesses(name)')
       .eq('id', reviewId)
       .single()
 
@@ -28,12 +33,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const businessName = (review as any).businesses?.name as string | undefined
+
     // Generate response using Anthropic
-    const result = await generateReviewResponse({
-      content: review.content,
-      rating: review.rating,
-      author_name: review.author_name,
-    })
+    const result = await generateReviewResponse(
+      {
+        content: review.content,
+        rating: review.rating,
+        author_name: review.author_name,
+      },
+      { tone: safeTone, businessName }
+    )
 
     if (!result.success) {
       return NextResponse.json(

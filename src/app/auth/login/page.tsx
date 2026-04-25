@@ -90,9 +90,9 @@ export default function LoginPage() {
               <div>
                 <div className="flex justify-between items-center mb-1.5">
                   <label className="block text-sm font-medium text-slate-700">Password</label>
-                  <a href="mailto:reviewinzight@gmail.com?subject=Password Reset Request" className="text-xs text-blue-700 hover:text-blue-800 font-medium">
+                  <Link href="/auth/forgot-password" className="text-xs text-blue-700 hover:text-blue-800 font-medium">
                     Forgot password?
-                  </a>
+                  </Link>
                 </div>
                 <div className="relative">
                   <input

@@ -5,9 +5,10 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { signOut } from 'next-auth/react'
+import { supabase } from '@/lib/supabase'
 import NotificationBell from '@/components/layout/NotificationBell'
 import { LogoIcon } from '@/components/Logo'
-import { LayoutDashboard, MessageSquareText, Bell, Settings, LogOut, Menu, HelpCircle, Mail, X } from 'lucide-react'
+import { LayoutDashboard, MessageSquareText, Bell, Settings, LogOut, Menu, HelpCircle, Mail, X, MessageSquare, AlertTriangle } from 'lucide-react'
 
 export default function DashboardLayout({
   children,
@@ -25,6 +26,60 @@ export default function DashboardLayout({
       router.push('/auth/login')
     }
   }, [status, router])
+
+  // Close sidebar on mobile when navigating to a new page
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setSidebarOpen(false)
+    }
+  }, [pathname])
+
+  // Sidebar should default closed on mobile, open on desktop
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setSidebarOpen(window.innerWidth >= 1024)
+    }
+  }, [])
+
+  // Top bar review summary
+  const [summary, setSummary] = useState<{ awaiting: number; urgent: number } | null>(null)
+
+  useEffect(() => {
+    const userId = (session?.user as any)?.id
+    if (!userId) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const { data: businesses } = await supabase
+          .from('businesses')
+          .select('id')
+          .eq('user_id', userId)
+        if (!businesses || businesses.length === 0) {
+          if (!cancelled) setSummary({ awaiting: 0, urgent: 0 })
+          return
+        }
+        const ids = businesses.map((b: any) => b.id)
+        const [{ count: awaiting }, { count: urgent }] = await Promise.all([
+          supabase
+            .from('reviews')
+            .select('id', { count: 'exact', head: true })
+            .in('business_id', ids)
+            .eq('is_responded', false),
+          supabase
+            .from('reviews')
+            .select('id', { count: 'exact', head: true })
+            .in('business_id', ids)
+            .eq('urgency_level', 'critical'),
+        ])
+        if (!cancelled) setSummary({ awaiting: awaiting || 0, urgent: urgent || 0 })
+      } catch {
+        if (!cancelled) setSummary(null)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [session, pathname])
 
   if (status === 'loading') {
     return (
@@ -221,8 +276,32 @@ export default function DashboardLayout({
               <Menu size={18} className="text-slate-500" />
             </button>
             <div className="text-sm">
-              <p className="font-medium text-slate-900">Welcome back</p>
-              <p className="text-xs text-slate-400 mt-0.5">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              <p className="font-medium text-slate-900">
+                {(() => {
+                  const hour = new Date().getHours()
+                  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
+                  const firstName = (session.user?.name || '').split(' ')[0]
+                  return firstName ? `${greeting}, ${firstName}` : greeting
+                })()}
+              </p>
+              {summary && (summary.awaiting > 0 || summary.urgent > 0) ? (
+                <div className="text-xs text-slate-500 mt-0.5 flex items-center gap-3">
+                  {summary.awaiting > 0 && (
+                    <Link href="/dashboard/reviews" className="flex items-center gap-1 hover:text-blue-700 transition-colors">
+                      <MessageSquare size={11} />
+                      <span><span className="font-semibold text-slate-700">{summary.awaiting}</span> awaiting reply</span>
+                    </Link>
+                  )}
+                  {summary.urgent > 0 && (
+                    <Link href="/dashboard/reviews" className="flex items-center gap-1 text-orange-600 hover:text-orange-700 transition-colors">
+                      <AlertTriangle size={11} />
+                      <span><span className="font-semibold">{summary.urgent}</span> urgent</span>
+                    </Link>
+                  )}
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400 mt-0.5">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+              )}
             </div>
           </div>
           <NotificationBell userId={(session?.user as any)?.id} />

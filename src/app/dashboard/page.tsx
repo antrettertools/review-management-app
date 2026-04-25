@@ -151,6 +151,28 @@ export default function DashboardPage() {
   }
 
   const fetchInsights = async (reviewData: any[]) => {
+    // Client-side cache: skip the network call entirely if we have fresh
+    // cached insights for the same review-set fingerprint. Saves a round trip
+    // when the user navigates back to the dashboard within the TTL window.
+    const userId = (session?.user as any)?.id || 'anon'
+    const fingerprint = `${reviewData.length}|${reviewData
+      .map((r) => `${r.rating}|${(r.content || '').slice(0, 60)}`)
+      .sort()
+      .join(',')}`
+    const cacheKey = `insights:${userId}`
+    try {
+      const raw = sessionStorage.getItem(cacheKey)
+      if (raw) {
+        const cached = JSON.parse(raw)
+        if (cached.fingerprint === fingerprint && Date.now() - cached.at < 30 * 60 * 1000) {
+          setInsights(cached.insights)
+          return
+        }
+      }
+    } catch {
+      // sessionStorage may be unavailable (SSR, private mode) — ignore
+    }
+
     setInsightsLoading(true)
     setInsightsError('')
     try {
@@ -168,8 +190,17 @@ export default function DashboardPage() {
       })
       if (!res.ok) throw new Error('Failed to fetch insights')
       const data = await res.json()
-      if (data.success) setInsights(data.insights)
-      else setInsightsError('Could not generate insights.')
+      if (data.success) {
+        setInsights(data.insights)
+        try {
+          sessionStorage.setItem(
+            cacheKey,
+            JSON.stringify({ insights: data.insights, fingerprint, at: Date.now() })
+          )
+        } catch {
+          /* ignore storage errors */
+        }
+      } else setInsightsError('Could not generate insights.')
     } catch {
       setInsightsError('Could not generate insights. Please try again later.')
     } finally {

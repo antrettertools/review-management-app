@@ -116,7 +116,15 @@ body {
 /* ── Focus styles ── */
 input:focus, textarea:focus, select:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.25);
+}
+
+/* Visible keyboard focus for buttons and links (does not interfere with mouse clicks) */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #1e3a8a;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* ── Shimmer loading animation ── */

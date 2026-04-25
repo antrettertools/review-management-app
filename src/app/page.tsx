@@ -167,6 +167,17 @@ export default function Home() {
               <div>No manual work needed</div>
             </div>
           </div>
+
+          {/* Trust signals */}
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-xs text-slate-500">
+            <span className="inline-flex items-center gap-1.5"><Shield size={13} className="text-emerald-600" /> SOC2-aligned security</span>
+            <span className="text-slate-200">|</span>
+            <span className="inline-flex items-center gap-1.5"><Lock size={13} className="text-emerald-600" /> Encrypted at rest &amp; in transit</span>
+            <span className="text-slate-200">|</span>
+            <span className="inline-flex items-center gap-1.5"><Zap size={13} className="text-emerald-600" /> Powered by Claude AI</span>
+            <span className="text-slate-200">|</span>
+            <span className="inline-flex items-center gap-1.5"><CheckCircle size={13} className="text-emerald-600" /> Cancel anytime</span>
+          </div>
           </AnimateOnScroll>
         </div>
       </section>
@@ -176,8 +187,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6">
           <AnimateOnScroll>
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3">Why respond to reviews matters</h2>
-              <p className="text-slate-600 text-lg">Reviews influence 94% of purchasing decisions. ResponseTime drives results.</p>
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3">Why responding to reviews matters</h2>
+              <p className="text-slate-600 text-lg">Reviews influence 94% of purchasing decisions. Response time drives results.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="text-center">
@@ -359,43 +370,80 @@ export default function Home() {
             <div className="bg-white rounded-xl border border-slate-200">
               <FAQItem
                 question="How does the 14-day free trial work?"
-                answer="Start with full access to ReviewInzight. No charge during the trial. We require a credit card to prevent fraud, but you won't be charged until day 15. Cancel anytime—no questions asked."
+                answer="You get full access to ReviewInzight for 14 days at no charge. We ask for a credit card upfront to prevent fraud, but you won't be charged until day 15 — and you can cancel anytime from your settings with one click."
+              />
+              <FAQItem
+                question="I already reply to reviews myself — why do I need this?"
+                answer="If you're managing one location with low review volume, you might not. ReviewInzight pays off when you're losing time switching between Google, Facebook, and email — or when you're missing reviews because nobody's watching the inbox. The AI gets you a draft in 5 seconds so a 30-minute task becomes 30 seconds."
+              />
+              <FAQItem
+                question="How do you compare to Birdeye, Podium, or Reputation.com?"
+                answer="Those platforms start at $299–$400/month and target enterprise teams. ReviewInzight is built for individual owners and small teams who want the same review-response automation without the enterprise contract or per-seat pricing. We're $39.99/month, flat — and you can cancel anytime."
               />
               <FAQItem
                 question="What platforms do you support?"
-                answer="We currently sync reviews from Google Business Profile. Facebook and other platforms are coming soon. Let us know which platforms matter most to your business."
+                answer="Google Business Profile is fully integrated today. Facebook, Yelp, TripAdvisor, and Trustpilot are on the roadmap — let us know which one matters most to your business and we'll prioritize it."
               />
               <FAQItem
                 question="How good are the AI suggestions?"
-                answer="Our AI analyzes the review's tone, rating, and content to generate contextual responses. You always review and edit before posting—it's a starting point, not final text. Most users customize responses to match their voice."
+                answer="The AI reads the review's rating, tone, and specifics, then drafts a contextual reply in your chosen tone (professional, friendly, casual, or formal). It's a starting point — you review and edit every response before saving. Most users tweak 1–2 lines and ship it."
               />
               <FAQItem
                 question="Can I manage multiple locations?"
-                answer="Yes. Add each business separately in your account, and manage them all from one dashboard. Perfect for franchises, multi-location operators, or agencies."
+                answer="Yes. Add each location as its own business and manage them all from one dashboard. There's no per-location upcharge — the $39.99 plan covers up to 99 businesses, which is more than any small franchise will ever hit."
               />
               <FAQItem
                 question="What happens if I cancel?"
-                answer="Your review history and account data stay with us. You can reactivate anytime without losing anything. We never delete your data."
+                answer="Your review history and AI-generated responses stay in your account. You can reactivate anytime and pick up exactly where you left off. We don't delete anything unless you explicitly ask us to delete your account."
               />
               <FAQItem
                 question="How secure is my data?"
-                answer="We use OAuth for secure Google authentication—you never share passwords with us. All data is encrypted in transit and at rest using industry standards."
+                answer="We use OAuth to authenticate with Google — you never share passwords with us, and we can only read review data, not your wider Google account. All data is encrypted in transit and at rest, OAuth state is HMAC-signed to prevent CSRF, and Stripe handles all payment information."
               />
               <FAQItem
                 question="Is there a long-term contract?"
-                answer="Nope. Monthly billing, cancel anytime. No commitments, no surprises. Stop by your settings to cancel with one click."
+                answer="No. Monthly billing, cancel anytime, no commitments. One-click cancel in your settings — and if you cancel, you keep access until the end of your billing period."
               />
               <FAQItem
                 question="What if I need help?"
-                answer="Email us at reviewinzight@gmail.com. We typically respond within 24 hours. There's also a built-in Help Guide in your dashboard."
+                answer="Email us at reviewinzight@gmail.com — we typically respond within 24 hours. There's also a built-in Help Guide in your dashboard with step-by-step instructions for everything."
               />
             </div>
           </AnimateOnScroll>
         </div>
       </section>
 
+      {/* Why this matters — proof in numbers */}
+      <section className="py-16 bg-white border-t border-slate-100">
+        <div className="max-w-5xl mx-auto px-6">
+          <AnimateOnScroll>
+            <div className="text-center mb-10">
+              <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">The numbers don&apos;t lie</h2>
+              <p className="text-slate-600">Independent research on what review management actually drives.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-slate-50 rounded-xl border border-slate-200 p-6 text-center">
+                <p className="text-4xl font-bold text-blue-800 mb-1">94%</p>
+                <p className="text-sm text-slate-600 leading-relaxed">of consumers say a negative review convinced them to avoid a business</p>
+                <p className="text-[10px] text-slate-400 mt-2 uppercase tracking-wider">ReviewTrackers</p>
+              </div>
+              <div className="bg-slate-50 rounded-xl border border-slate-200 p-6 text-center">
+                <p className="text-4xl font-bold text-emerald-700 mb-1">+12%</p>
+                <p className="text-sm text-slate-600 leading-relaxed">average revenue lift for businesses that respond to reviews vs. those that don&apos;t</p>
+                <p className="text-[10px] text-slate-400 mt-2 uppercase tracking-wider">Harvard Business Review</p>
+              </div>
+              <div className="bg-slate-50 rounded-xl border border-slate-200 p-6 text-center">
+                <p className="text-4xl font-bold text-amber-700 mb-1">7 days</p>
+                <p className="text-sm text-slate-600 leading-relaxed">is the typical &ldquo;fresh review&rdquo; window — Google ranks recently-replied businesses higher</p>
+                <p className="text-[10px] text-slate-400 mt-2 uppercase tracking-wider">Google Local Search</p>
+              </div>
+            </div>
+          </AnimateOnScroll>
+        </div>
+      </section>
+
       {/* Pricing */}
-      <section className="py-20">
+      <section id="pricing" className="py-20">
         <div className="max-w-7xl mx-auto px-6">
           <AnimateOnScroll>
             <div className="text-center mb-14">
@@ -438,7 +486,23 @@ export default function Home() {
                   Start Free Trial
                   <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
                 </Link>
-                <p className="text-xs text-slate-500 text-center mt-4">vs. hiring an assistant: $2,000+/month</p>
+                <p className="text-xs text-slate-500 text-center mt-4">No charge today. Cancel anytime in one click.</p>
+              </div>
+            </div>
+
+            {/* Price comparison anchor */}
+            <div className="mt-6 grid grid-cols-3 gap-2 text-center">
+              <div className="bg-slate-50 rounded-lg border border-slate-200 p-3">
+                <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5">Birdeye</p>
+                <p className="text-sm font-bold text-slate-900">$299/mo</p>
+              </div>
+              <div className="bg-slate-50 rounded-lg border border-slate-200 p-3">
+                <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5">Podium</p>
+                <p className="text-sm font-bold text-slate-900">$400/mo</p>
+              </div>
+              <div className="bg-blue-50 rounded-lg border border-blue-200 p-3">
+                <p className="text-[10px] text-blue-700 uppercase tracking-wider mb-0.5">ReviewInzight</p>
+                <p className="text-sm font-bold text-blue-900">$39.99/mo</p>
               </div>
             </div>
             </div>

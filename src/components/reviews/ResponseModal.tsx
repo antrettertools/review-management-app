@@ -356,7 +356,13 @@ export default function ResponseModal({
                 <p className="text-[11px] text-slate-400">
                   {responseContent.length} / 2,000 characters
                 </p>
-                {responseContent.length > 1800 && (
+                {responseContent.length > 0 && responseContent.length < 50 && (
+                  <p className="text-[11px] text-slate-400">Tip: 2–4 sentences usually works best.</p>
+                )}
+                {responseContent.length >= 600 && responseContent.length < 1800 && (
+                  <p className="text-[11px] text-amber-600 font-medium">Shorter replies tend to perform better.</p>
+                )}
+                {responseContent.length >= 1800 && (
                   <p className="text-[11px] text-orange-600 font-semibold">Getting close to limit</p>
                 )}
               </div>

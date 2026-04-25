@@ -18,6 +18,28 @@ export default function SignupPage() {
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
+  // Password strength calculation: requires multiple character classes, not just length
+  const calcStrength = (pw: string): number => {
+    if (!pw) return 0
+    let score = 0
+    if (pw.length >= 8) score++
+    if (pw.length >= 12) score++
+    if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++
+    if (/[0-9]/.test(pw)) score++
+    if (/[^A-Za-z0-9]/.test(pw)) score++
+    // Penalize common patterns
+    if (/^(.)\1+$/.test(pw)) score = 1 // all same char
+    if (/^(password|qwerty|12345|letmein|admin)/i.test(pw)) score = Math.min(score, 1)
+    return Math.min(score, 4)
+  }
+
+  const passwordStrength = calcStrength(password)
+  const passwordValid =
+    password.length >= 8 &&
+    /[A-Z]/.test(password) &&
+    /[a-z]/.test(password) &&
+    /[0-9]/.test(password)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -25,6 +47,12 @@ export default function SignupPage() {
 
     if (!termsAccepted) {
       setError('You must accept the Terms and Conditions to create an account.')
+      setLoading(false)
+      return
+    }
+
+    if (!passwordValid) {
+      setError('Password must be at least 8 characters and include uppercase, lowercase, and a number.')
       setLoading(false)
       return
     }
@@ -123,16 +151,29 @@ export default function SignupPage() {
                   </button>
                 </div>
                 {password && (
-                  <div className="flex gap-1 mt-2">
-                    {[1, 2, 3, 4].map((i) => {
-                      const strength = Math.min(Math.ceil(password.length / 4), 4)
-                      const isFilled = i <= strength
-                      const color = strength === 1 ? 'bg-red-400' : strength === 2 ? 'bg-amber-400' : strength === 3 ? 'bg-blue-400' : 'bg-emerald-500'
-                      return (
-                        <div key={i} className={`h-1 flex-1 rounded-full ${isFilled ? color : 'bg-slate-200'} transition-colors`} />
-                      )
-                    })}
-                  </div>
+                  <>
+                    <div className="flex gap-1 mt-2">
+                      {[1, 2, 3, 4].map((i) => {
+                        const isFilled = i <= passwordStrength
+                        const color =
+                          passwordStrength === 1
+                            ? 'bg-red-400'
+                            : passwordStrength === 2
+                            ? 'bg-amber-400'
+                            : passwordStrength === 3
+                            ? 'bg-blue-400'
+                            : 'bg-emerald-500'
+                        return (
+                          <div key={i} className={`h-1 flex-1 rounded-full ${isFilled ? color : 'bg-slate-200'} transition-colors`} />
+                        )
+                      })}
+                    </div>
+                    <p className={`text-[11px] mt-1.5 ${passwordValid ? 'text-emerald-600' : 'text-slate-500'}`}>
+                      {passwordValid
+                        ? 'Strong password ✓'
+                        : 'Use 8+ characters with uppercase, lowercase, and a number'}
+                    </p>
+                  </>
                 )}
               </div>
 
