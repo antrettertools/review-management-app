@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { syncGoogleReviews } from '@/lib/api-clients/google-reviews'
+import { applyRulesToReviews } from '@/lib/rule-engine'
 
 export async function POST(request: NextRequest) {
   try {
@@ -52,17 +53,16 @@ export async function POST(request: NextRequest) {
 
     // Insert reviews into database
     const reviews = syncResult.reviews || []
-    
+
     if (reviews.length > 0) {
+      const reviewsWithBusiness = reviews.map((review: any) => ({
+        ...review,
+        business_id: businessId,
+      }))
+
       const { error: insertError } = await supabase
         .from('reviews')
-        .upsert(
-          reviews.map((review: any) => ({
-            ...review,
-            business_id: businessId,
-          })),
-          { onConflict: 'platform_review_id' }
-        )
+        .upsert(reviewsWithBusiness, { onConflict: 'platform_review_id' })
 
       if (insertError) {
         console.error('Error inserting reviews:', insertError)
@@ -71,6 +71,11 @@ export async function POST(request: NextRequest) {
           { status: 500 }
         )
       }
+
+      // Apply auto-response rules (fire-and-forget)
+      applyRulesToReviews(businessId, reviewsWithBusiness).catch(err =>
+        console.error('Rule engine error:', err)
+      )
     }
 
     return NextResponse.json({

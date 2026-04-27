@@ -8,7 +8,7 @@ import { signOut } from 'next-auth/react'
 import { supabase } from '@/lib/supabase'
 import NotificationBell from '@/components/layout/NotificationBell'
 import { LogoIcon } from '@/components/Logo'
-import { LayoutDashboard, MessageSquareText, Bell, Settings, LogOut, Menu, HelpCircle, Mail, X, MessageSquare, AlertTriangle } from 'lucide-react'
+import { LayoutDashboard, MessageSquareText, Bell, Settings, LogOut, Menu, HelpCircle, Mail, X, MessageSquare, AlertTriangle, BarChart2, Zap } from 'lucide-react'
 
 export default function DashboardLayout({
   children,
@@ -98,6 +98,8 @@ export default function DashboardLayout({
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/dashboard/reviews', label: 'Reviews', icon: MessageSquareText },
+    { href: '/dashboard/analytics', label: 'Analytics', icon: BarChart2 },
+    { href: '/dashboard/rules', label: 'Auto-Response', icon: Zap },
     { href: '/dashboard/notifications', label: 'Notifications', icon: Bell },
     { href: '/dashboard/settings', label: 'Settings', icon: Settings },
   ]

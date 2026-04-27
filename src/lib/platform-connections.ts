@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { applyRulesToReviews } from './rule-engine'
 
 /**
  * Merges a new platform connection into the existing platform_connections JSONB field.
@@ -61,6 +62,11 @@ export async function upsertReviews(businessId: string, reviews: any[]) {
     if (error) {
       throw new Error(`Failed to upsert reviews: ${error.message}`)
     }
+
+    // Apply auto-response rules (fire-and-forget)
+    applyRulesToReviews(businessId, reviewsWithBusiness).catch(err =>
+      console.error('Rule engine error:', err)
+    )
 
     return { success: true, count: reviews.length }
   } catch (err) {
