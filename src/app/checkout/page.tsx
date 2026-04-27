@@ -9,6 +9,7 @@ interface SignupData {
   userId: string
   email: string
   name: string
+  billing?: 'monthly' | 'annual'
 }
 
 export default function CheckoutPage() {
@@ -29,7 +30,12 @@ export default function CheckoutPage() {
   const handleCheckout = async () => {
     if (!signupData) return
 
-    if (!process.env.NEXT_PUBLIC_STRIPE_PRICE_ID) {
+    const isAnnual = signupData.billing === 'annual'
+    const priceId = isAnnual
+      ? process.env.NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID
+      : process.env.NEXT_PUBLIC_STRIPE_PRICE_ID
+
+    if (!priceId) {
       setError('Payment configuration error. Please contact support.')
       return
     }
@@ -42,8 +48,8 @@ export default function CheckoutPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          planId: 'pro',
-          priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
+          planId: isAnnual ? 'pro_annual' : 'pro',
+          priceId,
           userId: signupData.userId,
           isNewSignup: true,
         }),
@@ -89,17 +95,31 @@ export default function CheckoutPage() {
         <div className="w-full max-w-md">
           <div className="text-center mb-7">
             <h1 className="text-2xl font-bold text-slate-900 mb-1">Start Your Free Trial</h1>
-            <p className="text-sm text-slate-500">14 days free, then $39.99/month</p>
+            <p className="text-sm text-slate-500">
+              {signupData?.billing === 'annual' ? '14 days free, then $399/year' : '14 days free, then $39.99/month'}
+            </p>
           </div>
 
           <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
             <div className="bg-blue-800 p-6 text-center">
               <p className="text-blue-200 font-medium text-sm uppercase tracking-wider mb-1">ReviewInzight Pro</p>
-              <div className="flex items-baseline justify-center gap-1">
-                <span className="text-3xl font-bold text-white">$39.99</span>
-                <span className="text-blue-200">/month</span>
-              </div>
-              <p className="text-blue-200/80 text-sm mt-1">after 14-day free trial</p>
+              {signupData?.billing === 'annual' ? (
+                <>
+                  <div className="flex items-baseline justify-center gap-1">
+                    <span className="text-3xl font-bold text-white">$33.25</span>
+                    <span className="text-blue-200">/month</span>
+                  </div>
+                  <p className="text-blue-200/80 text-sm mt-1">Billed as $399/year after free trial</p>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-baseline justify-center gap-1">
+                    <span className="text-3xl font-bold text-white">$39.99</span>
+                    <span className="text-blue-200">/month</span>
+                  </div>
+                  <p className="text-blue-200/80 text-sm mt-1">after 14-day free trial</p>
+                </>
+              )}
             </div>
 
             <div className="p-6">

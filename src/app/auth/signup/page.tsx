@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { LogoIcon } from '@/components/Logo'
@@ -9,6 +9,8 @@ import { ArrowRight, Eye, EyeOff, Shield } from 'lucide-react'
 
 export default function SignupPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const billingParam = searchParams.get('billing')
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -83,7 +85,7 @@ export default function SignupPage() {
 
         await supabase.from('users').update({ terms_accepted_at: new Date().toISOString() }).eq('id', data.user.id)
 
-        const signupData = { userId: data.user.id, email, name }
+        const signupData = { userId: data.user.id, email, name, billing: billingParam || 'monthly' }
         if (typeof window !== 'undefined') {
           sessionStorage.setItem('signupData', JSON.stringify(signupData))
         }

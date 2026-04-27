@@ -7,7 +7,7 @@ const VALID_TONES: ResponseTone[] = ['professional', 'friendly', 'casual', 'form
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { reviewId, tone } = body
+    const { reviewId, tone, language } = body
 
     if (!reviewId) {
       return NextResponse.json(
@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
 
     const safeTone: ResponseTone =
       tone && VALID_TONES.includes(tone) ? tone : 'professional'
+    const safeLanguage: string = typeof language === 'string' && language.trim() ? language.trim() : 'English'
 
     // Fetch the review (with business name for personalization)
     const { data: review, error: fetchError } = await supabase
@@ -42,7 +43,7 @@ export async function POST(request: NextRequest) {
         rating: review.rating,
         author_name: review.author_name,
       },
-      { tone: safeTone, businessName }
+      { tone: safeTone, businessName, language: safeLanguage }
     )
 
     if (!result.success) {

@@ -70,25 +70,27 @@ export async function generateReviewResponse(review: {
   content: string
   rating: number
   author_name: string
-}, options: { tone?: ResponseTone; businessName?: string } = {}) {
+}, options: { tone?: ResponseTone; businessName?: string; language?: string } = {}) {
   const tone: ResponseTone = options.tone || 'professional'
   const toneGuidance = TONE_GUIDANCE[tone]
   const businessLine = options.businessName
     ? `You are responding on behalf of "${options.businessName}". `
     : ''
+  const language = options.language || 'English'
+  const languageLine = language !== 'English' ? ` Write your response in ${language}.` : ''
 
   try {
     let systemPrompt = ''
 
     if (review.rating >= 4) {
       systemPrompt =
-        `${businessLine}You are a business owner responding to a positive review. ${toneGuidance} Thank the customer specifically (reference what they liked when possible), express genuine appreciation, and invite them back. Keep it concise — 2 to 4 short sentences, around 300–500 characters. Do not start with "Dear" or "Hi [name]" unless it fits the tone naturally. Never make promises you can't keep. Never offer discounts or compensation unless the review specifically asks. Sign off naturally; do not include placeholders like [Your Name] or [Business Name].`
+        `${businessLine}You are a business owner responding to a positive review. ${toneGuidance} Thank the customer specifically (reference what they liked when possible), express genuine appreciation, and invite them back. Keep it concise — 2 to 4 short sentences, around 300–500 characters. Do not start with "Dear" or "Hi [name]" unless it fits the tone naturally. Never make promises you can't keep. Never offer discounts or compensation unless the review specifically asks. Sign off naturally; do not include placeholders like [Your Name] or [Business Name].${languageLine}`
     } else if (review.rating >= 3) {
       systemPrompt =
-        `${businessLine}You are a business owner responding to a neutral or mixed review. ${toneGuidance} Acknowledge what they liked AND what fell short, show you understand, and briefly note how you'll improve. Keep it concise — 2 to 4 short sentences, around 300–500 characters. Avoid being defensive. Never make promises you can't keep. Never include placeholders like [Your Name].`
+        `${businessLine}You are a business owner responding to a neutral or mixed review. ${toneGuidance} Acknowledge what they liked AND what fell short, show you understand, and briefly note how you'll improve. Keep it concise — 2 to 4 short sentences, around 300–500 characters. Avoid being defensive. Never make promises you can't keep. Never include placeholders like [Your Name].${languageLine}`
     } else {
       systemPrompt =
-        `${businessLine}You are a business owner responding to a negative review. ${toneGuidance} Apologize sincerely without being defensive, acknowledge the specific issue mentioned, and invite them to contact you privately to make it right (no public refund offers). Keep it concise — 2 to 4 short sentences, around 300–500 characters. Never include placeholders like [Your Name] or [Phone Number].`
+        `${businessLine}You are a business owner responding to a negative review. ${toneGuidance} Apologize sincerely without being defensive, acknowledge the specific issue mentioned, and invite them to contact you privately to make it right (no public refund offers). Keep it concise — 2 to 4 short sentences, around 300–500 characters. Never include placeholders like [Your Name] or [Phone Number].${languageLine}`
     }
 
     const message = await client.messages.create({

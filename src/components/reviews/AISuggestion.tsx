@@ -7,6 +7,7 @@ type Tone = 'professional' | 'friendly' | 'casual' | 'formal'
 
 interface AISuggestionProps {
   reviewId: string
+  language?: string
   onUse: (response: string) => void
   onClose: () => void
 }
@@ -20,6 +21,7 @@ const TONES: { key: Tone; label: string }[] = [
 
 export default function AISuggestion({
   reviewId,
+  language = 'English',
   onUse,
   onClose,
 }: AISuggestionProps) {
@@ -35,7 +37,7 @@ export default function AISuggestion({
       const response = await fetch('/api/responses/ai-generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reviewId, tone: selectedTone }),
+        body: JSON.stringify({ reviewId, tone: selectedTone, language }),
       })
 
       if (!response.ok) throw new Error('Failed to generate response')

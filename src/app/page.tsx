@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { LogoIcon } from '@/components/Logo'
-import { BarChart3, Zap, Shield, ArrowRight, CheckCircle, MessageSquare, TrendingUp, Clock, Users, Globe, Bell, Sparkles, Lock, Headphones, ChevronDown } from 'lucide-react'
+import { BarChart3, Zap, Shield, ArrowRight, CheckCircle, MessageSquare, TrendingUp, Clock, Bell, Lock, ChevronDown } from 'lucide-react'
 
 // Hook to detect when element enters viewport
 function useInView(ref: React.RefObject<HTMLDivElement | null>, threshold = 0.15) {
@@ -81,6 +81,83 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
         </div>
       )}
     </div>
+  )
+}
+
+const ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID
+
+function PricingSection() {
+  const [annual, setAnnual] = useState(false)
+  const hasAnnual = !!ANNUAL_PRICE_ID
+
+  const monthlyPrice = '$39.99'
+  const annualMonthly = '$33.25'
+  const annualTotal = '$399'
+
+  return (
+    <>
+      {/* Billing toggle */}
+      <div className="flex items-center justify-center gap-3 mb-8">
+        <span className={`text-sm font-medium ${!annual ? 'text-slate-900' : 'text-slate-400'}`}>Monthly</span>
+        <button
+          onClick={() => hasAnnual && setAnnual((v) => !v)}
+          disabled={!hasAnnual}
+          title={!hasAnnual ? 'Annual billing coming soon' : undefined}
+          className={`relative w-11 h-6 rounded-full transition-colors ${annual ? 'bg-blue-800' : 'bg-slate-200'} ${!hasAnnual ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+        >
+          <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${annual ? 'translate-x-5' : 'translate-x-0'}`} />
+        </button>
+        <span className={`text-sm font-medium ${annual ? 'text-slate-900' : 'text-slate-400'}`}>
+          Annual
+          {hasAnnual && <span className="ml-1.5 text-[11px] font-semibold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">Save 17%</span>}
+          {!hasAnnual && <span className="ml-1.5 text-[11px] text-slate-400">(coming soon)</span>}
+        </span>
+      </div>
+
+      <div className="bg-white rounded-2xl border-2 border-blue-800 overflow-visible shadow-lg relative">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-800 text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">Most Popular</div>
+
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 text-center border-b border-blue-800">
+          {annual ? (
+            <>
+              <div className="flex items-baseline justify-center gap-1 mb-1">
+                <span className="text-5xl font-bold text-slate-900">{annualMonthly}</span>
+                <span className="text-slate-600 text-lg">/month</span>
+              </div>
+              <p className="text-sm text-slate-500 mb-1">Billed as {annualTotal}/year</p>
+            </>
+          ) : (
+            <div className="flex items-baseline justify-center gap-1 mb-2">
+              <span className="text-5xl font-bold text-slate-900">{monthlyPrice}</span>
+              <span className="text-slate-600 text-lg">/month</span>
+            </div>
+          )}
+          <p className="text-sm text-slate-600">14-day free trial • Cancel anytime</p>
+        </div>
+
+        <div className="p-8">
+          <div className="mb-8 pb-8 border-b border-slate-200">
+            <p className="text-xs text-slate-500 font-semibold uppercase tracking-widest mb-2">Everything you need:</p>
+            <ul className="space-y-3">
+              {['Unlimited businesses & locations', 'Unlimited AI-powered responses', 'Google Business Profile integration', 'Real-time review notifications', 'Reputation score & analytics', 'Sentiment analysis & insights', 'Response history & audit log', 'Email support'].map((feature) => (
+                <li key={feature} className="flex items-center gap-3">
+                  <CheckCircle size={18} className="text-emerald-500 flex-shrink-0" />
+                  <span className="text-sm text-slate-700">{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <Link
+            href={`/auth/signup${annual ? '?billing=annual' : ''}`}
+            className="group w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-800 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors text-sm"
+          >
+            Start Free Trial
+            <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+          </Link>
+          <p className="text-xs text-slate-500 text-center mt-4">No charge today. Cancel anytime in one click.</p>
+        </div>
+      </div>
+    </>
   )
 }
 
@@ -454,41 +531,7 @@ export default function Home() {
 
           <AnimateOnScroll>
             <div className="max-w-md mx-auto px-4 sm:px-0">
-            <div className="bg-white rounded-2xl border-2 border-blue-800 overflow-visible shadow-lg relative">
-              {/* Most Popular Badge */}
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-800 text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">Most Popular</div>
-
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 text-center border-b border-blue-800">
-                <div className="flex items-baseline justify-center gap-1 mb-2">
-                  <span className="text-5xl font-bold text-slate-900">$39.99</span>
-                  <span className="text-slate-600 text-lg">/month</span>
-                </div>
-                <p className="text-sm text-slate-600">14-day free trial • Cancel anytime</p>
-              </div>
-
-              <div className="p-8">
-                <div className="mb-8 pb-8 border-b border-slate-200">
-                  <p className="text-xs text-slate-500 font-semibold uppercase tracking-widest mb-2">Everything you need:</p>
-                  <ul className="space-y-3">
-                    {['Unlimited businesses & locations', 'Unlimited AI-powered responses', 'Google Business Profile integration', 'Real-time review notifications', 'Reputation score & analytics', 'Sentiment analysis & insights', 'Response history & audit log', 'Email support'].map((feature) => (
-                      <li key={feature} className="flex items-center gap-3">
-                        <CheckCircle size={18} className="text-emerald-500 flex-shrink-0" />
-                        <span className="text-sm text-slate-700">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <Link
-                  href="/auth/signup"
-                  className="group w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-800 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                >
-                  Start Free Trial
-                  <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
-                </Link>
-                <p className="text-xs text-slate-500 text-center mt-4">No charge today. Cancel anytime in one click.</p>
-              </div>
-            </div>
+            <PricingSection />
 
             {/* Price comparison anchor */}
             <div className="mt-6 grid grid-cols-3 gap-2 text-center">

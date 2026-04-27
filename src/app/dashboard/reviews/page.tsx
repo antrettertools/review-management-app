@@ -5,7 +5,8 @@ import { supabase } from '@/lib/supabase'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import ResponseModal from '@/components/reviews/ResponseModal'
-import { Star, MessageSquare, AlertTriangle, CheckCircle, Clock, Search, ArrowUpDown, Check, Settings as SettingsIcon } from 'lucide-react'
+import QRCodeModal from '@/components/reviews/QRCodeModal'
+import { Star, MessageSquare, AlertTriangle, CheckCircle, Clock, Search, Check, Settings as SettingsIcon, Download, QrCode, ChevronDown } from 'lucide-react'
 
 export default function ReviewsPage() {
   const { data: session } = useSession()
@@ -20,6 +21,8 @@ export default function ReviewsPage() {
   const [selectedReviews, setSelectedReviews] = useState<string[]>([])
   const [page, setPage] = useState(1)
   const PAGE_SIZE = 25
+  const [showQRModal, setShowQRModal] = useState(false)
+  const [showExportMenu, setShowExportMenu] = useState(false)
 
   useEffect(() => {
     if ((session?.user as any)?.id) {
@@ -181,6 +184,73 @@ export default function ReviewsPage() {
     })
   }
 
+  const exportCSV = () => {
+    const headers = ['Author', 'Rating', 'Platform', 'Date', 'Content', 'Responded', 'Urgent']
+    const rows = filteredReviews.map((r) => [
+      `"${(r.author_name || '').replace(/"/g, '""')}"`,
+      r.rating,
+      r.platform || '',
+      formatDate(r.created_at),
+      `"${(r.content || '').replace(/"/g, '""')}"`,
+      r.is_responded ? 'Yes' : 'No',
+      r.urgency_level === 'critical' ? 'Yes' : 'No',
+    ])
+    const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `reviews-${new Date().toISOString().slice(0, 10)}.csv`
+    link.click()
+    setShowExportMenu(false)
+  }
+
+  const exportPDF = () => {
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Reviews Export</title>
+  <style>
+    body { font-family: -apple-system, sans-serif; color: #1e293b; padding: 32px; }
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .meta { font-size: 12px; color: #94a3b8; margin-bottom: 24px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { background: #1e40af; color: white; text-align: left; padding: 8px 10px; }
+    td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+    tr:nth-child(even) td { background: #f8fafc; }
+    .stars { color: #f59e0b; }
+    .badge { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .responded { background: #dbeafe; color: #1d4ed8; }
+    .urgent { background: #ffedd5; color: #c2410c; }
+  </style>
+</head>
+<body>
+  <h1>Reviews Report</h1>
+  <div class="meta">Exported ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} · ${filteredReviews.length} review${filteredReviews.length !== 1 ? 's' : ''}</div>
+  <table>
+    <thead><tr><th>Author</th><th>Rating</th><th>Platform</th><th>Date</th><th>Review</th><th>Status</th></tr></thead>
+    <tbody>
+      ${filteredReviews.map((r) => `<tr>
+        <td><strong>${r.author_name || 'Unknown'}</strong></td>
+        <td class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</td>
+        <td>${r.platform || '—'}</td>
+        <td>${formatDate(r.created_at)}</td>
+        <td>${(r.content || '').replace(/</g, '&lt;')}</td>
+        <td>${r.is_responded ? '<span class="badge responded">Responded</span>' : ''}${r.urgency_level === 'critical' ? '<span class="badge urgent">Urgent</span>' : ''}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>
+</body>
+</html>`
+    const win = window.open('', '_blank')
+    if (win) {
+      win.document.write(html)
+      win.document.close()
+      win.print()
+    }
+    setShowExportMenu(false)
+  }
+
   const filters = [
     { key: 'all', label: 'All Reviews' },
     { key: 'responded', label: 'Responded' },
@@ -196,11 +266,47 @@ export default function ReviewsPage() {
           <h1 className="text-xl font-bold text-slate-900">Reviews</h1>
           <p className="text-sm text-slate-400 mt-1">Manage and respond to your customer reviews</p>
         </div>
-        {!loading && (
-          <div className="text-sm text-slate-400 font-medium bg-white px-3.5 py-2 rounded-lg border border-slate-200">
-            {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+        <div className="flex items-center gap-2">
+          {/* QR Code */}
+          <button
+            onClick={() => setShowQRModal(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+          >
+            <QrCode size={15} />
+            QR Code
+          </button>
+
+          {/* Export dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu((v) => !v)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+            >
+              <Download size={15} />
+              Export
+              <ChevronDown size={13} />
+            </button>
+            {showExportMenu && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setShowExportMenu(false)} />
+                <div className="absolute right-0 mt-1.5 w-40 bg-white border border-slate-200 rounded-lg shadow-md z-20 overflow-hidden">
+                  <button onClick={exportCSV} className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                    Export as CSV
+                  </button>
+                  <button onClick={exportPDF} className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors border-t border-slate-100">
+                    Export as PDF
+                  </button>
+                </div>
+              </>
+            )}
           </div>
-        )}
+
+          {!loading && (
+            <div className="text-sm text-slate-400 font-medium bg-white px-3.5 py-2 rounded-lg border border-slate-200">
+              {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Filters, Search, and Sort */}
@@ -470,6 +576,12 @@ export default function ReviewsPage() {
           }}
         />
       )}
+
+      {/* QR Code Modal */}
+      <QRCodeModal
+        isOpen={showQRModal}
+        onClose={() => setShowQRModal(false)}
+      />
     </div>
   )
 }

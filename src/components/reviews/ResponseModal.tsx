@@ -39,6 +39,7 @@ export default function ResponseModal({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showAISuggestion, setShowAISuggestion] = useState(false)
+  const [replyLanguage, setReplyLanguage] = useState('English')
 
   // Existing responses state
   const [existingResponses, setExistingResponses] = useState<SavedResponse[]>([])
@@ -302,6 +303,7 @@ export default function ResponseModal({
           {showAISuggestion && (
             <AISuggestion
               reviewId={review.id}
+              language={replyLanguage}
               onUse={handleUseAISuggestion}
               onClose={() => setShowAISuggestion(false)}
             />
@@ -314,14 +316,25 @@ export default function ResponseModal({
                 <label className="block text-sm font-semibold text-slate-900">
                   {existingResponses.length > 0 ? 'Write Another Response' : 'Your Response'}
                 </label>
-                <button
-                  type="button"
-                  onClick={() => setShowAISuggestion(!showAISuggestion)}
-                  className="text-sm font-semibold text-blue-700 hover:text-blue-900 transition-colors flex items-center gap-1.5"
-                >
-                  <Sparkles size={13} />
-                  {showAISuggestion ? 'Hide AI Suggestion' : 'Get AI Suggestion'}
-                </button>
+                <div className="flex items-center gap-2">
+                  <select
+                    value={replyLanguage}
+                    onChange={(e) => setReplyLanguage(e.target.value)}
+                    className="text-xs border border-slate-200 rounded-lg px-2 py-1.5 text-slate-600 bg-white focus:border-blue-800 focus:outline-none"
+                  >
+                    {['English','Spanish','French','German','Portuguese','Italian','Dutch','Polish','Swedish','Japanese','Korean','Chinese','Arabic','Hindi','Russian'].map((lang) => (
+                      <option key={lang} value={lang}>{lang}</option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => setShowAISuggestion(!showAISuggestion)}
+                    className="text-sm font-semibold text-blue-700 hover:text-blue-900 transition-colors flex items-center gap-1.5"
+                  >
+                    <Sparkles size={13} />
+                    {showAISuggestion ? 'Hide AI Suggestion' : 'Get AI Suggestion'}
+                  </button>
+                </div>
               </div>
 
               {/* Quick Templates */}
