@@ -218,7 +218,7 @@ export default function RulesPage() {
                 name="name"
                 placeholder="e.g., Reply to negative reviews"
                 required
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900"
               />
             </div>
 
@@ -228,7 +228,7 @@ export default function RulesPage() {
                 <select
                   name="conditionType"
                   required
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900"
                 >
                   <option value="">Select condition...</option>
                   <option value="rating_lte">Rating ≤</option>
@@ -242,7 +242,7 @@ export default function RulesPage() {
                 <label className="block text-sm font-medium text-slate-700 mb-1">Value</label>
                 <select
                   name="conditionValue"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900"
                 >
                   <option value="">Auto</option>
                   <option value="1">1 Star</option>
@@ -289,7 +289,7 @@ export default function RulesPage() {
               <textarea
                 name="responseTemplate"
                 placeholder="Write your auto-response template..."
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm h-24 resize-none"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm h-24 resize-none text-slate-900"
               />
             </div>
 
@@ -297,7 +297,7 @@ export default function RulesPage() {
               <label className="block text-sm font-medium text-slate-700 mb-1">Tone</label>
               <select
                 name="tone"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900"
               >
                 <option value="professional">Professional</option>
                 <option value="friendly">Friendly</option>
