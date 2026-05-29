@@ -84,6 +84,42 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
   )
 }
 
+function VideoPlayer() {
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    const handleFullscreenChange = () => {
+      if (document.fullscreenElement === video || document.fullscreenElement === video.parentElement) {
+        video.currentTime = 0
+        video.play()
+      }
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  }, [])
+
+  return (
+    <video
+      ref={videoRef}
+      width="100%"
+      height="auto"
+      autoPlay
+      muted
+      loop
+      playsInline
+      controls
+      className="w-full h-auto bg-black"
+    >
+      <source src="/insidepreview.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+  )
+}
+
 const ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID
 
 function PricingSection() {
@@ -255,6 +291,50 @@ export default function Home() {
             <span className="text-slate-200">|</span>
             <span className="inline-flex items-center gap-1.5"><CheckCircle size={13} className="text-emerald-600" /> Cancel anytime</span>
           </div>
+          </AnimateOnScroll>
+        </div>
+      </section>
+
+      {/* Video Preview Section */}
+      <section className="py-16 bg-gradient-to-b from-white to-slate-50 border-b border-slate-100">
+        <div className="max-w-5xl mx-auto px-6">
+          <AnimateOnScroll>
+            <div className="text-center mb-8">
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3">See it in action</h2>
+              <p className="text-lg text-slate-600 max-w-2xl mx-auto">Take a quick tour of ReviewInzight's dashboard. Watch how easy it is to manage reviews and respond with AI assistance.</p>
+            </div>
+          </AnimateOnScroll>
+
+          <AnimateOnScroll delay={100}>
+            <div className="rounded-2xl overflow-hidden shadow-2xl border border-slate-200 bg-white">
+              <VideoPlayer />
+            </div>
+          </AnimateOnScroll>
+
+          <AnimateOnScroll delay={200}>
+            <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <span className="text-blue-700 font-bold">1</span>
+                </div>
+                <h4 className="font-semibold text-slate-900 mb-2">Connect your reviews</h4>
+                <p className="text-sm text-slate-600">Link your Google Business Profile and sync all your reviews instantly</p>
+              </div>
+              <div className="text-center">
+                <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <span className="text-emerald-700 font-bold">2</span>
+                </div>
+                <h4 className="font-semibold text-slate-900 mb-2">Get AI suggestions</h4>
+                <p className="text-sm text-slate-600">ReviewInzight drafts professional responses powered by Claude AI in seconds</p>
+              </div>
+              <div className="text-center">
+                <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <span className="text-amber-700 font-bold">3</span>
+                </div>
+                <h4 className="font-semibold text-slate-900 mb-2">Reply and track</h4>
+                <p className="text-sm text-slate-600">Edit responses, post them directly, and watch your analytics improve</p>
+              </div>
+            </div>
           </AnimateOnScroll>
         </div>
       </section>
