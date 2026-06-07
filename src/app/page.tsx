@@ -127,8 +127,8 @@ function PricingSection() {
   const hasAnnual = !!ANNUAL_PRICE_ID
 
   const monthlyPrice = '$39.99'
-  const annualMonthly = '$33.25'
-  const annualTotal = '$399'
+  const annualMonthly = '$33.33'
+  const annualTotal = '$400'
 
   return (
     <>

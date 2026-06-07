@@ -96,7 +96,7 @@ export default function CheckoutPage() {
           <div className="text-center mb-7">
             <h1 className="text-2xl font-bold text-slate-900 mb-1">Start Your Free Trial</h1>
             <p className="text-sm text-slate-500">
-              {signupData?.billing === 'annual' ? '14 days free, then $399/year' : '14 days free, then $39.99/month'}
+              {signupData?.billing === 'annual' ? '14 days free, then $400/year' : '14 days free, then $39.99/month'}
             </p>
           </div>
 
@@ -109,7 +109,7 @@ export default function CheckoutPage() {
                     <span className="text-3xl font-bold text-white">$33.25</span>
                     <span className="text-blue-200">/month</span>
                   </div>
-                  <p className="text-blue-200/80 text-sm mt-1">Billed as $399/year after free trial</p>
+                  <p className="text-blue-200/80 text-sm mt-1">Billed as $400/year after free trial</p>
                 </>
               ) : (
                 <>
