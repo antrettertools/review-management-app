@@ -127,7 +127,7 @@ export default function TermsPage() {
                   Access to the Service requires an active paid subscription. By subscribing, you agree to the following:
                 </p>
                 <ul className="list-disc pl-6 space-y-2">
-                  <li><strong>Recurring Charges:</strong> Subscriptions are billed on a recurring monthly basis at the rate displayed at the time of purchase (currently $39.99/month for ReviewInzight Pro).</li>
+                  <li><strong>Recurring Charges:</strong> Subscriptions are billed on a recurring monthly basis at the rate displayed at the time of purchase (currently $19.99/month for ReviewInzight Pro).</li>
                   <li><strong>Price Changes:</strong> We reserve the right to change subscription pricing at any time. Price changes will take effect at the start of your next billing cycle following notice.</li>
                   <li><strong>No Refunds:</strong> All subscription fees are non-refundable except where required by applicable law.</li>
                   <li><strong>Failed Payments:</strong> If a payment fails, we may suspend or restrict your access to the Service without notice.</li>

@@ -113,7 +113,7 @@ export default function ReactivatePage() {
             <div className="bg-blue-800 p-6 text-center">
               <p className="text-blue-200 font-medium text-sm uppercase tracking-wider mb-1">ReviewInzight Pro</p>
               <div className="flex items-baseline justify-center gap-1">
-                <span className="text-3xl font-bold text-white">$39.99</span>
+                <span className="text-3xl font-bold text-white">$19.99</span>
                 <span className="text-blue-200">/month</span>
               </div>
             </div>

@@ -1,7 +1,7 @@
 /**
  * Subscription plan definitions.
  *
- * The app sells a single paid plan ("pro") at $39.99/month with a 14-day
+ * The app sells a single paid plan ("pro") at $19.99/month with a 14-day
  * free trial. Internal subscription_plan column on users may temporarily
  * hold 'pending' (signup, no payment yet), 'trialing' (active trial),
  * 'pro' (active paid), or 'cancelled'.

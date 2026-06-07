@@ -114,7 +114,7 @@ export default function CheckoutPage() {
               ) : (
                 <>
                   <div className="flex items-baseline justify-center gap-1">
-                    <span className="text-3xl font-bold text-white">$39.99</span>
+                    <span className="text-3xl font-bold text-white">$19.99</span>
                     <span className="text-blue-200">/month</span>
                   </div>
                   <p className="text-blue-200/80 text-sm mt-1">after 14-day free trial</p>

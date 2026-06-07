@@ -214,7 +214,7 @@ function SignupForm() {
 
           <div className="mt-3 flex items-center justify-center gap-1.5 text-sm text-slate-400">
             <Shield size={13} />
-            <span>14-day free trial. Credit card required. Then $39.99/mo.</span>
+            <span>14-day free trial. Credit card required. Then $19.99/mo.</span>
           </div>
         </div>
       </div>
