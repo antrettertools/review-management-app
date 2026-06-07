@@ -1,14 +1,21 @@
 <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#2563eb"/>
-      <stop offset="100%" stop-color="#1e3a8a"/>
+    <linearGradient id="logoGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#3b82f6" />
+      <stop offset="100%" stopColor="#1e3a8a" />
     </linearGradient>
   </defs>
-  <rect width="40" height="40" rx="10" fill="url(#g)"/>
-  <path d="M7 10 Q7 7 10 7 H30 Q33 7 33 10 V23 Q33 26 30 26 H21 L16 31 L15 26 H10 Q7 26 7 23 Z" fill="white" opacity="0.12"/>
-  <rect x="10" y="17" width="5" height="7" rx="1" fill="white" opacity="0.5"/>
-  <rect x="18" y="14" width="5" height="10" rx="1" fill="white" opacity="0.75"/>
-  <rect x="26" y="10" width="5" height="14" rx="1" fill="white"/>
-  <path d="M27 9 L28.5 7 L30 9" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect width="40" height="40" rx="8" fill="url(#logoGrad)" />
+
+  <rect x="9" y="24" width="4" height="2" rx="1" fill="white" opacity="0.6" />
+  <rect x="9" y="21" width="4" height="5" rx="1" fill="white" opacity="0.7" />
+
+  <rect x="17" y="24" width="4" height="2" rx="1" fill="white" opacity="0.8" />
+  <rect x="17" y="17" width="4" height="9" rx="1" fill="white" opacity="0.85" />
+
+  <rect x="25" y="24" width="4" height="2" rx="1" fill="white" />
+  <rect x="25" y="10" width="4" height="16" rx="1" fill="white" />
+
+  <path d="M26.5 9 L28 6.5 L29.5 9" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
 </svg>
