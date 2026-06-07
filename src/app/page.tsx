@@ -126,9 +126,9 @@ function PricingSection() {
   const [annual, setAnnual] = useState(false)
   const hasAnnual = !!ANNUAL_PRICE_ID
 
-  const monthlyPrice = '$39.99'
-  const annualMonthly = '$33.33'
-  const annualTotal = '$400'
+  const monthlyPrice = '$19.99'
+  const annualMonthly = '$16.67'
+  const annualTotal = '$200'
 
   return (
     <>
@@ -535,7 +535,7 @@ export default function Home() {
               />
               <FAQItem
                 question="How do you compare to Birdeye, Podium, or Reputation.com?"
-                answer="Those platforms start at $299–$400/month and target enterprise teams. ReviewInzight is built for individual owners and small teams who want the same review-response automation without the enterprise contract or per-seat pricing. We're $39.99/month, flat — and you can cancel anytime."
+                answer="Those platforms start at $299–$400/month and target enterprise teams. ReviewInzight is built for individual owners and small teams who want the same review-response automation without the enterprise contract or per-seat pricing. We're $19.99/month, flat — and you can cancel anytime."
               />
               <FAQItem
                 question="What platforms do you support?"
@@ -547,7 +547,7 @@ export default function Home() {
               />
               <FAQItem
                 question="Can I manage multiple locations?"
-                answer="Yes. Add each location as its own business and manage them all from one dashboard. There's no per-location upcharge — the $39.99 plan covers up to 99 businesses, which is more than any small franchise will ever hit."
+                answer="Yes. Add each location as its own business and manage them all from one dashboard. There's no per-location upcharge — the $19.99 plan covers up to 99 businesses, which is more than any small franchise will ever hit."
               />
               <FAQItem
                 question="What happens if I cancel?"
@@ -625,7 +625,7 @@ export default function Home() {
               </div>
               <div className="bg-blue-50 rounded-lg border border-blue-200 p-3">
                 <p className="text-[10px] text-blue-700 uppercase tracking-wider mb-0.5">ReviewInzight</p>
-                <p className="text-sm font-bold text-blue-900">$39.99/mo</p>
+                <p className="text-sm font-bold text-blue-900">$19.99/mo</p>
               </div>
             </div>
             </div>
